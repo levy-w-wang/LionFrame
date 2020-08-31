@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using AutoMapper;
+using LionFrame.CoreCommon.AutoMapperCfg;
 using Module = Autofac.Module;
 
 namespace LionFrame.CoreCommon
@@ -72,6 +74,14 @@ namespace LionFrame.CoreCommon
             builder.RegisterTypes(arrSingletonDependencyType)
                 .SingleInstance()
                 .PropertiesAutowired();
+
+            #endregion
+
+            #region 注册 mapper及配置 为属性注入
+
+            var config = new MapperConfiguration(c => c.AddProfile<MappingProfile>());
+            builder.RegisterInstance(config).SingleInstance().PropertiesAutowired();
+            builder.RegisterType<Mapper>().SingleInstance().PropertiesAutowired();
 
             #endregion
 

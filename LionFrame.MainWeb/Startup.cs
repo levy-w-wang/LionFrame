@@ -1,11 +1,10 @@
-using System;
-using System.IO;
-using System.Linq;
 using AspectCore.Extensions.Autofac;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AutoMapper;
 using LionFrame.Controller;
 using LionFrame.CoreCommon;
+using LionFrame.CoreCommon.AutoMapperCfg;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,14 +13,17 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Text.Encodings.Web;
-using System.Text.Unicode;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using System;
+using System.IO;
+using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace LionFrame.MainWeb
 {
-    public class Startup
+    public partial class Startup
     {
         public Startup(IWebHostEnvironment env)
         {
@@ -37,6 +39,9 @@ namespace LionFrame.MainWeb
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // 添加 automapper 映射关系
+            services.AddAutoMapper(c => c.AddProfile<MappingProfile>());
 
             // If using Kestrel:
             services.Configure<KestrelServerOptions>(options =>
@@ -173,7 +178,7 @@ namespace LionFrame.MainWeb
                 var testBll = LionWeb.AutofacContainer.Resolve<TestController>();
                 var guid = testBll.GetGuid();
             }
-
+            LionWeb.Environment = env;
             LionWeb.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
 
             // 从 http 跳转到 https

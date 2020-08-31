@@ -1,8 +1,8 @@
 ﻿using Autofac;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using System.Linq;
 
 namespace LionFrame.CoreCommon
@@ -34,7 +34,7 @@ namespace LionFrame.CoreCommon
         /// <summary>
         /// Environment
         /// </summary>
-        public static IHostingEnvironment Environment { get; set; }
+        public static IHostEnvironment Environment { get; set; }
 
         /// <summary>
         /// Configuration
