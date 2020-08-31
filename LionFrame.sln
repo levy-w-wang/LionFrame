@@ -3,23 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Domain", "LionFrame.Demain\LionFrame.Domain.csproj", "{8032124C-026C-4402-B2C8-A4371C3C4C37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Domain", "LionFrame.Demain\LionFrame.Domain.csproj", "{8032124C-026C-4402-B2C8-A4371C3C4C37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Data", "LionFrame.Data\LionFrame.Data.csproj", "{4BF8568D-9A53-47E9-9E5C-C6EE7DAF95D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Data", "LionFrame.Data\LionFrame.Data.csproj", "{4BF8568D-9A53-47E9-9E5C-C6EE7DAF95D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Controller", "LionFrame.Controller\LionFrame.Controller.csproj", "{64819BDB-025E-4A33-985C-11F0E7E37540}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Controller", "LionFrame.Controller\LionFrame.Controller.csproj", "{64819BDB-025E-4A33-985C-11F0E7E37540}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Business", "LionFrame.Business\LionFrame.Business.csproj", "{3E14598F-9D1E-4D28-9CD6-9C328D0E3DA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Business", "LionFrame.Business\LionFrame.Business.csproj", "{3E14598F-9D1E-4D28-9CD6-9C328D0E3DA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Config", "LionFrame.Config\LionFrame.Config.csproj", "{2B403B9B-632B-4FC7-BCA7-EA6D111A5631}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Config", "LionFrame.Config\LionFrame.Config.csproj", "{2B403B9B-632B-4FC7-BCA7-EA6D111A5631}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Basic", "LionFrame.Basic\LionFrame.Basic.csproj", "{4263C1F6-0642-4980-94D3-25D69E43AF05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Basic", "LionFrame.Basic\LionFrame.Basic.csproj", "{4263C1F6-0642-4980-94D3-25D69E43AF05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Model", "LionFrame.Model\LionFrame.Model.csproj", "{3281C33A-4683-4D15-A21C-9C6903DC6E9F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Model", "LionFrame.Model\LionFrame.Model.csproj", "{3281C33A-4683-4D15-A21C-9C6903DC6E9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.CoreCommon", "LionFrame.CoreCommon\LionFrame.CoreCommon.csproj", "{32D62C6B-9CCE-4455-BE06-5D9020553708}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.CoreCommon", "LionFrame.CoreCommon\LionFrame.CoreCommon.csproj", "{32D62C6B-9CCE-4455-BE06-5D9020553708}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.MainWeb", "LionFrame.MainWeb\LionFrame.MainWeb.csproj", "{313C0270-FA45-4F8D-8453-01FBDF11741F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.MainWeb", "LionFrame.MainWeb\LionFrame.MainWeb.csproj", "{313C0270-FA45-4F8D-8453-01FBDF11741F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4BF8568D-9A53-47E9-9E5C-C6EE7DAF95D3} = {4BF8568D-9A53-47E9-9E5C-C6EE7DAF95D3}
+		{3E14598F-9D1E-4D28-9CD6-9C328D0E3DA1} = {3E14598F-9D1E-4D28-9CD6-9C328D0E3DA1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
