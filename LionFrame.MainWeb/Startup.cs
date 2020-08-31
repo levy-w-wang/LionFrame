@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using AspectCore.Extensions.Autofac;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -13,6 +16,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace LionFrame.MainWeb
 {
@@ -57,6 +62,54 @@ namespace LionFrame.MainWeb
             {
                 options.LowercaseUrls = true; //资源路径小写
             });
+
+            #region Swagger
+            // 若要注释等信息记得修改输出路径  参考本项目csproj中的更改,取消显示警告加上1591
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo()
+                {
+                    Version = "v1",
+                    Title = "API Doc",
+                    Description = "作者:Levy_w_Wang",
+                    //服务条款
+                    TermsOfService = new Uri("http://book.levy.net.cn/"),
+                    //作者信息
+                    Contact = new OpenApiContact
+                    {
+                        Name = "levy",
+                        Email = "levywang123@gmail.com",
+                        Url = new Uri("http://book.levy.net.cn/")
+                    },
+                    //许可证
+                    License = new OpenApiLicense
+                    {
+                        Name = "MIT",
+                        Url = new Uri("https://github.com/levy-w-wang/LionFrame/blob/master/LICENSE")
+                    }
+                });
+
+                #region XmlComments
+
+                var basePath1 = Path.GetDirectoryName(typeof(Program).Assembly.Location); //获取应用程序所在目录（绝对，不受工作目录(平台)影响，建议采用此方法获取路径）
+                //获取目录下的XML文件 显示注释等信息
+                var xmlComments = Directory.GetFiles(basePath1, "*.xml", SearchOption.AllDirectories).ToList();
+
+                foreach (var xmlComment in xmlComments)
+                {
+                    options.IncludeXmlComments(xmlComment);
+                }
+
+                #endregion
+
+                options.DocInclusionPredicate((docName, description) => true);
+
+                options.IgnoreObsoleteProperties(); //忽略 有Obsolete 属性的方法
+                options.IgnoreObsoleteActions();
+                options.DescribeAllEnumsAsStrings();
+            });
+
+            #endregion
         }
 
         /// <summary>
@@ -128,6 +181,21 @@ namespace LionFrame.MainWeb
             app.UseStaticFiles();
             //app.UseCookiePolicy();
 
+            #region Swagger
+
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "apidoc/{documentName}/swagger.json";
+            });
+            app.UseSwaggerUI(c =>
+            {
+                c.RoutePrefix = "apidoc";
+                c.SwaggerEndpoint("v1/swagger.json", "ContentCenter API V1");
+                c.DocExpansion(DocExpansion.None);
+            });
+
+            #endregion
+
             app.UseRouting();
             //app.UseRequestLocalization();
 
@@ -149,7 +217,7 @@ namespace LionFrame.MainWeb
                 endpoints.MapGet("/", async context =>
                 {
                     context.Response.ContentType = "text/html; charset=utf-8";
-                    await context.Response.WriteAsync("<div style='text-align: center;margin-top: 15%;'><h3>项目<b style='color: green;'>启动成功</b>,测试请使用接口测试工具，或与前端联调！</h3></div>");
+                    await context.Response.WriteAsync("<div style='text-align: center;margin-top: 15%;'><h3>项目<b style='color: green;'>启动成功</b>,测试请使用接口测试工具，或与前端联调！</h3> <h4>项目<a href='/apidoc' style='color: cornflowerblue;'>接口文档</a>,点击查看</h4></div>");
                 });
             });
         }

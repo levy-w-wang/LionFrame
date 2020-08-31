@@ -9,7 +9,8 @@ namespace LionFrame.Controller
     [ApiController]
     [Route("api/[controller]")]
     public class TestController : ControllerBase
-    {//构造函数注入和原生DI注入是一样的，这里就不写了
+    {
+        //构造函数注入和原生DI注入是一样的，这里就不写了
         /// <summary>
         /// 属性注入
         /// </summary>
