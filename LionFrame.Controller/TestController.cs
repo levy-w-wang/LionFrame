@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Autofac;
+﻿using Autofac;
 using LionFrame.Business;
 using LionFrame.CoreCommon;
+using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace LionFrame.Controller
 {

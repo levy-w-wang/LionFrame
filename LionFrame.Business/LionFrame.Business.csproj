@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LionFrame.Basic\LionFrame.Basic.csproj" />
+    <ProjectReference Include="..\LionFrame.CoreCommon\LionFrame.CoreCommon.csproj" />
   </ItemGroup>
 
 </Project>

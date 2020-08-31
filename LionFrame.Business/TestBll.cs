@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LionFrame.Basic.AutofacDependency;
+﻿using LionFrame.Basic.AutofacDependency;
+using LionFrame.CoreCommon.AopAttribute;
+using System;
 
 namespace LionFrame.Business
 {
     public class TestBll : IScopedDependency
     {
-        public string GetGuid()
+        [LogInterceptor]
+        public virtual string GetGuid()
         {
             return Guid.NewGuid().ToString();
         }

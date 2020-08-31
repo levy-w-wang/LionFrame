@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LionFrame.Basic.AutofacDependency
+﻿namespace LionFrame.Basic.AutofacDependency
 {
     /// <summary>
     /// 单例接口 SingleInstance

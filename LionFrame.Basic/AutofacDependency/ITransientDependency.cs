@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LionFrame.Basic.AutofacDependency
+﻿namespace LionFrame.Basic.AutofacDependency
 {
     /// <summary>
     /// 所有接口的依赖接口，每次创建新实例  InstancePerLifetimeScope 每次使用都创建一个新实例

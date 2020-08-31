@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Encodings.Web;
-using System.Text.Unicode;
-using System.Threading.Tasks;
+using AspectCore.Extensions.Autofac;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using LionFrame.Business;
 using LionFrame.Controller;
 using LionFrame.CoreCommon;
 using Microsoft.AspNetCore.Builder;
@@ -17,6 +11,8 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace LionFrame.MainWeb
 {
@@ -44,10 +40,10 @@ namespace LionFrame.MainWeb
 
             });
             // If using IIS:
-            services.Configure<IISServerOptions>(options =>
-            {
-                options.AllowSynchronousIO = true;
-            });
+            //services.Configure<IISServerOptions>(options =>
+            //{
+            //    options.AllowSynchronousIO = true;
+            //});
             services.AddControllers(options =>
             {
                 options.MaxModelValidationErrors = 3;
@@ -70,6 +66,37 @@ namespace LionFrame.MainWeb
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule<AutofacModule>();
+
+            // 配置AOP代理
+            // 属性注入得把方法加上 virtual  不然没效果
+            builder.RegisterDynamicProxy(config =>
+            {
+                ////全局使用AOP  这里由于不是使用的接口的方式，需要在要使用AOP的方法上加 virtual 关键字
+                //config.Interceptors.AddTyped<LogInterceptorAttribute>();
+                //config.Interceptors.AddServiced<LogInterceptorAttribute>();
+                //// 带有Service后缀当前方法会被拦截
+                //config.Interceptors.AddTyped<LogInterceptorAttribute>(method => method.Name.EndsWith("Service"));
+                //// 使用 通配符 的特定全局拦截器
+                //config.Interceptors.AddTyped<LogInterceptorAttribute>(Predicates.ForService("*Service"));
+
+                ////Demo.Data命名空间下的Service不会被代理
+                //config.NonAspectPredicates.AddNamespace("Demo.Data");
+
+                ////最后一级为Data的命名空间下的Service不会被代理
+                //config.NonAspectPredicates.AddNamespace("*.Data");
+
+                ////ICustomService接口不会被代理
+                //config.NonAspectPredicates.AddService("ICustomService");
+
+                ////后缀为Service的接口和类不会被代理
+                //config.NonAspectPredicates.AddService("*Service");
+
+                ////命名为FindUser的方法不会被代理
+                //config.NonAspectPredicates.AddMethod("FindUser");
+
+                ////后缀为User的方法不会被代理
+                //config.NonAspectPredicates.AddMethod("*User");
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
