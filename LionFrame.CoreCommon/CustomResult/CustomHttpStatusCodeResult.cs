@@ -26,7 +26,7 @@ namespace LionFrame.CoreCommon.CustomResult
             context.HttpContext.Response.StatusCode = StatusCode;
             if (string.IsNullOrEmpty(Data))
                 return;
-            context.HttpContext.Response.ContentType = "application/json";
+            context.HttpContext.Response.ContentType = "application/json;charset=utf-8";
             var bytes = Encoding.UTF8.GetBytes(Data);
 
             context.HttpContext.Response.Body.Write(bytes, 0, bytes.Length);

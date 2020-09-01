@@ -1,11 +1,11 @@
-﻿using LionFrame.CoreCommon.AutoMapperCfg;
+﻿using LionFrame.Basic;
+using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Domain;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using LionFrame.Basic;
 
 namespace LionFrame.Controller
 {
@@ -103,7 +103,7 @@ namespace LionFrame.Controller
         /// 日志测试
         /// </summary>
         /// <returns>成功</returns>
-        [HttpGet,Route("log")]
+        [HttpGet, Route("log")]
         public ActionResult LogTest()
         {
             LogHelper.Logger.Trace("测试");
@@ -113,6 +113,19 @@ namespace LionFrame.Controller
             LogHelper.Logger.Fatal("测试");
 
             return Succeed("日志测试");
+        }
+
+        /// <summary>
+        /// 异常测试
+        /// </summary>
+        /// <returns>成功</returns>
+        [HttpGet, Route("ex")]
+        public ActionResult ExTest()
+        {
+            var zero = 0;
+            var a = 1 / zero;
+
+            return Succeed("异常测试");
         }
     }
 }

@@ -2,10 +2,17 @@ using AspectCore.Extensions.Autofac;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
+using LionFrame.Basic;
+using LionFrame.Basic.Extensions;
 using LionFrame.Controller;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.CustomException;
+using LionFrame.CoreCommon.CustomFilter;
+using LionFrame.Model;
+using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,8 +25,10 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using System.Threading.Tasks;
 
 namespace LionFrame.MainWeb
 {
@@ -57,7 +66,8 @@ namespace LionFrame.MainWeb
             services.AddControllers(options =>
             {
                 options.MaxModelValidationErrors = 3;
-                //options.Filters.Add(xxx);
+                // 3.异常过滤器--处理mvc中未捕捉的异常
+                options.Filters.Add<ExceptionFilter>();
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson()
@@ -159,15 +169,22 @@ namespace LionFrame.MainWeb
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // 全局异常处理的三种方式  个人使用第三种  //搜索异常查找
+            // 1.自定义的异常拦截管道 - - 放在第一位处理全局未捕捉的异常
+            // app.UseExceptionHandler(build => build.Use(CustomExceptionHandler));
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                // app.UseExceptionHandler("/Error");
+                app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+
+
+            // 2.使用自定义异常处理中间件  处理该中间件以后未捕捉的异常
+            //app.UseMiddleware<CustomExceptionMiddleware>();
 
             //autofac 新增 
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();
@@ -226,5 +243,61 @@ namespace LionFrame.MainWeb
                 });
             });
         }
+
+        #region 自定义的错误拦截管道来作为处理程序
+
+        /// <summary>
+        /// 自定义的错误拦截管道来作为处理程序
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
+        private async Task CustomExceptionHandler(HttpContext httpContext, Func<Task> next)
+        {
+            //该信息由ExceptionHandlerMiddleware中间件提供，里面包含了ExceptionHandlerMiddleware中间件捕获到的异常信息。
+            var exceptionDetails = httpContext.Features.Get<IExceptionHandlerFeature>();
+            var ex = exceptionDetails?.Error;
+
+            if (ex != null)
+            {
+                LogHelper.Logger.Fatal(ex,
+                    $"【异常信息】：{ex.Message} 【请求路径】：{httpContext.Request.Method}:{httpContext.Request.Path}\n " +
+                    $"【UserHostAddress】:{ LionWeb.GetClientIp()} " +
+                    $"【UserAgent】:{ httpContext.Request.Headers["User-Agent"]}");
+
+                if (ex is CustomSystemException se)
+                {
+                    await ExceptionResult(httpContext, new ResponseModel().Fail(se.Code, se.Message, "").ToJson(true, isLowCase: true));
+                }
+                else if (ex is DataValidException de)
+                {
+                    await ExceptionResult(httpContext, new ResponseModel().Fail(de.Code, de.Message, "").ToJson(true, isLowCase: true));
+                }
+                else
+                {
+#if DEBUG
+                    Console.WriteLine(ex);
+                    var content = ex.ToJson();
+#else
+                var content = "系统错误，请稍后再试或联系管理人员。";
+#endif
+                    await ExceptionResult(httpContext, new ResponseModel().Fail(ResponseCode.UnknownEx, content, "").ToJson(true, isLowCase: true));
+                }
+            }
+        }
+
+        public async Task ExceptionResult(HttpContext httpContext, string data)
+        {
+            httpContext.Response.StatusCode = 200;
+            if (string.IsNullOrEmpty(data))
+                return;
+            httpContext.Response.ContentType = "application/json;charset=utf-8";
+            var bytes = Encoding.UTF8.GetBytes(data);
+
+            await httpContext.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        #endregion
+
     }
 }
