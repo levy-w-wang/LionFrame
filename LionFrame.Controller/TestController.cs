@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LionFrame.Basic;
 
 namespace LionFrame.Controller
 {
@@ -101,6 +102,7 @@ namespace LionFrame.Controller
         [HttpGet, Route("time")]
         public ActionResult GetTime()
         {
+            LogHelper.Logger.Trace("测试123");
             return Ok(DateTime.Now);
         }
     }

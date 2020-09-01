@@ -5,6 +5,7 @@ using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using LionFrame.Basic;
 
 namespace LionFrame.Controller
 {
@@ -96,6 +97,22 @@ namespace LionFrame.Controller
             pageResult.Data = users;
 
             return Succeed(pageResult);
+        }
+
+        /// <summary>
+        /// 日志测试
+        /// </summary>
+        /// <returns>成功</returns>
+        [HttpGet,Route("log")]
+        public ActionResult LogTest()
+        {
+            LogHelper.Logger.Trace("测试");
+            LogHelper.Logger.Info("测试");
+            LogHelper.Logger.Debug("测试");
+            LogHelper.Logger.Error("测试");
+            LogHelper.Logger.Fatal("测试");
+
+            return Succeed("日志测试");
         }
     }
 }

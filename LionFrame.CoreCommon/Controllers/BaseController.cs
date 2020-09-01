@@ -1,16 +1,20 @@
-﻿using LionFrame.Basic.Extensions;
+﻿using System.Diagnostics;
+using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon.CustomResult;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Text;
+using LionFrame.Basic;
 
 namespace LionFrame.CoreCommon.Controllers
 {
     [ApiController]
     public abstract class BaseController : Controller
     {
+        private Stopwatch _stopWatch;
+
         /// <summary>
         /// 从 Request.Body 中获取数据并JSON序列化成对象
         /// </summary>
@@ -94,6 +98,17 @@ namespace LionFrame.CoreCommon.Controllers
         [ApiExplorerSettings(IgnoreApi = true)]
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+#if DEBUG
+            LogHelper.Logger.Debug(
+                "[Ip]:{0}\n [Arguments]:{1}\n [Headers]:{2}\n ",
+                LionWeb.GetClientIp(),
+                context.ActionArguments.ToJson(true),
+               context.HttpContext.Request.Headers.ToJson(true)
+            );
+
+            _stopWatch = new Stopwatch();
+            _stopWatch.Start();
+#endif
             base.OnActionExecuting(context);
         }
 
@@ -104,6 +119,10 @@ namespace LionFrame.CoreCommon.Controllers
         [ApiExplorerSettings(IgnoreApi = true)]
         public override void OnActionExecuted(ActionExecutedContext context)
         {
+#if DEBUG
+            _stopWatch.Stop();
+            LogHelper.Logger.Trace("[Id]:{0}\n [Value]:{1}", context.ActionDescriptor.DisplayName, _stopWatch.ElapsedMilliseconds);
+#endif
         }
     }
 }
