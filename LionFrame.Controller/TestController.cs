@@ -1,15 +1,15 @@
 ﻿using Autofac;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LionFrame.Business;
 using LionFrame.CoreCommon;
+using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.Domain;
+using LionFrame.Model;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
-using LionFrame.Domain;
-using LionFrame.Model;
-using AutoMapper.QueryableExtensions;
-using LionFrame.CoreCommon.AutoMapperCfg;
 
 namespace LionFrame.Controller
 {

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
+﻿using AutoMapper;
 using LionFrame.Domain;
 using LionFrame.Model;
 

@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Autofac;
+using AutoMapper;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Autofac;
-using AutoMapper;
 
 namespace LionFrame.CoreCommon.AutoMapperCfg
 {

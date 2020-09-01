@@ -1,5 +1,7 @@
 ﻿using Autofac;
+using AutoMapper;
 using LionFrame.Basic.AutofacDependency;
+using LionFrame.CoreCommon.AutoMapperCfg;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyModel;
 using System;
@@ -7,8 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using AutoMapper;
-using LionFrame.CoreCommon.AutoMapperCfg;
 using Module = Autofac.Module;
 
 namespace LionFrame.CoreCommon
