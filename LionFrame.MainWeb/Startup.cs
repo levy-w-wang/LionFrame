@@ -4,7 +4,6 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
-using LionFrame.Controller;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.CoreCommon.CustomException;
@@ -65,11 +64,17 @@ namespace LionFrame.MainWeb
             //});
             services.AddControllers(options =>
             {
+                //验证错误最大个数，避免返回一长串错误
                 options.MaxModelValidationErrors = 3;
                 // 3.异常过滤器--处理mvc中未捕捉的异常
                 options.Filters.Add<ExceptionFilter>();
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    //抑制系统自带模型验证,不然只会走 ApiController 自带的模型验证
+                    options.SuppressModelStateInvalidFilter = true;
+                })
                 .AddNewtonsoftJson()
                 .AddControllersAsServices();
             ;
@@ -190,11 +195,12 @@ namespace LionFrame.MainWeb
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();
 
             // autofac测试
-            if (LionWeb.AutofacContainer.IsRegistered<TestController>())
-            {
-                var testBll = LionWeb.AutofacContainer.Resolve<TestController>();
-                var guid = testBll.GetGuid();
-            }
+            //if (LionWeb.AutofacContainer.IsRegistered<TestController>())
+            //{
+            //    var testBll = LionWeb.AutofacContainer.Resolve<TestController>();
+            //    var guid = testBll.GetGuid();
+            //}
+
             LionWeb.Environment = env;
             LionWeb.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
 

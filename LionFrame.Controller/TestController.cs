@@ -5,6 +5,7 @@ using LionFrame.Basic;
 using LionFrame.Business;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.Controllers;
 using LionFrame.Domain;
 using LionFrame.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ namespace LionFrame.Controller
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TestController : ControllerBase
+    public class TestController : BaseController
     {
         //构造函数注入和原生DI注入是一样的，这里就不写了
         /// <summary>
@@ -97,6 +98,17 @@ namespace LionFrame.Controller
             var userDto = user.MapTo<UserDto>();
 
             return Ok(userDto);
+        }
+
+        /// <summary>
+        /// 用户添加--测试模型验证
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPost, Route("user")]
+        public ActionResult AddUser(UserDto user)
+        {
+            return Succeed(user);
         }
 
         [HttpGet, Route("time")]

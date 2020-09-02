@@ -1,5 +1,6 @@
 ﻿using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
+using LionFrame.CoreCommon.CustomFilter;
 using LionFrame.CoreCommon.CustomResult;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
@@ -10,7 +11,10 @@ using System.Text;
 
 namespace LionFrame.CoreCommon.Controllers
 {
-    [ApiController]
+    /// <summary>
+    /// 基控制器
+    /// </summary>
+    [ModelValid, ApiController]
     public abstract class BaseController : Controller
     {
         private Stopwatch _stopWatch;
@@ -73,7 +77,7 @@ namespace LionFrame.CoreCommon.Controllers
         /// <param name="code"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        protected ActionResult Fail(ResponseCode code, string content = "")
+        internal ActionResult Fail(ResponseCode code, string content = "")
         {
             return MyJson(new ResponseModel().Fail(code, content, null));
         }
