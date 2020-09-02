@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -47,6 +48,8 @@ namespace LionFrame.MainWeb
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            services.AddMemoryCache();//使用MemoryCache
 
             // 添加 automapper 映射关系
             services.AddAutoMapper(c => c.AddProfile<MappingProfile>());
@@ -172,7 +175,7 @@ namespace LionFrame.MainWeb
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMemoryCache memoryCache)
         {
             // 全局异常处理的三种方式  个人使用第三种  //搜索异常查找
             // 1.自定义的异常拦截管道 - - 放在第一位处理全局未捕捉的异常
@@ -203,6 +206,8 @@ namespace LionFrame.MainWeb
 
             LionWeb.Environment = env;
             LionWeb.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
+
+            LionWeb.MemoryCache = memoryCache;
 
             // 从 http 跳转到 https
             app.UseHttpsRedirection();

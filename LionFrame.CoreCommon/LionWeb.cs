@@ -42,7 +42,7 @@ namespace LionFrame.CoreCommon
         public static IConfiguration Configuration { get; set; }
 
         /// <summary>
-        /// MemoryCache
+        /// MemoryCache 使用
         /// </summary>
         public static IMemoryCache MemoryCache { get; set; }
 
