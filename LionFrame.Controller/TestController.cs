@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LionFrame.CoreCommon.Cache.Redis;
 
 namespace LionFrame.Controller
 {
@@ -28,6 +29,8 @@ namespace LionFrame.Controller
         public Mapper Mapper { get; set; }
 
         public MapperConfiguration MapperConfig { get; set; }
+
+        public RedisClient RedisClient { get; set; }
 
         /// <summary>
         /// 属性注入
@@ -109,6 +112,17 @@ namespace LionFrame.Controller
         public ActionResult AddUser(UserDto user)
         {
             return Succeed(user);
+        }
+
+        /// <summary>
+        /// redis测试
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("redis")]
+        public ActionResult RedisTest()
+        {
+            RedisClient.StringSet("test", "测试测试");
+            return Succeed(RedisClient.StringGet("test"));
         }
 
         [HttpGet, Route("time")]

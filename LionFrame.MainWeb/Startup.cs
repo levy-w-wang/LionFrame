@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using LionFrame.CoreCommon.Cache.Redis;
 
 namespace LionFrame.MainWeb
 {
@@ -40,9 +41,13 @@ namespace LionFrame.MainWeb
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
-            LionWeb.Configuration = builder.Build();
+
+            var config = builder.Build();
+            LionWeb.Configuration = config;
+            Configuration = config;
         }
 
+        public IConfiguration Configuration { get; set; }
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
@@ -80,7 +85,7 @@ namespace LionFrame.MainWeb
                 })
                 .AddNewtonsoftJson()
                 .AddControllersAsServices();
-            ;
+            
             services.AddRouting(options =>
             {
                 options.LowercaseUrls = true; //资源路径小写
@@ -142,6 +147,8 @@ namespace LionFrame.MainWeb
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule<AutofacModule>();
+            // 注册redis实例
+            builder.RegisterInstance(new RedisClient(Configuration)).SingleInstance().PropertiesAutowired();
 
             // 配置AOP代理
             // 属性注入得把方法加上 virtual  不然没效果
