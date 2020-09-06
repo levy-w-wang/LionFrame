@@ -1,10 +1,10 @@
-﻿using LionFrame.Domain.BaseDomain;
+﻿using LionFrame.Basic.AutofacDependency;
+using LionFrame.Domain.BaseDomain;
 using LionFrame.Model.ResponseDto.ResultModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using LionFrame.Basic.AutofacDependency;
 
 namespace LionFrame.Data.BasicData
 {

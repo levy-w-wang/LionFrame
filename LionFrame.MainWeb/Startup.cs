@@ -26,6 +26,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -140,6 +141,31 @@ namespace LionFrame.MainWeb
                 #endregion
 
                 options.DocInclusionPredicate((docName, description) => true);
+
+                #region 添加头部swagger全局头部参数
+
+                options.AddSecurityDefinition("token", new OpenApiSecurityScheme()
+                {
+                    Description = "JWT Authorization header using the Bearer scheme.",//参数描述
+                    Name = "token",//名字
+                    In = ParameterLocation.Header,//对应位置
+                    Type = SecuritySchemeType.ApiKey,//类型描述
+                    Scheme = "token"
+                });
+                //添加Jwt验证设置，不然在代码中取不到
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "token" }
+                        }, new List<string>()
+                    }
+                });
+
+                #endregion
 
                 options.IgnoreObsoleteProperties(); //忽略 有Obsolete 属性的方法
                 options.IgnoreObsoleteActions();

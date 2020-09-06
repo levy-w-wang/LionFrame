@@ -1,5 +1,4 @@
-﻿using LionFrame.Basic.AutofacDependency;
-using LionFrame.Data.BasicData;
+﻿using LionFrame.Data.BasicData;
 using LionFrame.Domain;
 
 namespace LionFrame.Data
