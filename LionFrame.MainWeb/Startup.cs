@@ -6,8 +6,10 @@ using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.CoreCommon.CustomException;
 using LionFrame.CoreCommon.CustomFilter;
+using LionFrame.Data.BasicData;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +18,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +32,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
-using LionFrame.CoreCommon.Cache.Redis;
 
 namespace LionFrame.MainWeb
 {
@@ -39,7 +41,7 @@ namespace LionFrame.MainWeb
         {
             var builder = new ConfigurationBuilder().SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             var config = builder.Build();
@@ -53,6 +55,13 @@ namespace LionFrame.MainWeb
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            //services.AddDbContext<LionDbContext>(options =>
+            //{
+            //    options.UseSqlServer(connectionString: Configuration.GetConnectionString("SqlServerConnection"));
+            //    options.EnableSensitiveDataLogging();
+            //    options.UseLoggerFactory(loggerFactory: DbConsoleLoggerFactory);
+            //});
 
             services.AddMemoryCache();//使用MemoryCache
 
@@ -85,7 +94,7 @@ namespace LionFrame.MainWeb
                 })
                 .AddNewtonsoftJson()
                 .AddControllersAsServices();
-            
+
             services.AddRouting(options =>
             {
                 options.LowercaseUrls = true; //资源路径小写
@@ -149,6 +158,18 @@ namespace LionFrame.MainWeb
             builder.RegisterModule<AutofacModule>();
             // 注册redis实例
             builder.RegisterInstance(new RedisClient(Configuration)).SingleInstance().PropertiesAutowired();
+            // 注册dbcontext上下文
+            builder.Register(context =>
+            {
+                //var config = context.Resolve<IConfiguration>();
+                var opt = new DbContextOptionsBuilder<LionDbContext>();
+                opt.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
+
+                opt.EnableSensitiveDataLogging();
+                opt.UseLoggerFactory(DbConsoleLoggerFactory);
+
+                return new LionDbContext(opt.Options);
+            }).InstancePerLifetimeScope().PropertiesAutowired();
 
             // 配置AOP代理
             // 属性注入得把方法加上 virtual  不然没效果
@@ -196,7 +217,6 @@ namespace LionFrame.MainWeb
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-
 
             // 2.使用自定义异常处理中间件  处理该中间件以后未捕捉的异常
             //app.UseMiddleware<CustomExceptionMiddleware>();

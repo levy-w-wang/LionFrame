@@ -15,4 +15,8 @@
     <OutputPath>bin\Release\netcoreapp3.1\</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="SystemDomain\" />
+  </ItemGroup>
+
 </Project>

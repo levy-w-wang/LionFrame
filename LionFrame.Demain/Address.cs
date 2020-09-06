@@ -1,7 +1,11 @@
-﻿namespace LionFrame.Domain
+﻿using LionFrame.Domain.BaseDomain;
+using System.ComponentModel.DataAnnotations;
+
+namespace LionFrame.Domain
 {
-    public class Address
+    public class Address : BaseModel
     {
+        [Key]
         public long Id { get; set; }
         public string Province { get; set; }
         public string City { get; set; }

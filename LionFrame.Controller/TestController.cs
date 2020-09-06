@@ -5,6 +5,7 @@ using LionFrame.Basic;
 using LionFrame.Business;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Domain;
 using LionFrame.Model;
@@ -12,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LionFrame.CoreCommon.Cache.Redis;
 
 namespace LionFrame.Controller
 {
@@ -123,6 +123,21 @@ namespace LionFrame.Controller
         {
             RedisClient.StringSet("test", "测试测试");
             return Succeed(RedisClient.StringGet("test"));
+        }
+
+
+        [HttpGet, Route("testadd")]
+        public ActionResult TestAdd()
+        {
+            var result = TestBll.TestAdd(new Address()
+            {
+                Province = "四川省",
+                City = "成都市",
+                Area = "武侯区",
+                Detail = "天府广场"
+            });
+            var address = TestBll.GetAddress(2);
+            return Succeed(address);
         }
 
         [HttpGet, Route("time")]
