@@ -11,7 +11,8 @@ namespace LionFrame.Domain.SystemDomain
         public SysRole()
         {
             RoleDesc = "";
-            SysUsers = new List<SysUser>();
+            SysRoleMenuRelations = new List<SysRoleMenuRelation>();
+            SysUserRoleRelations = new List<SysUserRoleRelation>();
         }
         [Key]
         public long RoleId { get; set; }
@@ -22,6 +23,7 @@ namespace LionFrame.Domain.SystemDomain
         [Column(TypeName = "nvarchar(128)")]
         public string RoleDesc { get; set; }
 
-        public List<SysUser> SysUsers { get; set; }
+        public List<SysRoleMenuRelation> SysRoleMenuRelations { get; set; }
+        public List<SysUserRoleRelation> SysUserRoleRelations { get; set; }
     }
 }

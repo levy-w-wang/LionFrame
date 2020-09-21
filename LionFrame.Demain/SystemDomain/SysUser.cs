@@ -11,7 +11,7 @@ namespace LionFrame.Domain.SystemDomain
     {
         public SysUser()
         {
-            SysRoles = new List<SysRole>();
+            SysUserRoleRelations = new List<SysUserRoleRelation>();
         }
         [Key]
         public long UserId { get; set; }
@@ -30,6 +30,6 @@ namespace LionFrame.Domain.SystemDomain
         [Column(TypeName = "datetime2(7)"), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedTime { get; set; }
 
-        public List<SysRole> SysRoles { get; set; }
+        public List<SysUserRoleRelation> SysUserRoleRelations { get; set; }
     }
 }

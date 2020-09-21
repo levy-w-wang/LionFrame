@@ -57,14 +57,14 @@ namespace LionFrame.MainWeb
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            // 迁移用
-            //services.AddDbContext<LionDbContext>(options =>
-            //{
-            //    options.UseSqlServer(connectionString: Configuration.GetConnectionString("SqlServerConnection"));
-            //    options.EnableSensitiveDataLogging();
-            //    options.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
-            //    options.UseLoggerFactory(loggerFactory: DbConsoleLoggerFactory);
-            //});
+            // 迁移用  -- 貌似在autofac下，在数据层开启了属性注入时，数据库上下文也能属性注入进去
+            services.AddDbContext<LionDbContext>(options =>
+            {
+                options.UseSqlServer(connectionString: Configuration.GetConnectionString("SqlServerConnection"));
+                options.EnableSensitiveDataLogging();
+                options.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
+                options.UseLoggerFactory(loggerFactory: DbConsoleLoggerFactory);
+            });
 
             services.AddMemoryCache();//使用MemoryCache
 
@@ -78,10 +78,10 @@ namespace LionFrame.MainWeb
 
             });
             // If using IIS:
-            //services.Configure<IISServerOptions>(options =>
-            //{
-            //    options.AllowSynchronousIO = true;
-            //});
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+            });
             services.AddControllers(options =>
             {
                 //验证错误最大个数，避免返回一长串错误
@@ -187,18 +187,22 @@ namespace LionFrame.MainWeb
             builder.RegisterModule<AutofacModule>();
             // 注册redis实例
             builder.RegisterInstance(new RedisClient(Configuration)).SingleInstance().PropertiesAutowired();
-            // 注册dbcontext上下文 使用
-            builder.Register(context =>
-            {
-                //var config = context.Resolve<IConfiguration>();
-                var opt = new DbContextOptionsBuilder<LionDbContext>();
-                opt.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
-                opt.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
-                opt.EnableSensitiveDataLogging();
-                opt.UseLoggerFactory(DbConsoleLoggerFactory);
 
-                return new LionDbContext(opt.Options);
-            }).InstancePerLifetimeScope().PropertiesAutowired();
+            #region 注册dbcontext上下文 使用属性注入 -- 但是使用上面的方式直接add好像也可以
+
+            //builder.Register(context =>
+            //{
+            //    //var config = context.Resolve<IConfiguration>();
+            //    var opt = new DbContextOptionsBuilder<LionDbContext>();
+            //    opt.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
+            //    opt.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
+            //    opt.EnableSensitiveDataLogging();
+            //    opt.UseLoggerFactory(DbConsoleLoggerFactory);
+
+            //    return new LionDbContext(opt.Options);
+            //}).InstancePerLifetimeScope().PropertiesAutowired();
+
+            #endregion
 
             // 配置AOP代理
             // 属性注入得把方法加上 virtual  不然没效果
@@ -252,13 +256,6 @@ namespace LionFrame.MainWeb
 
             //autofac 新增 
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();
-
-            // autofac测试
-            //if (LionWeb.AutofacContainer.IsRegistered<TestController>())
-            //{
-            //    var testBll = LionWeb.AutofacContainer.Resolve<TestController>();
-            //    var guid = testBll.GetGuid();
-            //}
 
             LionWeb.Environment = env;
             LionWeb.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());

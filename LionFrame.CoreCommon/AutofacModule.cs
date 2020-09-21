@@ -88,7 +88,7 @@ namespace LionFrame.CoreCommon
             #region 注册controller实现类
 
             var controller = typeof(ControllerBase);
-            var arrControllerType = listAllType.Where(t => controller.IsAssignableFrom(t) && t != controller).ToArray();
+            var arrControllerType = listAllType.Where(t => controller.IsAssignableFrom(t) && !t.IsAbstract && t != controller).ToArray();
             builder.RegisterTypes(arrControllerType).PropertiesAutowired();
 
             #endregion

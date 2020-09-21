@@ -15,7 +15,7 @@ namespace LionFrame.Domain.BaseDomain
         [Column(Order = 90)]
         public bool Deleted { get; set; }
 
-        [Column(Order = 91), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column(Order = 91, TypeName = "datetime2(7)"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedTime { get; set; }
 
         [Column(Order = 92)]
@@ -24,7 +24,7 @@ namespace LionFrame.Domain.BaseDomain
         [Column(Order = 93, TypeName = "datetime2(7)"), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedTime { get; set; }
 
-        [Column(Order = 94, TypeName = "datetime2(7)")]
+        [Column(Order = 94)]
         public long UpdatedBy { get; set; }
     }
 }

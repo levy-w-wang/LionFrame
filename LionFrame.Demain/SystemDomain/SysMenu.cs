@@ -1,4 +1,5 @@
 ﻿using LionFrame.Domain.BaseDomain;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,6 +8,10 @@ namespace LionFrame.Domain.SystemDomain
     [Table("Sys_Menu")]
     public class SysMenu : BaseCommonModel
     {
+        public SysMenu()
+        {
+            SysRoleMenuRelations = new List<SysRoleMenuRelation>();
+        }
         /// <summary>
         /// 自定义管理Id - 菜单 按钮
         /// </summary>
@@ -30,5 +35,7 @@ namespace LionFrame.Domain.SystemDomain
         /// 排序 从小到大
         /// </summary>
         public int OrderIndex { get; set; }
+
+        public List<SysRoleMenuRelation> SysRoleMenuRelations { get; set; } 
     }
 }
