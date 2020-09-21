@@ -33,6 +33,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LionFrame.MainWeb
 {
@@ -56,11 +57,12 @@ namespace LionFrame.MainWeb
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
+            // 迁移用
             //services.AddDbContext<LionDbContext>(options =>
             //{
             //    options.UseSqlServer(connectionString: Configuration.GetConnectionString("SqlServerConnection"));
             //    options.EnableSensitiveDataLogging();
+            //    options.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
             //    options.UseLoggerFactory(loggerFactory: DbConsoleLoggerFactory);
             //});
 
@@ -96,9 +98,10 @@ namespace LionFrame.MainWeb
                 .AddNewtonsoftJson()
                 .AddControllersAsServices();
 
+            //资源路径小写
             services.AddRouting(options =>
             {
-                options.LowercaseUrls = true; //资源路径小写
+                options.LowercaseUrls = true; 
             });
 
             #region Swagger
@@ -184,13 +187,13 @@ namespace LionFrame.MainWeb
             builder.RegisterModule<AutofacModule>();
             // 注册redis实例
             builder.RegisterInstance(new RedisClient(Configuration)).SingleInstance().PropertiesAutowired();
-            // 注册dbcontext上下文
+            // 注册dbcontext上下文 使用
             builder.Register(context =>
             {
                 //var config = context.Resolve<IConfiguration>();
                 var opt = new DbContextOptionsBuilder<LionDbContext>();
                 opt.UseSqlServer(Configuration.GetConnectionString("SqlServerConnection"));
-
+                opt.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
                 opt.EnableSensitiveDataLogging();
                 opt.UseLoggerFactory(DbConsoleLoggerFactory);
 

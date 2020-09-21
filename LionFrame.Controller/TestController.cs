@@ -140,6 +140,28 @@ namespace LionFrame.Controller
             return Succeed(address);
         }
 
+        [HttpGet, Route("usertest")]
+        public ActionResult TestAddUser()
+        {
+            var user1 = new User()
+            {
+                UserName = "levy",
+                Age = 22,
+                Address = new Address()
+                {
+                    Province = "四川省",
+                    City = "成都市",
+                    Area = "武侯区",
+                    Detail = "天府广场"
+                }
+            };
+            var result = TestBll.TestAdd(user1);
+            var onlyUser = TestBll.GetUser(1);
+            //var user = TestBll.GetUser(1);
+            
+            return Succeed(onlyUser);
+        }
+
         [HttpGet, Route("time")]
         public ActionResult GetTime()
         {

@@ -364,3 +364,4 @@ pnpm-debug.log*
 *.ntvs*
 *.njsproj
 *.sw?
+/LionFrame.Data/Migrations

@@ -10,5 +10,11 @@ namespace LionFrame.Data
             Add(address);
             return SaveChanges();
         }
+
+        public int AddUser(User user)
+        {
+            Add(user);
+            return SaveChanges();
+        }
     }
 }
