@@ -21,10 +21,10 @@ namespace LionFrame.Domain.BaseDomain
         [Column(Order = 92)]
         public long CreatedBy { get; set; }
 
-        [Column(Order = 93),DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [Column(Order = 93, TypeName = "datetime2(7)"), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdatedTime { get; set; }
 
-        [Column(Order = 94)]
+        [Column(Order = 94, TypeName = "datetime2(7)")]
         public long UpdatedBy { get; set; }
     }
 }

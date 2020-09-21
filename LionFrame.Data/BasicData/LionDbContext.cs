@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Reflection;
+using LionFrame.Domain.SystemDomain;
 
 namespace LionFrame.Data.BasicData
 {
@@ -29,6 +30,12 @@ namespace LionFrame.Data.BasicData
             {
                 modelBuilder.Model.AddEntityType(modeType);
             }
+
+            modelBuilder.Entity<SysUserRoleRelation>()
+                .HasKey(t => new { t.RoleId, t.UserId });
+
+            modelBuilder.Entity<SysRoleMenuRelation>()
+                .HasKey(t => new { t.RoleId, t.MenuId });
         }
     }
 }
