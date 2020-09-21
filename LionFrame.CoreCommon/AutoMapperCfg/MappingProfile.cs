@@ -8,7 +8,7 @@ namespace LionFrame.CoreCommon.AutoMapperCfg
     {
         public MappingProfile()
         {
-            CreateMap<User, UserDto>().ForMember(c => c.Address, c => c.MapFrom(u => u.Address.Province + u.Address.City + u.Address.Area + u.Address.Detail));
+            //CreateMap<User, UserDto>().ForMember(c => c.Address, c => c.MapFrom(u => u.Address.Province + u.Address.City + u.Address.Area + u.Address.Detail));
         }
     }
 }
