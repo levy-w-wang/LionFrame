@@ -14,17 +14,19 @@ namespace LionFrame.Basic.Encryptions
         /// 秘钥向量 
         /// </summary> 
         private static string Iv => "0102030405060708";
+        private static string Secret => "Levy2020";
+
 
         #region aes 加密
 
         /// <summary>
-        /// 默认Key加密(Key=Levy2020)
+        /// 默认Key加密(Key=Secret)
         /// </summary>
         /// <param name="text">需要加密的明文</param>
         /// <returns>加密的明文文</returns>
         public static string EncryptAES(this string text)
         {
-            return EncryptAES(text, "Levy2020");
+            return EncryptAES(text, Secret);
         }
 
         /// <summary> 
@@ -70,13 +72,13 @@ namespace LionFrame.Basic.Encryptions
         #region  aes 解密
 
         /// <summary>
-        /// 默认Key解密(Key=Levy2020)
+        /// 默认Key解密(Key=Secret)
         /// </summary>
         /// <param name="text">要解密的密文</param>
         /// <returns>解密的明文</returns>
         public static string DecryptAES(this string text)
         {
-            return DecryptAES(text, "Levy2020");
+            return DecryptAES(text, Secret);
         }
 
         /// <summary> 
@@ -186,7 +188,7 @@ namespace LionFrame.Basic.Encryptions
             StringBuilder sb = new StringBuilder(32);
             for (int i = 0; i < t.Length; i++)
                 sb.Append(t[i].ToString("x").PadLeft(2, '0'));
-            return sb.ToString().ToUpper();
+            return sb.ToString();
         }
 
         /// <summary>
@@ -201,7 +203,7 @@ namespace LionFrame.Basic.Encryptions
             StringBuilder sb = new StringBuilder();
             foreach (byte var in buffer)
                 sb.Append(var.ToString("x2"));
-            return sb.ToString().ToUpper();
+            return sb.ToString();
         }
 
         /// <summary>

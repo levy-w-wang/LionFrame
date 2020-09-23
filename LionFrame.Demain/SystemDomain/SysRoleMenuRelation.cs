@@ -6,10 +6,6 @@ namespace LionFrame.Domain.SystemDomain
     [Table("Sys_Role_Menu_Relation")]
     public class SysRoleMenuRelation : BaseCommonModel
     {
-        public SysRoleMenuRelation()
-        {
-            SysMenu = new SysMenu();
-        }
         public long RoleId { get; set; }
         public SysRole SysRole { get; set; }
 

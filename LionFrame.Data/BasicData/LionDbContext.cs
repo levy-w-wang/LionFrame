@@ -41,26 +41,28 @@ namespace LionFrame.Data.BasicData
             modelBuilder.Entity<SysUserRoleRelation>()
                 .HasKey(t => new { t.RoleId, t.UserId });
             modelBuilder.Entity<SysUserRoleRelation>()
-               .HasOne(ur => ur.SysUser)
-               .WithMany(r => r.SysUserRoleRelations)
-                .HasForeignKey(r => r.UserId);
+                .HasOne(ur => ur.SysUser)
+                .WithMany(r => r.SysUserRoleRelations)
+                .HasForeignKey(c => c.UserId);
             modelBuilder.Entity<SysUserRoleRelation>()
-               .HasOne(ur => ur.SysRole)
-               .WithMany(r => r.SysUserRoleRelations)
-               .HasForeignKey(r => r.RoleId);
+                .HasOne(ur => ur.SysRole)
+                .WithMany(r => r.SysUserRoleRelations)
+                .HasForeignKey(c => c.RoleId);
 
             modelBuilder.Entity<SysRoleMenuRelation>()
                 .HasKey(t => new { t.RoleId, t.MenuId });
-
             modelBuilder.Entity<SysRoleMenuRelation>()
                 .HasOne(rm => rm.SysRole)
                 .WithMany(r => r.SysRoleMenuRelations)
-                 .HasForeignKey(r => r.RoleId);
-
+                 .HasForeignKey(c => c.RoleId);
             modelBuilder.Entity<SysRoleMenuRelation>()
                 .HasOne(rm => rm.SysMenu)
                 .WithMany(r => r.SysRoleMenuRelations)
-                 .HasForeignKey(r => r.MenuId);
+                .HasForeignKey(c => c.MenuId);
+
+
+            // 初始数据
+            modelBuilder.InitData();
         }
     }
 }

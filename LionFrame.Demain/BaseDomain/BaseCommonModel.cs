@@ -15,13 +15,13 @@ namespace LionFrame.Domain.BaseDomain
         [Column(Order = 90)]
         public bool Deleted { get; set; }
 
-        [Column(Order = 91, TypeName = "datetime2(7)"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column(Order = 91, TypeName = "datetime2(7)")]
         public DateTime CreatedTime { get; set; }
 
         [Column(Order = 92)]
         public long CreatedBy { get; set; }
 
-        [Column(Order = 93, TypeName = "datetime2(7)"), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        [Column(Order = 93, TypeName = "datetime2(7)")]
         public DateTime UpdatedTime { get; set; }
 
         [Column(Order = 94)]

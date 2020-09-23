@@ -8,12 +8,6 @@ namespace LionFrame.Domain.SystemDomain
     [Table("Sys_Role")]
     public class SysRole : BaseCommonModel
     {
-        public SysRole()
-        {
-            RoleDesc = "";
-            SysRoleMenuRelations = new List<SysRoleMenuRelation>();
-            SysUserRoleRelations = new List<SysUserRoleRelation>();
-        }
         [Key]
         public long RoleId { get; set; }
 
