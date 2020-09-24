@@ -5,6 +5,12 @@
     /// </summary>
     public class ResponseModel : ResponseModel<object>
     {
+        public ResponseModel Fail(ResponseCode code, string content)
+        {
+            Code = code;
+            Message = content;
+            return this;
+        }
     }
     /// <summary>
     /// 响应返回体

@@ -1,8 +1,5 @@
-﻿using LionFrame.Domain.BaseDomain;
+﻿using LionFrame.Domain.SystemDomain;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Reflection;
-using LionFrame.Domain.SystemDomain;
 
 namespace LionFrame.Data.BasicData
 {
@@ -15,7 +12,7 @@ namespace LionFrame.Data.BasicData
         {
         }
 
-        public DbSet<SysUser> Posts { get; set; }
+        public DbSet<SysUser> SysUsers { get; set; }
         public DbSet<SysRole> SysRoles { get; set; }
         public DbSet<SysUserRoleRelation> SysUserRoleRelations { get; set; }
         public DbSet<SysMenu> SysMenus { get; set; }
@@ -37,6 +34,8 @@ namespace LionFrame.Data.BasicData
             //    modelBuilder.Model.AddEntityType(modeType);
             //}
             #endregion
+
+            modelBuilder.Entity<SysUser>().HasIndex(c => c.UserName).IsUnique();
 
             modelBuilder.Entity<SysUserRoleRelation>()
                 .HasKey(t => new { t.RoleId, t.UserId });

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Internal;
@@ -9,13 +6,16 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.Update.Internal;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace LionFrame.Data.BasicData
 {
     [SuppressMessage("Usage", "EF1001:Internal EF Core API usage.", Justification = "<挂起>")]
     public class MigrationsModelDifferWithoutForeignKey : MigrationsModelDiffer
     {
-        public MigrationsModelDifferWithoutForeignKey([NotNull]IRelationalTypeMappingSource typeMappingSource, [NotNull]IMigrationsAnnotationProvider migrationsAnnotations, [NotNull]IChangeDetector changeDetector, [NotNull]IUpdateAdapterFactory updateAdapterFactory, [NotNull]CommandBatchPreparerDependencies commandBatchPreparerDependencies) : base(typeMappingSource, migrationsAnnotations, changeDetector, updateAdapterFactory, commandBatchPreparerDependencies)
+        public MigrationsModelDifferWithoutForeignKey([NotNull] IRelationalTypeMappingSource typeMappingSource, [NotNull] IMigrationsAnnotationProvider migrationsAnnotations, [NotNull] IChangeDetector changeDetector, [NotNull] IUpdateAdapterFactory updateAdapterFactory, [NotNull] CommandBatchPreparerDependencies commandBatchPreparerDependencies) : base(typeMappingSource, migrationsAnnotations, changeDetector, updateAdapterFactory, commandBatchPreparerDependencies)
         {
         }
 

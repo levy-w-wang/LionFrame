@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LionFrame.Config
+﻿namespace LionFrame.Config
 {
     public class SysConstants
     {

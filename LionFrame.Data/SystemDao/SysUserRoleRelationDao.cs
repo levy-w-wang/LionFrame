@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LionFrame.Data.BasicData;
+﻿using LionFrame.Data.BasicData;
 
 namespace LionFrame.Data.SystemDao
 {

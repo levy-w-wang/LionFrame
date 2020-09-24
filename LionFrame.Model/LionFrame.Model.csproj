@@ -15,4 +15,8 @@
     <OutputPath>bin\Release\netcoreapp3.1\</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LionFrame.Config\LionFrame.Config.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,7 @@
 ﻿using LionFrame.Domain.BaseDomain;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,6 +19,9 @@ namespace LionFrame.Domain.SystemDomain
         [Column(TypeName = "varchar(512)"), Required]
         public string PassWord { get; set; }
 
+        [Column(TypeName = "varchar(256)"), Required]
+        [DefaultValue("")]
+        public string Email { get; set; }
         /// <summary>
         /// 1为用户有效状态 -1为无效 其它尚未定义
         /// </summary>

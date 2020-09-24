@@ -1,13 +1,8 @@
 ﻿using LionFrame.Config;
-using LionFrame.Domain.BaseDomain;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LionFrame.Domain.SystemDomain
+namespace LionFrame.Model.SystemBo
 {
-    [Table("Sys_Menu")]
-    public class SysMenu : BaseCommonModel
+    public class MenuCacheBo
     {
         /// <summary>
         /// 自定义管理Id - 菜单M 按钮B 开头
@@ -17,13 +12,11 @@ namespace LionFrame.Domain.SystemDomain
         /// 菜单层级3 10101 20101
         /// 菜单层级4 1010101 2010101
         /// </summary>
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None), MaxLength(128)]
         public string MenuId { get; set; }
 
         /// <summary>
         /// 菜单名字
         /// </summary>
-        [MaxLength(64), Required]
         public string MenuName { get; set; }
 
         /// <summary>
@@ -34,13 +27,12 @@ namespace LionFrame.Domain.SystemDomain
         /// <summary>
         /// 菜单层级
         /// </summary>
-        public int Level { get; set; } = 1;
+        public int Level { get; set; }
 
         /// <summary>
         /// 菜单地址
         /// </summary>
-        [MaxLength(256), Required]
-        public string Url { get; set; } = "";
+        public string Url { get; set; }
 
         /// <summary>
         /// 1:菜单 2:按钮
@@ -50,14 +42,11 @@ namespace LionFrame.Domain.SystemDomain
         /// <summary>
         /// 图标
         /// </summary>
-        [MaxLength(128), Required]
         public string Icon { get; set; }
 
         /// <summary>
         /// 排序 从小到大
         /// </summary>
         public int OrderIndex { get; set; }
-
-        public List<SysRoleMenuRelation> SysRoleMenuRelations { get; set; }
     }
 }

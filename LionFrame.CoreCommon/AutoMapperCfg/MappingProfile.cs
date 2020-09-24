@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using LionFrame.Domain;
-using LionFrame.Model;
 
 namespace LionFrame.CoreCommon.AutoMapperCfg
 {

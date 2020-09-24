@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using LionFrame.Basic.Encryptions;
+﻿using LionFrame.Basic.Encryptions;
 using LionFrame.Config;
 using LionFrame.Domain.SystemDomain;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 
 namespace LionFrame.Data.BasicData
 {
@@ -22,6 +22,7 @@ namespace LionFrame.Data.BasicData
                 UserId = 1L,
                 UserName = "levy",
                 PassWord = "qwer1234".Md5Encrypt(),
+                Email = "levywang123@gmail.com",
                 Status = 1,
                 CreatedTime = DateTime.Now,
                 UpdatedTime = DateTime.Now
@@ -205,7 +206,7 @@ namespace LionFrame.Data.BasicData
 
             #region 菜单用户关系
             var roleMenus = new List<SysRoleMenuRelation>();
-            menus.ForEach(m=>roleMenus.Add(new SysRoleMenuRelation()
+            menus.ForEach(m => roleMenus.Add(new SysRoleMenuRelation()
             {
                 MenuId = m.MenuId,
                 RoleId = 1L

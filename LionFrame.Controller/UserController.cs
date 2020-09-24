@@ -1,23 +1,21 @@
 ﻿using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
+using LionFrame.Model.RequestParam;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LionFrame.Controller
 {
     [Route("api/[controller]")]
     public class UserController : BaseUserController
     {
-        public UserBll UserBll {get;set;}
+        public UserBll UserBll { get; set; }
 
-        [HttpGet,Route("test"),AllowAnonymous]
-        public ActionResult Test()
+        [HttpPost, Route("login"), AllowAnonymous]
+        public ActionResult Login(LoginParam loginParam)
         {
-            var result = UserBll.Test();
-            return Succeed(result);
+            var result = UserBll.Login(loginParam);
+            return MyJson(result);
         }
     }
 }

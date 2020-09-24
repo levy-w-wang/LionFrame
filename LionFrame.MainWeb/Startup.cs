@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +34,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LionFrame.MainWeb
 {
@@ -101,7 +101,7 @@ namespace LionFrame.MainWeb
             //资源路径小写
             services.AddRouting(options =>
             {
-                options.LowercaseUrls = true; 
+                options.LowercaseUrls = true;
             });
 
             #region Swagger
