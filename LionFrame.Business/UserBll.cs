@@ -21,7 +21,7 @@ namespace LionFrame.Business
         public ResponseModel Login(LoginParam loginParam)
         {
             var responseResult = SysUserDao.Login(loginParam);
-            return SysUserDao.Login(loginParam);
+            return responseResult;
         }
     }
 }

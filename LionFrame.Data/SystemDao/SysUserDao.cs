@@ -46,11 +46,12 @@ namespace LionFrame.Data.SystemDao
                                                     RoleName = sysRole.RoleName,
                                                 }
                              };
-                //var dbData = CurrentDbContext.SysUsers.Where(c => c.UserId == user.UserId).Include(c => c.SysUserRoleRelations).ThenInclude(c => c.SysRole).ThenInclude(c => c.SysRoleMenuRelations).ThenInclude(c => c.SysMenu).ToList();
+                // 使用include 无法使用条件判断
+                //var dbData1 = CurrentDbContext.SysUsers.Where(c => c.UserId == user.UserId && c.Status == 1).Include(c => c.SysUserRoleRelations).ThenInclude(c => c.SysRole).FirstOrDefault();
+                //var userCacheBo = dbData1.MapTo<UserCacheBo>();
                 response.Succeed(dbData.FirstOrDefault());
                 return response;
             }
-
             return response.Fail(ResponseCode.LoginFail, "账号或密码错误");
         }
     }

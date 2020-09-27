@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace LionFrame.Model.SystemBo
 {
@@ -13,6 +12,5 @@ namespace LionFrame.Model.SystemBo
         public string LoginIp { get; set; }
         public string LoginTime { get; set; }
         public IEnumerable<RoleCacheBo> RoleCacheBos { get; set; }
-        public IQueryable<MenuCacheBo> MenuCacheBos { get; set; }
     }
 }

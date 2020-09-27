@@ -1,4 +1,8 @@
 ﻿using AutoMapper;
+using LionFrame.Basic.Extensions;
+using LionFrame.Domain.SystemDomain;
+using LionFrame.Model.SystemBo;
+using System.Linq;
 
 namespace LionFrame.CoreCommon.AutoMapperCfg
 {
@@ -6,7 +10,11 @@ namespace LionFrame.CoreCommon.AutoMapperCfg
     {
         public MappingProfile()
         {
-            //CreateMap<User, UserDto>().ForMember(c => c.Address, c => c.MapFrom(u => u.Address.Province + u.Address.City + u.Address.Area + u.Address.Detail));
+            //CreateMap<SysRole, RoleCacheBo>();
+            //CreateMap<SysMenu, MenuCacheBo>();
+            //CreateMap<SysUser, UserCacheBo>()
+            //    .ForMember(c => c.RoleCacheBos,
+            //        c => c.MapFrom(d => d.SysUserRoleRelations.Select(u => u.SysRole).DistinctBy(r => r.RoleId)));
         }
     }
 }
