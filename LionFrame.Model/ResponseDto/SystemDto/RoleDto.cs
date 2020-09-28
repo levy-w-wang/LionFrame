@@ -1,4 +1,4 @@
-﻿namespace LionFrame.Model.ResponseDto
+﻿namespace LionFrame.Model.ResponseDto.SystemDto
 {
     public class RoleDto
     {

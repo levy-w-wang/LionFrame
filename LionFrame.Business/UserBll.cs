@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using AutoMapper;
 using LionFrame.Basic.AutofacDependency;
-using LionFrame.Basic.Encryptions;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.Data.SystemDao;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model.RequestParam;
-using LionFrame.Model.ResponseDto;
 using LionFrame.Model.ResponseDto.ResultModel;
+using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
 
 namespace LionFrame.Business
@@ -18,13 +17,6 @@ namespace LionFrame.Business
     public class UserBll : IScopedDependency
     {
         public SysUserDao SysUserDao { get; set; }
-        public Mapper map { get; set; }
-
-        public SysUser Test()
-        {
-            //SysUserDao.CloseTracking();
-            return SysUserDao.First<SysUser>(c => c.UserId == 1);
-        }
 
         /// <summary>
         /// 用户登录 业务层

@@ -1,4 +1,5 @@
-﻿using LionFrame.Business;
+﻿using System.Threading.Tasks;
+using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Model.RequestParam;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ namespace LionFrame.Controller
     public class UserController : BaseUserController
     {
         public UserBll UserBll { get; set; }
+        public MenuBll MenuBll { get; set; }
 
         /// <summary>
         /// 登录
@@ -17,9 +19,9 @@ namespace LionFrame.Controller
         /// <param name="loginParam"></param>
         /// <returns></returns>
         [HttpPost, Route("login"), AllowAnonymous]
-        public ActionResult Login(LoginParam loginParam)
+        public async Task<ActionResult> Login(LoginParam loginParam)
         {
-            var result = UserBll.Login(loginParam);
+            var result = await Task.FromResult(UserBll.Login(loginParam));
             return MyJson(result);
         }
 
@@ -31,6 +33,17 @@ namespace LionFrame.Controller
         public ActionResult GetCurrentUser()
         {
             return Succeed(CurrentUser);
+        }
+
+        /// <summary>
+        /// 获取可以访问的菜单树
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("menu")]
+        public async Task<ActionResult> GetMenuTree()
+        {
+            var result = await Task.FromResult(MenuBll.GetCurrentMenuTree(CurrentUser));
+            return Succeed(result);
         }
     }
 }

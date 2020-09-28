@@ -102,7 +102,7 @@ namespace LionFrame.Basic.Extensions
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string ToDescription(this Enum value)
+        public static string GetDescription(this Enum value)
         {
             return GetEnumDescription(value);
         }

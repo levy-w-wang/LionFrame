@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LionFrame.Model.ResponseDto;
+using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
 
 namespace LionFrame.CoreCommon.AutoMapperCfg
@@ -10,6 +10,7 @@ namespace LionFrame.CoreCommon.AutoMapperCfg
         {
             CreateMap<RoleCacheBo, RoleDto>();
             CreateMap<UserCacheBo, UserDto>().ForMember(c => c.RoleDtos, c => c.MapFrom(d => d.RoleCacheBos));
+            CreateMap<MenuCacheBo, MenuDto>();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace LionFrame.CoreCommon.Cache
     /// <summary>
     /// MemoryCache缓存
     /// </summary>
-    public class MemoryCache
+    public class LionMemoryCache
     {
         private static readonly HashSet<string> Keys = new HashSet<string>();
 
@@ -21,7 +21,7 @@ namespace LionFrame.CoreCommon.Cache
         /// 构造函数
         /// </summary>
         /// <param name="prefix"></param>
-        public MemoryCache(string prefix)
+        public LionMemoryCache(string prefix)
         {
             Prefix = prefix + "_";
         }

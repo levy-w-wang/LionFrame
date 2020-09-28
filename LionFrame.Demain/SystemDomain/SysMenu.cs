@@ -32,7 +32,7 @@ namespace LionFrame.Domain.SystemDomain
         public string ParentMenuId { get; set; }
 
         /// <summary>
-        /// 菜单层级
+        /// 菜单层级 1 2 3 4
         /// </summary>
         public int Level { get; set; } = 1;
 

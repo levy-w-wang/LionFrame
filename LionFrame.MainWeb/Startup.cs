@@ -34,6 +34,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using LionFrame.CoreCommon.Cache;
 
 namespace LionFrame.MainWeb
 {
@@ -187,6 +188,7 @@ namespace LionFrame.MainWeb
             builder.RegisterModule<AutofacModule>();
             // 注册redis实例
             builder.RegisterInstance(new RedisClient(Configuration)).SingleInstance().PropertiesAutowired();
+            builder.RegisterInstance(new LionMemoryCache("Cache")).SingleInstance().PropertiesAutowired();
 
             #region 注册dbcontext上下文 使用属性注入 -- 但是使用上面的方式直接add好像也可以
 

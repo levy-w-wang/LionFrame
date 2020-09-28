@@ -12,7 +12,7 @@ namespace LionFrame.CoreCommon
     /// </summary>
     public class LionUserCache
     {
-        private static readonly MemoryCache Cache = new MemoryCache("UserCache");
+        private static readonly LionMemoryCache Cache = LionWeb.AutofacContainer.Resolve<LionMemoryCache>();
 
         private static TimeSpan _timeout = TimeSpan.Zero;
         private static TimeSpan _redisTimeout = TimeSpan.Zero;

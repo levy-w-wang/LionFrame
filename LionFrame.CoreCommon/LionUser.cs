@@ -3,6 +3,7 @@ using LionFrame.CoreCommon.CustomException;
 using LionFrame.Model;
 using LionFrame.Model.SystemBo;
 using System;
+using LionFrame.Config;
 
 namespace LionFrame.CoreCommon
 {
@@ -58,18 +59,28 @@ namespace LionFrame.CoreCommon
             return null;
         }
 
-        internal static bool ValidSessionId(string uid,string sessionId)
+        /// <summary>
+        /// token 验证正确性 单点登录
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="sessionId"></param>
+        /// <returns></returns>
+        internal static SysConstants.TokenValidType ValidSessionId(string uid,string sessionId)
         {
             var cache = LionUserCache.Get(uid); //先从内存获取，再从redis获取
-            if (cache != null && cache.SessionId == sessionId)
+            if (cache == null)
+            {
+                return SysConstants.TokenValidType.LogonInvalid;
+            }
+            if (cache.SessionId == sessionId)
             {
                 LionWeb.HttpContext.Items["user"] = cache;
 #if DEBUG
                 LogHelper.Logger.Debug("[LoginName]:{0}\n \n [UserId]:{1}\n [UserToken]:{2}", cache.UserName, cache.UserId, cache.UserToken);
 #endif
-                return true;
+                return SysConstants.TokenValidType.Success;
             }
-            return false;
+            return SysConstants.TokenValidType.LoggedInOtherPlaces;
         }
     }
 }

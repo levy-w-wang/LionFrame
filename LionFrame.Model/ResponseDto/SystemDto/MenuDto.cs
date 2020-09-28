@@ -1,24 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using LionFrame.Config;
 
-namespace LionFrame.Model.SystemBo
+namespace LionFrame.Model.ResponseDto.SystemDto
 {
-    public class MenuCacheBo
+    /// <summary>
+    /// 传输到前端的菜单对象
+    /// </summary>
+    public class MenuDto
     {
-        public long RoleId { get; set; }
-        
-        /// <summary>
-        /// 自定义管理Id - 菜单M 按钮B 开头
-        /// 各个页面管理自己页面的按钮
-        /// 菜单层级1  1 2
-        /// 菜单层级2 101  201
-        /// 菜单层级3 10101 20101
-        /// 菜单层级4 1010101 2010101
-        /// </summary>
         public string MenuId { get; set; }
 
         /// <summary>
-        /// 菜单/按钮名字
+        /// 菜单名字
         /// </summary>
         public string MenuName { get; set; }
 
@@ -55,7 +50,6 @@ namespace LionFrame.Model.SystemBo
         /// <summary>
         /// 子菜单
         /// </summary>
-        public List<MenuCacheBo> ChildMenus { get; set; }
-
+        public List<MenuDto> ChildMenus { get; set; }
     }
 }
