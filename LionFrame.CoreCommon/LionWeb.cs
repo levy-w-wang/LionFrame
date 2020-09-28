@@ -57,10 +57,10 @@ namespace LionFrame.CoreCommon
         /// <returns></returns>
         public static string GetClientIp()
         {
-            var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0].Trim();
+            var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0]?.Trim();
             if (string.IsNullOrEmpty(ip))
             {
-                ip = HttpContext.Connection.RemoteIpAddress.ToString();
+                ip = HttpContext.Connection.RemoteIpAddress?.ToString();
             }
 
             return ip;

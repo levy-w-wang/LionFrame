@@ -17,14 +17,14 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="loginParam"></param>
         /// <returns></returns>
-        public ResponseModel Login(LoginParam loginParam)
+        public ResponseModel<UserCacheBo> Login(LoginParam loginParam)
         {
             CloseTracking();
-            var response = new ResponseModel();
+            var response = new ResponseModel<UserCacheBo>();
             var user = First<SysUser>(c => c.UserName == loginParam.UserName && c.Status == 1);
             if (user == null)
             {
-                return response.Fail(ResponseCode.LoginFail, "账号不存在");
+                return response.Fail(ResponseCode.LoginFail, "账号不存在", null);
             }
             if (user.PassWord == loginParam.PassWord.Md5Encrypt())
             {
@@ -36,6 +36,7 @@ namespace LionFrame.Data.SystemDao
                                  UserName = sysUser.UserName,
                                  PassWord = sysUser.PassWord,
                                  Email = sysUser.Email,
+                                 Sex = sysUser.Sex,
                                  RoleCacheBos = from userRoleRelation in CurrentDbContext.SysUserRoleRelations
                                                 join sysRole in CurrentDbContext.SysRoles on userRoleRelation.RoleId equals sysRole.RoleId
                                                 where userRoleRelation.UserId == sysUser.UserId && !userRoleRelation.Deleted && !sysRole.Deleted
@@ -52,7 +53,7 @@ namespace LionFrame.Data.SystemDao
                 response.Succeed(dbData.FirstOrDefault());
                 return response;
             }
-            return response.Fail(ResponseCode.LoginFail, "账号或密码错误");
+            return response.Fail(ResponseCode.LoginFail, "账号或密码错误", null);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace LionFrame.Data.BasicData
                 UserName = "levy",
                 PassWord = "qwer1234".Md5Encrypt(),
                 Email = "levywang123@gmail.com",
+                Sex = 1,
                 Status = 1,
                 CreatedTime = DateTime.Now,
                 UpdatedTime = DateTime.Now

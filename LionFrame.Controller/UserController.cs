@@ -11,11 +11,26 @@ namespace LionFrame.Controller
     {
         public UserBll UserBll { get; set; }
 
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="loginParam"></param>
+        /// <returns></returns>
         [HttpPost, Route("login"), AllowAnonymous]
         public ActionResult Login(LoginParam loginParam)
         {
             var result = UserBll.Login(loginParam);
             return MyJson(result);
+        }
+
+        /// <summary>
+        /// 测试获取当前用户
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("user")]
+        public ActionResult GetCurrentUser()
+        {
+            return Succeed(CurrentUser);
         }
     }
 }
