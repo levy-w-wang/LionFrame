@@ -44,6 +44,7 @@ namespace LionFrame.Data.SystemDao
                                                 {
                                                     RoleId = sysRole.RoleId,
                                                     RoleDesc = sysRole.RoleDesc,
+                                                    Operable = sysRole.Operable,
                                                     RoleName = sysRole.RoleName,
                                                 }
                              };

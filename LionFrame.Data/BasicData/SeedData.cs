@@ -48,11 +48,13 @@ namespace LionFrame.Data.BasicData
                 RoleId = 1L,
                 RoleName = "系统管理员",
                 RoleDesc = "系统创建",
+                Operable = false,
             }, new SysRole()
             {
                 RoleId = 2L,
                 RoleName = "超级管理员",
                 RoleDesc = "系统创建",
+                Operable = false,
             });
 
             #endregion
