@@ -22,7 +22,6 @@ namespace LionFrame.Data.SystemDao
                 where roleIds.Contains(rlaRoleMenu.RoleId)  && !rlaRoleMenu.Deleted && !menu.Deleted
                 select new MenuCacheBo()
                 {
-                    RoleId = rlaRoleMenu.RoleId,
                     MenuId = menu.MenuId,
                     MenuName = menu.MenuName,
                     ParentMenuId = menu.ParentMenuId,
@@ -32,7 +31,7 @@ namespace LionFrame.Data.SystemDao
                     Icon = menu.Icon,
                     OrderIndex = menu.OrderIndex,
                 };
-            return menus.AsEnumerable().Distinct((m1,m2) => m1.MenuId == m2.MenuId).ToList();
+            return menus.Distinct().ToList();
         }
     }
 }

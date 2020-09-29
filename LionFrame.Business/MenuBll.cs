@@ -26,8 +26,8 @@ namespace LionFrame.Business
         /// <returns></returns>
         public List<MenuDto> GetCurrentMenuTree(UserCacheBo currentUser)
         {
-            var menuKey = "MenuTree_" + currentUser.UserId;
-            var cacheMenus = GetMenuTreeCache(currentUser.UserId, menuKey);
+            var menuKey = $"{CacheKeys.MENU_TREE}{currentUser.UserId}";
+            var cacheMenus = GetMenuTreeCache(menuKey);
             if (cacheMenus != null)
             {
                 return cacheMenus.MapToList<MenuDto>();
@@ -42,17 +42,15 @@ namespace LionFrame.Business
         /// <summary>
         /// 从缓存中获取菜单树
         /// </summary>
-        /// <param name="userId"></param>
         /// <param name="menuKey"></param>
         /// <returns></returns>
-        private List<MenuCacheBo> GetMenuTreeCache(long userId, string menuKey)
+        private List<MenuCacheBo> GetMenuTreeCache(string menuKey)
         {
             var cacheMenus = Cache.Get<List<MenuCacheBo>>(menuKey);
             if (cacheMenus != null)
             {
                 return cacheMenus;
             }
-
             cacheMenus = RedisClient.Get<List<MenuCacheBo>>(menuKey);
             if (cacheMenus != null)
             {
@@ -94,8 +92,20 @@ namespace LionFrame.Business
                 Type = menu.Type,
                 Icon = menu.Icon,
                 OrderIndex = menu.OrderIndex,
-                ChildMenus = GetMenus(menus, menu.MenuId, menu.Level + 1)
+                ChildMenus = GetMenus(menus, menu.MenuId, menu.Level + 1),
+                ButtonPerms = GetButtonPerms(menus, menu.MenuId)
             }).OrderBy(c => c.OrderIndex).ToList();
+        }
+
+        /// <summary>
+        /// 获取当前菜单的权限组合
+        /// </summary>
+        /// <param name="menu"></param>
+        /// <param name="menuMenuId"></param>
+        /// <returns></returns>
+        private List<string> GetButtonPerms(List<MenuCacheBo> menu, string menuMenuId)
+        {
+            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => c.MenuName).Distinct().ToList();
         }
     }
 }

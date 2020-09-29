@@ -5,8 +5,6 @@ namespace LionFrame.Model.SystemBo
 {
     public class MenuCacheBo
     {
-        public long RoleId { get; set; }
-        
         /// <summary>
         /// 自定义管理Id - 菜单M 按钮B 开头
         /// 各个页面管理自己页面的按钮
@@ -56,6 +54,13 @@ namespace LionFrame.Model.SystemBo
         /// 子菜单
         /// </summary>
         public List<MenuCacheBo> ChildMenus { get; set; }
-
+        
+        /// <summary>
+        /// 当前页面的按钮权限组合名称
+        /// 放置于每个router中的meta中。
+        /// 在 watch $route 中，将每次点击的路由的权限放在vuex中
+        /// 在页面中通过指令来权限判断
+        /// </summary>
+        public List<string> ButtonPerms { get; set; }
     }
 }

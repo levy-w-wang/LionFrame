@@ -51,5 +51,13 @@ namespace LionFrame.Model.ResponseDto.SystemDto
         /// 子菜单
         /// </summary>
         public List<MenuDto> ChildMenus { get; set; }
+
+        /// <summary>
+        /// 按钮权限组合名称
+        /// 放置于每个router中的meta中。
+        /// 在 watch $route 中，将每次点击的路由的权限放在vuex中
+        /// 在页面中通过指令来权限判断
+        /// </summary>
+        public List<string> ButtonPerms { get; set; }
     }
 }

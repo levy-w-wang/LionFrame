@@ -4,6 +4,7 @@ using LionFrame.CoreCommon.Cache;
 using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.Model.SystemBo;
 using System;
+using LionFrame.Config;
 
 namespace LionFrame.CoreCommon
 {
@@ -64,12 +65,7 @@ namespace LionFrame.CoreCommon
 
         private static string FormatPrefixKey(string uid)
         {
-            return $"{GetKeyPrefix()}{uid}";
-        }
-
-        private static string GetKeyPrefix()
-        {
-            return "U_User_";
+            return $"{CacheKeys.USER}{uid}";
         }
 
         /// <summary>

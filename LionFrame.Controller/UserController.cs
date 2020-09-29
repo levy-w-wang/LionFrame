@@ -11,7 +11,6 @@ namespace LionFrame.Controller
     public class UserController : BaseUserController
     {
         public UserBll UserBll { get; set; }
-        public MenuBll MenuBll { get; set; }
 
         /// <summary>
         /// 登录
@@ -33,17 +32,6 @@ namespace LionFrame.Controller
         public ActionResult GetCurrentUser()
         {
             return Succeed(CurrentUser);
-        }
-
-        /// <summary>
-        /// 获取可以访问的菜单树
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet, Route("menu")]
-        public async Task<ActionResult> GetMenuTree()
-        {
-            var result = await Task.FromResult(MenuBll.GetCurrentMenuTree(CurrentUser));
-            return Succeed(result);
         }
     }
 }

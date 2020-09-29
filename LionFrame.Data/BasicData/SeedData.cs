@@ -15,7 +15,7 @@ namespace LionFrame.Data.BasicData
         /// <param name="modelBuilder"></param>
         public static void InitData(this ModelBuilder modelBuilder)
         {
-            #region 角色
+            #region 用户
 
             modelBuilder.Entity<SysUser>().HasData(new SysUser()
             {
@@ -27,15 +27,30 @@ namespace LionFrame.Data.BasicData
                 Status = 1,
                 CreatedTime = DateTime.Now,
                 UpdatedTime = DateTime.Now
+            }, new SysUser()
+            {
+                UserId = 2L,
+                UserName = "levy1",
+                PassWord = "qwer1234".Md5Encrypt(),
+                Email = "levywang123@gmail.com",
+                Sex = 1,
+                Status = 1,
+                CreatedTime = DateTime.Now,
+                UpdatedTime = DateTime.Now
             });
 
             #endregion
 
-            #region 用户
+            #region 角色
 
             modelBuilder.Entity<SysRole>().HasData(new SysRole()
             {
                 RoleId = 1L,
+                RoleName = "系统管理员",
+                RoleDesc = "系统创建",
+            }, new SysRole()
+            {
+                RoleId = 2L,
                 RoleName = "超级管理员",
                 RoleDesc = "系统创建",
             });
@@ -47,6 +62,14 @@ namespace LionFrame.Data.BasicData
             modelBuilder.Entity<SysUserRoleRelation>().HasData(new SysUserRoleRelation()
             {
                 RoleId = 1L,
+                UserId = 1L,
+            }, new SysUserRoleRelation()
+            {
+                RoleId = 2L,
+                UserId = 2L,
+            }, new SysUserRoleRelation()
+            {
+                RoleId = 2L,
                 UserId = 1L,
             });
 
@@ -200,18 +223,29 @@ namespace LionFrame.Data.BasicData
                     OrderIndex = 2,
                 }
             };
-            modelBuilder.Entity<SysMenu>().HasData(menus
-            );
+            modelBuilder.Entity<SysMenu>().HasData(menus);
 
             #endregion
 
             #region 菜单用户关系
             var roleMenus = new List<SysRoleMenuRelation>();
-            menus.ForEach(m => roleMenus.Add(new SysRoleMenuRelation()
-            {
-                MenuId = m.MenuId,
-                RoleId = 1L
-            }));
+            menus.ForEach(m =>
+                {
+                    roleMenus.Add(new SysRoleMenuRelation()
+                    {
+                        MenuId = m.MenuId,
+                        RoleId = 1L
+                    });
+                    if (m.MenuId != "M102")//非系统管理员不能管理菜单
+                    {
+                        roleMenus.Add(new SysRoleMenuRelation()
+                        {
+                            MenuId = m.MenuId,
+                            RoleId = 2L
+                        });
+                    }
+                }
+            );
             modelBuilder.Entity<SysRoleMenuRelation>().HasData(roleMenus);
 
             #endregion
