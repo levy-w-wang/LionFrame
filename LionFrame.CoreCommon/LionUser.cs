@@ -1,9 +1,9 @@
 ﻿using LionFrame.Basic;
+using LionFrame.Config;
 using LionFrame.CoreCommon.CustomException;
 using LionFrame.Model;
 using LionFrame.Model.SystemBo;
 using System;
-using LionFrame.Config;
 
 namespace LionFrame.CoreCommon
 {
@@ -65,7 +65,7 @@ namespace LionFrame.CoreCommon
         /// <param name="uid"></param>
         /// <param name="sessionId"></param>
         /// <returns></returns>
-        internal static SysConstants.TokenValidType ValidSessionId(string uid,string sessionId)
+        internal static SysConstants.TokenValidType ValidSessionId(string uid, string sessionId)
         {
             var cache = LionUserCache.Get(uid); //先从内存获取，再从redis获取
             if (cache == null)

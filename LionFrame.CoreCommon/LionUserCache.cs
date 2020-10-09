@@ -1,10 +1,10 @@
 ﻿using Autofac;
 using LionFrame.Basic;
+using LionFrame.Config;
 using LionFrame.CoreCommon.Cache;
 using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.Model.SystemBo;
 using System;
-using LionFrame.Config;
 
 namespace LionFrame.CoreCommon
 {

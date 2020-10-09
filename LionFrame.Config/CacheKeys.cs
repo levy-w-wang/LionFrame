@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LionFrame.Config
+﻿namespace LionFrame.Config
 {
     /// <summary>
     /// 缓存key值  统一管理
@@ -18,5 +14,9 @@ namespace LionFrame.Config
         /// </summary>
         public static readonly string MENU_TREE = "MenuTree_";
 
+        /// <summary>
+        /// 验证码前缀
+        /// </summary>
+        public static readonly string CAPTCHA = "Captcha_";
     }
 }

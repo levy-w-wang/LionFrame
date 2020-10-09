@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using LionFrame.Config;
-using LionFrame.Data.BasicData;
+﻿using LionFrame.Data.BasicData;
 using LionFrame.Model.SystemBo;
 using Microsoft.EntityFrameworkCore.Internal;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LionFrame.Data.SystemDao
 {
@@ -18,19 +17,19 @@ namespace LionFrame.Data.SystemDao
         {
             CloseTracking();
             var menus = from rlaRoleMenu in CurrentDbContext.SysRoleMenuRelations
-                join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
-                where roleIds.Contains(rlaRoleMenu.RoleId)  && !rlaRoleMenu.Deleted && !menu.Deleted
-                select new MenuCacheBo()
-                {
-                    MenuId = menu.MenuId,
-                    MenuName = menu.MenuName,
-                    ParentMenuId = menu.ParentMenuId,
-                    Url = menu.Url,
-                    Level = menu.Level,
-                    Type = menu.Type,
-                    Icon = menu.Icon,
-                    OrderIndex = menu.OrderIndex,
-                };
+                        join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
+                        where roleIds.Contains(rlaRoleMenu.RoleId) && !rlaRoleMenu.Deleted && !menu.Deleted
+                        select new MenuCacheBo()
+                        {
+                            MenuId = menu.MenuId,
+                            MenuName = menu.MenuName,
+                            ParentMenuId = menu.ParentMenuId,
+                            Url = menu.Url,
+                            Level = menu.Level,
+                            Type = menu.Type,
+                            Icon = menu.Icon,
+                            OrderIndex = menu.OrderIndex,
+                        };
             return menus.Distinct().ToList();
         }
     }

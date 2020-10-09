@@ -6,6 +6,7 @@ using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.Cache;
 using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.CoreCommon.CustomException;
 using LionFrame.CoreCommon.CustomFilter;
@@ -34,7 +35,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
-using LionFrame.CoreCommon.Cache;
 
 namespace LionFrame.MainWeb
 {

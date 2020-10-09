@@ -1,8 +1,10 @@
 ﻿using Autofac;
 using AutoMapper;
+using LionFrame.Basic;
 using LionFrame.Basic.AutofacDependency;
 using LionFrame.CoreCommon.AutoMapperCfg;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyModel;
 using System;
 using System.Collections.Generic;
@@ -93,6 +95,8 @@ namespace LionFrame.CoreCommon
 
             #endregion
 
+            var idWorker = LionWeb.Configuration.GetSection("IdWorker").Get<long>();
+            builder.RegisterInstance(new IdWorker(idWorker));
         }
     }
 }

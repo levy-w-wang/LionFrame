@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using LionFrame.Business;
+﻿using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Model.RequestParam;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace LionFrame.Controller
 {

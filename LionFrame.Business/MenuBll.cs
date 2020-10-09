@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LionFrame.Basic.AutofacDependency;
+﻿using LionFrame.Basic.AutofacDependency;
 using LionFrame.Config;
 using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.CoreCommon.Cache;
@@ -10,6 +6,9 @@ using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.Data.SystemDao;
 using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LionFrame.Business
 {

@@ -26,7 +26,7 @@ namespace LionFrame.Data.SystemDao
             {
                 return response.Fail(ResponseCode.LoginFail, "账号不存在", null);
             }
-            if (user.PassWord == loginParam.PassWord.Md5Encrypt())
+            if (user.PassWord == loginParam.Password.Md5Encrypt())
             {
                 var dbData = from sysUser in CurrentDbContext.SysUsers
                              where sysUser.UserId == user.UserId && sysUser.Status == 1

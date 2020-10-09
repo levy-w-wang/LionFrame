@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using LionFrame.Config;
+﻿using LionFrame.Config;
+using System.Collections.Generic;
 
 namespace LionFrame.Model.SystemBo
 {
@@ -54,7 +54,7 @@ namespace LionFrame.Model.SystemBo
         /// 子菜单
         /// </summary>
         public List<MenuCacheBo> ChildMenus { get; set; }
-        
+
         /// <summary>
         /// 当前页面的按钮权限组合名称
         /// 放置于每个router中的meta中。

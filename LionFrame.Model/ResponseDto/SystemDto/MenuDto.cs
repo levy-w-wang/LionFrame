@@ -1,7 +1,5 @@
-﻿using System;
+﻿using LionFrame.Config;
 using System.Collections.Generic;
-using System.Text;
-using LionFrame.Config;
 
 namespace LionFrame.Model.ResponseDto.SystemDto
 {

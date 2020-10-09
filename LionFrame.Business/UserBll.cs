@@ -1,23 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using AutoMapper;
-using LionFrame.Basic.AutofacDependency;
+﻿using LionFrame.Basic.AutofacDependency;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.Data.SystemDao;
-using LionFrame.Domain.SystemDomain;
+using LionFrame.Model;
 using LionFrame.Model.RequestParam;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
+using System;
+using System.Collections.Generic;
 
 namespace LionFrame.Business
 {
+    /// <summary>
+    /// 用户相关业务层
+    /// </summary>
     public class UserBll : IScopedDependency
     {
         public SysUserDao SysUserDao { get; set; }
-
+        public SystemBll SystemBll { get; set; }
         /// <summary>
         /// 用户登录 业务层
         /// </summary>
@@ -26,6 +28,12 @@ namespace LionFrame.Business
         public ResponseModel<UserDto> Login(LoginParam loginParam)
         {
             var result = new ResponseModel<UserDto>();
+            var verificationResult = SystemBll.VerificationLogin(loginParam).Result;
+            if (verificationResult != "验证通过")
+            {
+                result.Fail(ResponseCode.LoginFail, verificationResult, null);
+                return result;
+            }
             var responseResult = SysUserDao.Login(loginParam);
             if (responseResult.Success)
             {
