@@ -90,7 +90,7 @@ namespace LionFrame.CoreCommon.Controllers
         /// <param name="code"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        protected ActionResult Fail<T>(T data, ResponseCode code, string content = "")
+        protected ActionResult Fail<T>(T data, ResponseCode code = ResponseCode.Fail, string content = "")
         {
             return MyJson(new ResponseModel().Fail(code, content, data));
         }

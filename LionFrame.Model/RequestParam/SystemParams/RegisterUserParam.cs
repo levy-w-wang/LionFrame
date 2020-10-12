@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LionFrame.Model.RequestParam.SystemParams
 {
@@ -20,10 +19,12 @@ namespace LionFrame.Model.RequestParam.SystemParams
          Required(ErrorMessage = "请输入邮箱")]
         public string Email { get; set; }
 
-        /// <summary>
-        /// 男女 1男 0女
-        /// </summary>
-        [Range(0, 1, ErrorMessage = "性别设置错误")]
-        public int Sex { get; set; } = 1;
+        [StringLength(maximumLength: 6, MinimumLength = 6, ErrorMessage = "验证码长度不正确"), Required(ErrorMessage = "请输入验证码")]
+        public string Captcha { get; set; }
+        ///// <summary>
+        ///// 男女 1男 0女
+        ///// </summary>
+        //[Range(0, 1, ErrorMessage = "性别设置错误")]
+        //public int Sex { get; set; } = 1;
     }
 }

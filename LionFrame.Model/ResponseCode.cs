@@ -7,6 +7,8 @@ namespace LionFrame.Model
     /// </summary>
     public enum ResponseCode
     {
+        [Description("通用错误码")]
+        Fail = -1,
         [Description("登录成功")]
         Success = 200,
         [Description("登录失败")]

@@ -5,6 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.9.0" />
+    <PackageReference Include="MimeKit" Version="2.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LionFrame.Basic\LionFrame.Basic.csproj" />
     <ProjectReference Include="..\LionFrame.CoreCommon\LionFrame.CoreCommon.csproj" />
     <ProjectReference Include="..\LionFrame.Data\LionFrame.Data.csproj" />

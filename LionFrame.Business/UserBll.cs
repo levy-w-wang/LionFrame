@@ -1,15 +1,22 @@
-﻿using LionFrame.Basic.AutofacDependency;
+﻿using LionFrame.Basic;
+using LionFrame.Basic.AutofacDependency;
+using LionFrame.Basic.Encryptions;
 using LionFrame.Basic.Extensions;
+using LionFrame.Config;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.Cache.Redis;
+using LionFrame.CoreCommon.CustomException;
 using LionFrame.Data.SystemDao;
+using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
-using LionFrame.Model.RequestParam;
+using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LionFrame.Business
 {
@@ -20,6 +27,8 @@ namespace LionFrame.Business
     {
         public SysUserDao SysUserDao { get; set; }
         public SystemBll SystemBll { get; set; }
+        public RedisClient RedisClient { get; set; }
+
         /// <summary>
         /// 用户登录 业务层
         /// </summary>
@@ -67,5 +76,133 @@ namespace LionFrame.Business
 
             LionUserCache.CreateUserCache(userCache);
         }
+
+        /// <summary>
+        /// 得到验证码
+        /// </summary>
+        /// <param name="emailTo"></param>
+        /// <returns></returns>
+        public async Task<string> GetRegisterCaptchaAsync(string emailTo)
+        {
+            var captchaNumber = CaptchaHelper.CreateRandomNumber(6);
+            var htmlEmail = SystemBll.GetMailContent("注册账号", captchaNumber, 10);
+            var result = await SystemBll.SendSystemMailAsync("LionFrame-注册账号", htmlEmail, emailTo);
+            if (result.Contains("发送成功"))
+            {
+                await RedisClient.SetAsync($"{CacheKeys.REGISTERCAPTCHA}{emailTo}", captchaNumber, new TimeSpan(0, 10, 0));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 验证是否存在该用户数据
+        /// </summary>
+        /// <param name="type">1：用户名  2：邮箱</param>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public async Task<bool> ExistUserAsync(int type, string str)
+        {
+            switch (type)
+            {
+                case 1:
+                    return await SysUserDao.ExistAsync<SysUser>(c => c.UserName == str);
+                case 2:
+                    return await SysUserDao.ExistAsync<SysUser>(c => c.Email == str);
+            }
+
+            throw new CustomSystemException("验证类型错误", ResponseCode.DataTypeError);
+        }
+
+        #region 注册用户
+
+        /// <summary>
+        /// 验证注册用户
+        /// </summary>
+        /// <param name="registerUserParam"></param>
+        /// <returns></returns>
+        public async Task<string> VerificationRegisterCaptchaAsync(RegisterUserParam registerUserParam)
+        {
+            var key = CacheKeys.REGISTERCAPTCHA + registerUserParam.Email;
+            var captcha = await RedisClient.GetAsync<string>(key);
+            if (captcha == null)
+            {
+                return "验证码已失效";
+            }
+
+            if (!string.Equals(registerUserParam.Captcha, captcha, StringComparison.OrdinalIgnoreCase))
+            {
+                return "验证码错误";
+            }
+
+            await RedisClient.DeleteAsync(key);
+            return "验证通过";
+        }
+
+
+        /// <summary>
+        /// 注册用户
+        /// </summary>
+        /// <param name="registerUserParam"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel<bool>> RegisterUserAsync(RegisterUserParam registerUserParam)
+        {
+            var result = new ResponseModel<bool>();
+            var verificationResult = await VerificationRegisterCaptchaAsync(registerUserParam);
+            if (verificationResult != "验证通过")
+            {
+                result.Fail(ResponseCode.Fail, verificationResult, false);
+                return result;
+            }
+
+            if (await ExistUserAsync(1, registerUserParam.UserName))
+            {
+                result.Fail(ResponseCode.Fail, "用户名已存在，请切换", false);
+                return result;
+            }
+
+            if (await ExistUserAsync(2, registerUserParam.Email))
+            {
+                result.Fail(ResponseCode.Fail, "该邮箱已存在，请切换", false);
+                return result;
+            }
+            var count = await SaveRegisterUserAsync(registerUserParam);
+            if (count > 0)
+            {
+                return result.Succeed(true);
+            }
+
+            return result.Fail(ResponseCode.Fail, "保存失败，请稍后再试", false);
+        }
+
+        /// <summary>
+        /// 保存注册用户
+        /// </summary>
+        /// <param name="registerUserParam"></param>
+        /// <returns></returns>
+        private async Task<int> SaveRegisterUserAsync(RegisterUserParam registerUserParam)
+        {
+            var sysUser = new SysUser()
+            {
+                UserName = registerUserParam.UserName,
+                PassWord = registerUserParam.PassWord.Md5Encrypt(),
+                Email = registerUserParam.Email,
+                Sex = 1,
+                Status = 1,
+                CreatedTime = DateTime.Now,
+                UpdatedTime = DateTime.Now,
+                SysUserRoleRelations = new List<SysUserRoleRelation>()
+                {
+                    new SysUserRoleRelation()
+                    {
+                        RoleId = 2 // 这里固定为种子数据中的超级管理员权限
+                    }
+                }
+            };
+            SysUserDao.Add(sysUser);
+            var count = await SysUserDao.SaveChangesAsync();
+            return count;
+        }
+
+        #endregion
     }
 }

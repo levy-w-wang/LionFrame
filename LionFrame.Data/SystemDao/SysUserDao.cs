@@ -2,10 +2,9 @@
 using LionFrame.Data.BasicData;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
-using LionFrame.Model.RequestParam;
+using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.SystemBo;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace LionFrame.Data.SystemDao

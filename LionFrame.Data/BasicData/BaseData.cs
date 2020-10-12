@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace LionFrame.Data.BasicData
 {
@@ -281,6 +282,167 @@ namespace LionFrame.Data.BasicData
         {
             this.CurrentDbContext.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region 增删改的公共方法
+
+        public async Task<T> AddAsync<T>(T entity) where T : BaseModel, new()
+        {
+            await CurrentDbContext.Set<T>().AddAsync(entity);
+            //DbContext.Entry(entity).State = EntityState.Added;
+            return entity;
+        }
+        public async Task<List<T>> AddAsync<T>(List<T> entity) where T : BaseModel, new()
+        {
+            await CurrentDbContext.Set<T>().AddRangeAsync(entity);
+            //DbContext.Entry(entity).State = EntityState.Added;
+            return entity;
+        }
+
+
+        public async Task DeleteAsync<T>(params object[] keyValues) where T : BaseModel, new()
+        {
+            var entity = await CurrentDbContext.Set<T>().FindAsync(keyValues);
+            CurrentDbContext.Entry(entity).State = EntityState.Deleted;
+        }
+
+        #endregion
+
+        #region 查询方法
+
+        /// <summary>
+        /// 查看是否存在
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="anyLambda"></param>
+        /// <returns></returns>
+        public async Task<bool> ExistAsync<T>(Expression<Func<T, bool>> anyLambda) where T : BaseModel, new()
+        {
+            return await CurrentDbContext.Set<T>().AnyAsync(anyLambda);
+        }
+
+        /// <summary>
+        /// 根据主键得到数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="keyValues"></param>
+        /// <returns></returns>
+        public async Task<T> FindAsync<T>(params object[] keyValues) where T : BaseModel, new()
+        {
+            return await CurrentDbContext.Set<T>().FindAsync(keyValues);
+        }
+
+        /// <summary>
+        /// 得到条数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="countLambda"></param>
+        /// <returns></returns>
+        public async Task<int> CountAsync<T>(Expression<Func<T, bool>> countLambda) where T : BaseModel, new()
+        {
+            return await CurrentDbContext.Set<T>().AsNoTracking().CountAsync(countLambda);
+        }
+
+        /// <summary>
+        /// 获取第一个或默认的
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="firstLambda"></param>
+        /// <returns></returns>
+        public async Task<T> FirstAsync<T>(Expression<Func<T, bool>> firstLambda) where T : BaseModel, new()
+        {
+            return await CurrentDbContext.Set<T>().FirstOrDefaultAsync(firstLambda);
+        }
+        /// <summary>
+        /// 返回分页模型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="currentPage"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="whereLambda"></param>
+        /// <param name="isAsc"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<T>> LoadPageEntitiesAsync<T, TKey>(int currentPage, int pageSize, Expression<Func<T, bool>> whereLambda, bool isAsc, Expression<Func<T, TKey>> orderBy) where T : BaseModel, new()
+        {
+            currentPage = currentPage < 1 ? 1 : currentPage;
+            pageSize = pageSize < 1 ? 20 : pageSize;
+            var temp = CurrentDbContext.Set<T>().AsNoTracking().Where(whereLambda); //去掉.AsQueryable().AsNoTracking()，将下面改为
+
+            var rest = new PageResponse<T>();
+            rest.CurrentPage = currentPage;
+            rest.PageSize = pageSize;
+            rest.RecordTotal = await temp.CountAsync();//记录总条数时，自动设置了总页数
+            if (isAsc)
+            {
+                rest.Data = await temp.OrderBy(orderBy)
+                     .Skip(pageSize * (currentPage - 1))
+                     .Take(pageSize).Select(t => new T()).ToListAsync(); //去掉.AsQueryable()，添加.select(t=>new Dto()).ToList()
+            }
+
+            rest.Data = await temp.OrderByDescending(orderBy)
+                .Skip(pageSize * (currentPage - 1))
+                .Take(pageSize).Select(t => new T()).ToListAsync(); //.select(t=>new Dto()).ToList()
+
+            return rest;
+        }
+
+
+        /// <summary>
+        /// 将查询出来的数据 转换成IQueryable，然后进行分页   不跟踪数据状态
+        /// </summary>
+        /// <typeparam name="T">返回类型</typeparam>
+        /// <typeparam name="TKey">根据哪个字段排序（必须）</typeparam>
+        /// <param name="query">数据集</param>
+        /// <param name="currentPage">页数</param>
+        /// <param name="pageSize">每页条数</param>
+        /// <param name="isAsc">是否升序</param>
+        /// <param name="orderBy">排序字段</param>
+        /// <returns>PageResponse分页结果</returns>
+        public async Task<PageResponse<T>> LoadPageEntitiesAsync<T, TKey>(IQueryable<T> query, int currentPage, int pageSize, bool isAsc, Expression<Func<T, TKey>> orderBy) where T : class, new()
+        {
+            currentPage = currentPage < 1 ? 1 : currentPage;
+            pageSize = pageSize < 1 ? 20 : pageSize;
+            var rest = new PageResponse<T>();
+            IQueryable<T> temp = query.AsNoTracking();
+            rest.PageSize = pageSize;
+            rest.CurrentPage = currentPage;
+            rest.RecordTotal = await temp.CountAsync();
+            if (isAsc)
+            {
+                rest.Data = await temp.OrderBy(orderBy)
+                    .Skip(pageSize * (currentPage - 1))
+                    .Take(pageSize).ToListAsync();
+            }
+            else
+            {
+                rest.Data = await temp.OrderByDescending(orderBy)
+                    .Skip(pageSize * (currentPage - 1))
+                    .Take(pageSize).ToListAsync();
+            }
+            return rest;
+        }
+
+        /// <summary>
+        /// 自带事务，调用此方法保存
+        /// </summary>
+        public async Task<int> SaveChangesAsync()
+        {
+            try
+            {
+                return await CurrentDbContext.SaveChangesAsync();
+            }
+            catch (DbException ex)
+            {
+                throw new CustomSystemException($"数据库保存失败!{ex.Message}", ResponseCode.DbEx);
+            }
+            catch (Exception ex)
+            {
+                throw new CustomSystemException($"数据库保存失败!{ex.Message}", ResponseCode.DbEx);
+            }
         }
 
         #endregion

@@ -36,6 +36,7 @@ namespace LionFrame.Data.BasicData
             #endregion
 
             modelBuilder.Entity<SysUser>().HasIndex(c => c.UserName).IsUnique();
+            modelBuilder.Entity<SysUser>().HasIndex(c => c.Email).IsUnique();
 
             modelBuilder.Entity<SysUserRoleRelation>()
                 .HasKey(t => new { t.RoleId, t.UserId });

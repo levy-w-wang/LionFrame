@@ -32,7 +32,7 @@ namespace LionFrame.Data.BasicData
                 UserId = 2L,
                 UserName = "levy1",
                 PassWord = "qwer1234".Md5Encrypt(),
-                Email = "levywang123@gmail.com",
+                Email = "levy_wang@qq.com",
                 Sex = 1,
                 Status = 1,
                 CreatedTime = DateTime.Now,

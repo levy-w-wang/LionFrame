@@ -18,5 +18,11 @@
         /// 验证码前缀
         /// </summary>
         public static readonly string CAPTCHA = "Captcha_";
+
+        /// <summary>
+        /// 注册用户验证码前缀
+        /// </summary>
+        public static readonly string REGISTERCAPTCHA = "RegisterCaptcha_";
+
     }
 }

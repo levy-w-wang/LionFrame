@@ -9,6 +9,10 @@ namespace LionFrame.Controller
     {
         public SystemBll SystemBll { get; set; }
 
+        /// <summary>
+        /// 获取验证码
+        /// </summary>
+        /// <returns></returns>
         [HttpGet, Route("captcha")]
         public ActionResult GetCaptcha()
         {
