@@ -110,7 +110,7 @@ namespace LionFrame.Business
                 return "发送异常  -  " + ex.Message;
 #else
 
-              return "发送异常";
+                return "发送异常";
 #endif
             }
         }

@@ -2,6 +2,7 @@
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.SystemParams;
+using LionFrame.Model.RequestParam.UserParams;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -76,6 +77,20 @@ namespace LionFrame.Controller
                 return Fail($"{info}已存在，请切换", content: $"{info}已存在，请切换");
             }
             return Succeed();
+        }
+
+        /// <summary>
+        /// 修改密码
+        /// 修改成功后删除当前登录信息，重新登录
+        /// </summary>
+        /// <param name="modifyPwdParam"></param>
+        /// <returns></returns>
+        [Route("modifypwd"), HttpPut]
+        public async Task<ActionResult> ModifyPwd(ModifyPwdParam modifyPwdParam)
+        {
+            var result = await UserBll.ModifyPwd(modifyPwdParam, CurrentUser);
+
+            return MyJson(result);
         }
     }
 }

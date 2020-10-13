@@ -1,11 +1,15 @@
-﻿using LionFrame.Basic.Encryptions;
+﻿using EFCore.BulkExtensions;
+using LionFrame.Basic.Encryptions;
 using LionFrame.Data.BasicData;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.SystemParams;
+using LionFrame.Model.RequestParam.UserParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.SystemBo;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LionFrame.Data.SystemDao
 {
@@ -54,6 +58,22 @@ namespace LionFrame.Data.SystemDao
                 return response;
             }
             return response.Fail(ResponseCode.LoginFail, "账号或密码错误", null);
+        }
+
+        /// <summary>
+        /// 根据用户名修改密码
+        /// </summary>
+        /// <param name="modifyPwdParam"></param>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        public async Task<bool> ModifyPwd(ModifyPwdParam modifyPwdParam, long uid)
+        {
+            var result = await CurrentDbContext.SysUsers.Where(c => c.UserId == uid).BatchUpdateAsync(c => new SysUser()
+            {// 使用这种方式只会修改这两个字段
+                PassWord = modifyPwdParam.NewPassWord.Md5Encrypt(),
+                UpdatedTime = DateTime.Now
+            });
+            return result > 0;
         }
     }
 }

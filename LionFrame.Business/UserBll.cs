@@ -5,12 +5,14 @@ using LionFrame.Basic.Extensions;
 using LionFrame.Config;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.AutoMapperCfg;
+using LionFrame.CoreCommon.Cache;
 using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.CoreCommon.CustomException;
 using LionFrame.Data.SystemDao;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.SystemParams;
+using LionFrame.Model.RequestParam.UserParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
@@ -28,6 +30,7 @@ namespace LionFrame.Business
         public SysUserDao SysUserDao { get; set; }
         public SystemBll SystemBll { get; set; }
         public RedisClient RedisClient { get; set; }
+        public LionMemoryCache LionMemoryCache { get; set; }
 
         /// <summary>
         /// 用户登录 业务层
@@ -204,5 +207,35 @@ namespace LionFrame.Business
         }
 
         #endregion
+
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="modifyPwdParam"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel<string>> ModifyPwd(ModifyPwdParam modifyPwdParam, UserCacheBo currentUser)
+        {
+            var result = new ResponseModel<string>();
+            if (modifyPwdParam.NewPassWord == modifyPwdParam.OldPassWord)
+            {
+                return result.Fail(ResponseCode.Fail, "不允许原密码和新密码相同的修改", "不允许原密码和新密码相同的修改");
+            }
+
+            if (modifyPwdParam.OldPassWord.Md5Encrypt() == currentUser.PassWord)
+            {
+                var updateResult = await SysUserDao.ModifyPwd(modifyPwdParam, currentUser.UserId);
+                if (updateResult)
+                {
+                    await RedisClient.DeleteAsync(CacheKeys.USER + currentUser.UserId);
+                    LionMemoryCache.Remove(CacheKeys.USER + currentUser.UserId);
+
+                    return result.Succeed("修改成功,请重新登录");
+                }
+                return result.Fail(ResponseCode.Fail, "修改失败，请稍后再试", "修改失败，请稍后再试");
+            }
+
+            return result.Fail(ResponseCode.Fail, "原密码不正确", "原密码不正确");
+        }
     }
 }

@@ -48,7 +48,7 @@ namespace LionFrame.CoreCommon.CustomMiddler
                     Console.WriteLine(ex);
                     var content = ex.ToJson();
 #else
-                var content = "系统错误，请稍后再试或联系管理人员。";
+                    var content = "系统错误，请稍后再试或联系管理人员。";
 #endif
                     await ExceptionResult(httpContext, new ResponseModel().Fail(ResponseCode.UnknownEx, content, "").ToJson(true, isLowCase: true));
                 }

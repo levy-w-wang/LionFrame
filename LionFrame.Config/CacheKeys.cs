@@ -15,12 +15,12 @@
         public static readonly string MENU_TREE = "MenuTree_";
 
         /// <summary>
-        /// 验证码前缀
+        /// 验证码前缀 后接唯一uuid
         /// </summary>
         public static readonly string CAPTCHA = "Captcha_";
 
         /// <summary>
-        /// 注册用户验证码前缀
+        /// 注册用户验证码前缀  后接邮箱 电话等
         /// </summary>
         public static readonly string REGISTERCAPTCHA = "RegisterCaptcha_";
 
