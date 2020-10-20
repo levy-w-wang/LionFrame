@@ -95,6 +95,10 @@ namespace LionFrame.CoreCommon.Controllers
             return MyJson(new ResponseModel().Fail(code, content, data));
         }
 
+        protected ActionResult Fail<T>(ResponseCode code = ResponseCode.Fail, string content = "")
+        {
+            return MyJson(new ResponseModel().Fail(code, content));
+        }
         /// <summary>
         /// 请求开始前的处理
         /// </summary>

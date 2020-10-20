@@ -29,6 +29,13 @@
             return this;
         }
 
+        public ResponseModel<T> Fail(ResponseCode code, string content)
+        {
+            Code = code;
+            Message = content;
+            Data = default;
+            return this;
+        }
         public ResponseModel<T> Succeed(T data, ResponseCode code = ResponseCode.Success, string msg = "successful")
         {
             Code = code;

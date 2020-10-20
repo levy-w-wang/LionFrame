@@ -219,7 +219,7 @@ namespace LionFrame.Business
             var result = new ResponseModel<string>();
             if (modifyPwdParam.NewPassWord == modifyPwdParam.OldPassWord)
             {
-                return result.Fail(ResponseCode.Fail, "不允许原密码和新密码相同的修改", "不允许原密码和新密码相同的修改");
+                return result.Fail(ResponseCode.Fail, "不允许原密码和新密码相同的修改");
             }
 
             if (modifyPwdParam.OldPassWord.Md5Encrypt() == currentUser.PassWord)
@@ -232,10 +232,10 @@ namespace LionFrame.Business
 
                     return result.Succeed("修改成功,请重新登录");
                 }
-                return result.Fail(ResponseCode.Fail, "修改失败，请稍后再试", "修改失败，请稍后再试");
+                return result.Fail(ResponseCode.Fail, "修改失败，请稍后再试");
             }
 
-            return result.Fail(ResponseCode.Fail, "原密码不正确", "原密码不正确");
+            return result.Fail(ResponseCode.Fail, "原密码不正确");
         }
     }
 }
