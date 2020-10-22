@@ -7,7 +7,7 @@ namespace LionFrame.Basic.Extensions
     /// <summary>
     /// 集合静态扩展
     /// </summary>
-    public static class CollectionExtensions
+    public static class CollectionExtension
     {
 
         public static bool IsNullOrEmpty<T>(this ICollection<T> source)
