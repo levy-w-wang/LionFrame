@@ -9,6 +9,11 @@ using LionFrame.Model.SystemBo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using LionFrame.Domain.SystemDomain;
+using LionFrame.Model;
+using LionFrame.Model.RequestParam.SystemParams;
+using LionFrame.Model.ResponseDto.ResultModel;
 
 namespace LionFrame.Business
 {
@@ -53,13 +58,14 @@ namespace LionFrame.Business
             cacheMenus = RedisClient.Get<List<MenuCacheBo>>(menuKey);
             if (cacheMenus != null)
             {
-                Cache.Set(menuKey, cacheMenus, new TimeSpan(3, 0, 0, 0));
+                Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             }
             return cacheMenus;
         }
 
         /// <summary>
         /// 从数据库中获取菜单树
+        /// 由于菜单不经常变化故设置redis存储7天  本地缓存设置1天
         /// </summary>
         /// <param name="roleIds"></param>
         /// <param name="menuKey"></param>
@@ -69,7 +75,7 @@ namespace LionFrame.Business
             var menus = SysMenuDao.GetMenus(roleIds);
             var cacheMenus = GetMenus(menus);
             RedisClient.Set(menuKey, cacheMenus, new TimeSpan(7, 0, 0, 0));
-            Cache.Set(menuKey, cacheMenus, new TimeSpan(3, 0, 0, 0));
+            Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             return cacheMenus;
         }
 
@@ -105,6 +111,39 @@ namespace LionFrame.Business
         private List<string> GetButtonPerms(List<MenuCacheBo> menu, string menuMenuId)
         {
             return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => c.MenuName).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 增加菜单
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <param name="incrementMenu"></param>
+        /// <returns></returns>
+        public async Task<BaseResponseModel> AddMenu(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
+        {
+            var responseModel = new ResponseModel<bool>();
+            var sysMenu = incrementMenu.MapTo<SysMenu>();
+            sysMenu.SysRoleMenuRelations = new List<SysRoleMenuRelation>()
+            {
+                new SysRoleMenuRelation()
+                {
+                    RoleId = 1
+                }
+            };
+            if (incrementMenu.AssignAdmin)
+            {
+                sysMenu.SysRoleMenuRelations.Add(new SysRoleMenuRelation()
+                {
+                    RoleId = 2
+                });
+            }
+
+            sysMenu.CreatedTime = DateTime.Now;
+            sysMenu.CreatedBy = currentUser.UserId;
+            sysMenu.UpdatedBy = currentUser.UserId;
+            await SysMenuDao.AddAsync(sysMenu); 
+            var count = await SysMenuDao.SaveChangesAsync();
+            return count > 0 ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "保存失败");
         }
     }
 }

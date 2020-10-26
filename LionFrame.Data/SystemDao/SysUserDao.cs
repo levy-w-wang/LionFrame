@@ -3,7 +3,6 @@ using LionFrame.Basic.Encryptions;
 using LionFrame.Data.BasicData;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
-using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.RequestParam.UserParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.SystemBo;

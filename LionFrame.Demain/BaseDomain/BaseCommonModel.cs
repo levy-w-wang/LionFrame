@@ -8,7 +8,7 @@ namespace LionFrame.Domain.BaseDomain
         protected BaseCommonModel()
         {
             Deleted = false;
-            CreatedTime = DateTime.Now;
+            //CreatedTime = DateTime.Now; //避免更新的时候将该字段更新
             UpdatedTime = DateTime.Now;
         }
 

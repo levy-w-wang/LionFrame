@@ -4,11 +4,11 @@ using LionFrame.Basic.Extensions;
 using LionFrame.Basic.Models;
 using LionFrame.Config;
 using LionFrame.CoreCommon.Cache.Redis;
-using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.SystemBo;
 using MimeKit;
 using System;
 using System.Threading.Tasks;
+using LionFrame.Model.RequestParam.UserParams;
 
 namespace LionFrame.Business
 {

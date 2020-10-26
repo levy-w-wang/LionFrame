@@ -1,7 +1,6 @@
 ﻿using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Model;
-using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.RequestParam.UserParams;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -91,6 +90,17 @@ namespace LionFrame.Controller
             var result = await UserBll.ModifyPwd(modifyPwdParam, CurrentUser);
 
             return MyJson(result);
+        }
+
+        /// <summary>
+        /// 登出
+        /// </summary>
+        /// <returns></returns>
+        [Route("logout"), HttpPost]
+        public async Task<ActionResult> Logout()
+        {
+            await UserBll.Logout(CurrentUser);
+            return Succeed();
         }
     }
 }

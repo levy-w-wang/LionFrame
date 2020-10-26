@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LionFrame.Model.SystemBo
 {
@@ -18,5 +19,11 @@ namespace LionFrame.Model.SystemBo
         public string LoginIp { get; set; }
         public DateTime LoginTime { get; set; }
         public IEnumerable<RoleCacheBo> RoleCacheBos { get; set; }
+
+        /// <summary>
+        /// 角色Id
+        /// </summary>
+        public List<long> RoleIdList => RoleCacheBos.Select(c => c.RoleId).ToList();
+        
     }
 }

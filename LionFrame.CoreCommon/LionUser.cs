@@ -4,6 +4,10 @@ using LionFrame.CoreCommon.CustomException;
 using LionFrame.Model;
 using LionFrame.Model.SystemBo;
 using System;
+using System.Collections.Generic;
+using LionFrame.Basic.Extensions;
+using LionFrame.CoreCommon.CustomResult;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace LionFrame.CoreCommon
 {
@@ -36,10 +40,6 @@ namespace LionFrame.CoreCommon
             try
             {
                 var http = LionWeb.HttpContext;
-                if (http == null)
-                    throw new CustomSystemException("未授权，请重新登录", ResponseCode.Unauthorized);
-                if (http.Items["user"] is UserCacheBo user)
-                    return user;
                 var cache = LionUserCache.Get(); //先从内存获取，再从redis获取
                 if (cache != null)
                 {
@@ -74,13 +74,50 @@ namespace LionFrame.CoreCommon
             }
             if (cache.SessionId == sessionId)
             {
-                LionWeb.HttpContext.Items["user"] = cache;
 #if DEBUG
                 LogHelper.Logger.Debug("[LoginName]:{0}\n \n [UserId]:{1}\n [UserToken]:{2}", cache.UserName, cache.UserId, cache.UserToken);
 #endif
                 return SysConstants.TokenValidType.Success;
             }
             return SysConstants.TokenValidType.LoggedInOtherPlaces;
+        }
+
+        /// <summary>
+        /// 验证token
+        /// </summary>
+        /// <returns></returns>
+        public static SysConstants.TokenValidType TokenLogin()
+        {
+            var token = LionWeb.HttpContext.Request.Headers["token"];
+            if (string.IsNullOrEmpty(token))
+            {
+                return SysConstants.TokenValidType.LogonInvalid;
+            }
+
+            // 验证登录
+            var str = TokenManager.ValidateToken(token, out DateTime date);
+            if (!string.IsNullOrEmpty(str) || date > DateTime.Now)
+            {
+                var userDic = str.ToObject<Dictionary<string, string>>();
+                LionWeb.HttpContext.Items["uid"] = userDic["uid"];
+                LionWeb.HttpContext.Items["sessionId"] = userDic["sessionId"];
+                // 单点登录验证
+                var validResult = LionUser.ValidSessionId(userDic["uid"], userDic["sessionId"]);
+
+                if (validResult != SysConstants.TokenValidType.Success)
+                {
+                    return validResult;
+                }
+
+                //当token过期时间小于8小时，更新token并重新返回新的token
+                if (date.AddHours(-8) > DateTime.Now) return validResult;
+                var nToken = TokenManager.GenerateToken(str);
+                LionWeb.HttpContext.Response.Headers["token"] = nToken;
+                LionWeb.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "token";
+                return validResult;
+            }
+
+            return SysConstants.TokenValidType.LogonInvalid;
         }
     }
 }

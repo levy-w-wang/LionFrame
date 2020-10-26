@@ -11,7 +11,6 @@ using LionFrame.CoreCommon.CustomException;
 using LionFrame.Data.SystemDao;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
-using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.RequestParam.UserParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.ResponseDto.SystemDto;
@@ -236,6 +235,19 @@ namespace LionFrame.Business
             }
 
             return result.Fail(ResponseCode.Fail, "原密码不正确");
+        }
+
+        /// <summary>
+        /// 登出 -- 注销当前信息
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task Logout(UserCacheBo currentUser)
+        {
+            await RedisClient.DeleteAsync(CacheKeys.USER + currentUser.UserId);
+            await RedisClient.DeleteAsync(CacheKeys.MENU_TREE + currentUser.UserId);
+            LionMemoryCache.Remove(CacheKeys.USER + currentUser.UserId);
+            LionMemoryCache.Remove(CacheKeys.MENU_TREE + currentUser.UserId);
         }
     }
 }

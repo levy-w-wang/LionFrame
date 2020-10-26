@@ -35,6 +35,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using LionFrame.CoreCommon.CustomMiddler;
 
 namespace LionFrame.MainWeb
 {
@@ -88,7 +89,7 @@ namespace LionFrame.MainWeb
                 //验证错误最大个数，避免返回一长串错误
                 options.MaxModelValidationErrors = 3;
                 // 3.异常过滤器--处理mvc中未捕捉的异常
-                options.Filters.Add<ExceptionFilter>();
+                //options.Filters.Add<ExceptionFilter>();
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .ConfigureApiBehaviorOptions(options =>
@@ -240,7 +241,7 @@ namespace LionFrame.MainWeb
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMemoryCache memoryCache)
         {
-            // 全局异常处理的三种方式  个人使用第三种  //搜索异常查找
+            // 全局异常处理的三种方式
             // 1.自定义的异常拦截管道 - - 放在第一位处理全局未捕捉的异常
             // app.UseExceptionHandler(build => build.Use(CustomExceptionHandler));
             if (env.IsDevelopment())
@@ -254,7 +255,7 @@ namespace LionFrame.MainWeb
             }
 
             // 2.使用自定义异常处理中间件  处理该中间件以后未捕捉的异常
-            //app.UseMiddleware<CustomExceptionMiddleware>();
+            app.UseMiddleware<CustomExceptionMiddleware>();
 
             //autofac 新增 
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();

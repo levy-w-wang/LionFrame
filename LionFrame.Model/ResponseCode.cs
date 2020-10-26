@@ -13,8 +13,14 @@ namespace LionFrame.Model
         Success = 200,
         [Description("登录失败")]
         LoginFail = 201,//  登录失败
+        /// <summary>
+        /// 未授权，需要重新登录
+        /// </summary>
         [Description("未授权")]
         Unauthorized = 401,
+        /// <summary>
+        /// 未授权，不需要重新登录，无权限操作
+        /// </summary>
         [Description("未授权")]
         Unauthorized1 = 1000, //未授权
         [Description("未知异常")]

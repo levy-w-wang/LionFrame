@@ -5,6 +5,9 @@ using LionFrame.CoreCommon.Cache;
 using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.Model.SystemBo;
 using System;
+using LionFrame.Basic.Extensions;
+using LionFrame.CoreCommon.CustomException;
+using LionFrame.Model;
 
 namespace LionFrame.CoreCommon
 {
@@ -114,14 +117,23 @@ namespace LionFrame.CoreCommon
             return uid;
         }
 
+        /// <summary>
+        /// 获取当前用户缓存
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns></returns>
         public static UserCacheBo Get(string uid = "")
         {
-            if (string.IsNullOrEmpty(uid))
-                uid = GetUidFromClient();
-            if (string.IsNullOrEmpty(uid))
+            var http = LionWeb.HttpContext;
+            if (http == null)
+                throw new CustomSystemException("未授权，请重新登录", ResponseCode.Unauthorized);
+            if (http.Items["user"] is UserCacheBo user)
+                return user;
+            uid = uid.IsNullOrEmpty() ? GetUidFromClient() : uid;
+            if (uid.IsNullOrEmpty())
                 return null;
-            var key = FormatPrefixKey(uid);
 
+            var key = FormatPrefixKey(uid);
             //从本地缓存中读取cache
             var cacheCache = Cache.Get<UserCacheBo>(key);
             if (cacheCache != null)

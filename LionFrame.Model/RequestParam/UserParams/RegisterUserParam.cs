@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LionFrame.Model.RequestParam.SystemParams
+namespace LionFrame.Model.RequestParam.UserParams
 {
     /// <summary>
     /// 账号注册
