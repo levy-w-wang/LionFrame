@@ -36,7 +36,7 @@
             Data = default;
             return this;
         }
-        public ResponseModel<T> Succeed(T data, ResponseCode code = ResponseCode.Success, string msg = "successful")
+        public ResponseModel<T> Succeed(T data, ResponseCode code = ResponseCode.Success, string msg = "success")
         {
             Code = code;
             Message = msg;

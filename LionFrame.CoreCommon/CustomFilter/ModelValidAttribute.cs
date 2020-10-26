@@ -31,7 +31,7 @@ namespace LionFrame.CoreCommon.CustomFilter
                 }
             }
             if (filterContext.Controller is BaseController controller)
-                filterContext.Result = controller.Fail(ResponseCode.RequestDataVerifyFail, $"请求错误,{string.Join(",", errMsg)}");
+                filterContext.Result = controller.Fail(ResponseCode.RequestDataVerifyFail, $"{string.Join(",", errMsg)}");
             else
                 throw new Exception("默认所有Controller都需要继承BaseController，以实现模型的验证，错误的提醒，若有特殊情况，再讨论！");
         }

@@ -51,7 +51,7 @@ namespace LionFrame.Business
                 var userCache = responseResult.Data;
                 CreateTokenCache(userCache);
                 var userDto = userCache.MapTo<UserDto>();
-                result.Data = userDto;
+                result.Succeed(userDto);
             }
             return result;
         }

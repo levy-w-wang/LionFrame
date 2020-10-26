@@ -26,9 +26,14 @@ namespace LionFrame.Business
 
         public IdWorker IdWorker { get; set; }
 
+        /// <summary>
+        /// 获取验证码
+        /// </summary>
+        /// <returns></returns>
         public CaptchaResult GetCaptchaResult()
         {
-            var captcha = CaptchaHelper.GenerateCaptcha(75, 35, CaptchaHelper.GenerateCaptchaCode());
+            //var captcha = CaptchaHelper.GenerateCaptcha(75, 35, CaptchaHelper.GenerateCaptchaCode());
+            var captcha = CaptchaHelper.CreateImage(CaptchaHelper.GenerateCaptchaCode());
             var uuid = IdWorker.NextId();
             var key = CacheKeys.CAPTCHA + uuid;
             RedisClient.Set(key, captcha.Captcha, CaptchaExpired);
@@ -50,12 +55,11 @@ namespace LionFrame.Business
                 return "验证码已失效";
             }
 
+            await RedisClient.DeleteAsync(key);
             if (!string.Equals(loginParam.Captcha, captcha, StringComparison.OrdinalIgnoreCase))
             {
                 return "验证码错误";
             }
-
-            await RedisClient.DeleteAsync(key);
             return "验证通过";
         }
 
