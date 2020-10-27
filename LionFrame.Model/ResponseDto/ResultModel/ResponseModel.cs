@@ -5,7 +5,7 @@
     /// </summary>
     public class ResponseModel : ResponseModel<object>
     {
-        public ResponseModel Fail(ResponseCode code, string content)
+        public new ResponseModel Fail(ResponseCode code, string content)
         {
             Code = code;
             Message = content;
@@ -21,6 +21,13 @@
         //public FailModel Error { get; set; }
         public T Data { get; set; }
 
+        /// <summary>
+        /// 失败返回
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="content"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public ResponseModel<T> Fail(ResponseCode code, string content, T data)
         {
             Code = code;
@@ -28,7 +35,27 @@
             Data = data;
             return this;
         }
+        /// <summary>
+        /// 通用错误返回
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="data"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public ResponseModel<T> Fail(string content, T data, ResponseCode code = ResponseCode.Fail)
+        {
+            Code = code;
+            Message = content;
+            Data = data;
+            return this;
+        }
 
+        /// <summary>
+        /// 错误返回 - 自定义错误码
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         public ResponseModel<T> Fail(ResponseCode code, string content)
         {
             Code = code;
@@ -36,6 +63,27 @@
             Data = default;
             return this;
         }
+
+        /// <summary>
+        /// 通用错误返回
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public ResponseModel<T> Fail( string content,ResponseCode code = ResponseCode.Fail)
+        {
+            Code = code;
+            Message = content;
+            Data = default;
+            return this;
+        }
+        /// <summary>
+        /// 成功返回
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="code"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         public ResponseModel<T> Succeed(T data, ResponseCode code = ResponseCode.Success, string msg = "success")
         {
             Code = code;

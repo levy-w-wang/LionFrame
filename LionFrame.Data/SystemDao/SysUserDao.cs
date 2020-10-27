@@ -74,5 +74,24 @@ namespace LionFrame.Data.SystemDao
             });
             return result > 0;
         }
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="retrievePwdParam"></param>
+        /// <returns></returns>
+        public async Task<bool> RetrievePwdAsync(RetrievePwdParam retrievePwdParam)
+        {
+            //var user = CurrentDbContext.SysUsers.First(c => c.Email == retrievePwdParam.Email);
+            //user.PassWord = retrievePwdParam.Pwd.Md5Encrypt();
+            //user.UpdatedTime = DateTime.Now;
+            //var result = await SaveChangesAsync();
+
+            var result = await CurrentDbContext.SysUsers.Where(c => c.Email == retrievePwdParam.Email).BatchUpdateAsync(c => new SysUser()
+            {
+                PassWord = retrievePwdParam.Pwd.Md5Encrypt(),
+                UpdatedTime = DateTime.Now
+            });
+            return result > 0;
+        }
     }
 }

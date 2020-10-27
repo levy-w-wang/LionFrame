@@ -24,5 +24,10 @@
         /// </summary>
         public static readonly string REGISTERCAPTCHA = "RegisterCaptcha_";
 
+        /// <summary>
+        /// 找回密码验证码前缀  后接邮箱 电话等
+        /// </summary>
+        public static readonly string RETRIEVEPWDCAPTCHA = "RetrievePwdCaptcha_";
+
     }
 }

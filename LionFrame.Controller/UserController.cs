@@ -1,4 +1,5 @@
-﻿using LionFrame.Business;
+﻿using System.Collections.Generic;
+using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.UserParams;
@@ -61,7 +62,7 @@ namespace LionFrame.Controller
         }
 
         /// <summary>
-        /// 验证用户数据是否存在,在用户输入完数据后，立即校验一次，提升用户体验
+        /// 验证用户数据是否存在,在用户输入完数据后（blur），立即校验一次，提升用户体验
         /// </summary>
         /// <param name="type">1：用户名  2：邮箱</param>
         /// <param name="str">对应值 -- 未直接校验</param>
@@ -92,6 +93,30 @@ namespace LionFrame.Controller
             return MyJson(result);
         }
 
+        /// <summary>
+        /// 找回密码 - 获取验证码
+        /// </summary>
+        /// <returns></returns>
+        [Route("send-email-reset-pwd"), HttpPost, AllowAnonymous]
+        public async Task<ActionResult> SendEmail()
+        {
+            var dic = GetJsonParams<Dictionary<string, string>>();
+            var result = await UserBll.SendEmail(dic["email"]);
+
+            return MyJson(result);
+        }
+        /// <summary>
+        /// 找回密码
+        /// </summary>
+        /// <returns></returns>
+        [Route("retrievepwd"), HttpPost,AllowAnonymous]
+        public async Task<ActionResult> RetrievePwd(RetrievePwdParam retrievePwdParam)
+        {
+            var dic = GetJsonParams<Dictionary<string, string>>();
+            var result = await UserBll.RetrievePwd(retrievePwdParam);
+
+            return MyJson(result);
+        }
         /// <summary>
         /// 登出
         /// </summary>

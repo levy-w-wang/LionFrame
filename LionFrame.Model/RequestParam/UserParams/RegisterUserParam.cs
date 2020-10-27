@@ -19,7 +19,7 @@ namespace LionFrame.Model.RequestParam.UserParams
          Required(ErrorMessage = "请输入邮箱")]
         public string Email { get; set; }
 
-        [StringLength(maximumLength: 6, MinimumLength = 6, ErrorMessage = "验证码长度不正确"), Required(ErrorMessage = "请输入验证码")]
+        [RegularExpression(@"^[0-9]{6}$", ErrorMessage = "验证码为6位数字"), Required(ErrorMessage = "请输入验证码")]
         public string Captcha { get; set; }
         ///// <summary>
         ///// 男女 1男 0女

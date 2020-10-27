@@ -80,6 +80,52 @@ namespace LionFrame.Business
         }
 
         /// <summary>
+        /// 验证是否存在该用户数据
+        /// </summary>
+        /// <param name="type">1：用户名  2：邮箱</param>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public async Task<bool> ExistUserAsync(int type, string str)
+        {
+            switch (type)
+            {
+                case 1:
+                    return await SysUserDao.ExistAsync<SysUser>(c => c.UserName == str && c.Status == 1);
+                case 2:
+                    return await SysUserDao.ExistAsync<SysUser>(c => c.Email == str && c.Status == 1);
+            }
+
+            throw new CustomSystemException("验证类型错误", ResponseCode.DataTypeError);
+        }
+
+        /// <summary>
+        /// 验证验证码
+        /// </summary>
+        /// <param name="prefixKey"></param>
+        /// <param name="email"></param>
+        /// <param name="sendCaptcha"></param>
+        /// <param name="deleteCaptcha">验证码是否在验证过一次后就删除 不管是否验证通过</param>
+        /// <returns></returns>
+        public async Task<string> VerificationCaptchaAsync(string prefixKey, string email, string sendCaptcha, bool deleteCaptcha = true)
+        {
+            var key = prefixKey + email;
+            var captcha = await RedisClient.GetAsync<string>(key);
+            if (captcha == null)
+            {
+                return "验证码错误或已失效";
+            }
+            var str = !string.Equals(sendCaptcha, captcha, StringComparison.OrdinalIgnoreCase) ? "验证码错误" : "验证通过";
+            // 当验证通过 或设定 只要获取过验证码就删除  重新获取验证码
+            if (str == "验证通过" || deleteCaptcha)
+            {
+                await RedisClient.DeleteAsync(key);
+            }
+            return str;
+        }
+
+        #region 注册用户
+
+        /// <summary>
         /// 得到验证码
         /// </summary>
         /// <param name="emailTo"></param>
@@ -97,51 +143,6 @@ namespace LionFrame.Business
         }
 
         /// <summary>
-        /// 验证是否存在该用户数据
-        /// </summary>
-        /// <param name="type">1：用户名  2：邮箱</param>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        public async Task<bool> ExistUserAsync(int type, string str)
-        {
-            switch (type)
-            {
-                case 1:
-                    return await SysUserDao.ExistAsync<SysUser>(c => c.UserName == str);
-                case 2:
-                    return await SysUserDao.ExistAsync<SysUser>(c => c.Email == str);
-            }
-
-            throw new CustomSystemException("验证类型错误", ResponseCode.DataTypeError);
-        }
-
-        #region 注册用户
-
-        /// <summary>
-        /// 验证注册用户
-        /// </summary>
-        /// <param name="registerUserParam"></param>
-        /// <returns></returns>
-        public async Task<string> VerificationRegisterCaptchaAsync(RegisterUserParam registerUserParam)
-        {
-            var key = CacheKeys.REGISTERCAPTCHA + registerUserParam.Email;
-            var captcha = await RedisClient.GetAsync<string>(key);
-            if (captcha == null)
-            {
-                return "验证码已失效";
-            }
-
-            if (!string.Equals(registerUserParam.Captcha, captcha, StringComparison.OrdinalIgnoreCase))
-            {
-                return "验证码错误";
-            }
-
-            await RedisClient.DeleteAsync(key);
-            return "验证通过";
-        }
-
-
-        /// <summary>
         /// 注册用户
         /// </summary>
         /// <param name="registerUserParam"></param>
@@ -149,7 +150,7 @@ namespace LionFrame.Business
         public async Task<ResponseModel<bool>> RegisterUserAsync(RegisterUserParam registerUserParam)
         {
             var result = new ResponseModel<bool>();
-            var verificationResult = await VerificationRegisterCaptchaAsync(registerUserParam);
+            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, registerUserParam.Email, registerUserParam.Captcha);
             if (verificationResult != "验证通过")
             {
                 result.Fail(ResponseCode.Fail, verificationResult, false);
@@ -207,6 +208,58 @@ namespace LionFrame.Business
 
         #endregion
 
+        #region 找回密码
+
+        /// <summary>
+        /// 发送验证码 - 找回密码
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel<string>> SendEmail(string email)
+        {
+            var response = new ResponseModel<string>();
+            if (!email.IsEmail())
+            {
+                return response.Fail("邮箱格式错误");
+            }
+
+            if (!await ExistUserAsync(2, email))
+            {
+                return response.Fail("该邮箱尚未注册或无效");
+            }
+
+            var expireMinutes = 5;
+            var captchaNumber = CaptchaHelper.CreateRandomNumber(6);
+            var htmlEmail = SystemBll.GetMailContent("找回密码", captchaNumber, expireMinutes);
+            var result = await SystemBll.SendSystemMailAsync("LionFrame-找回密码", htmlEmail, email);
+            if (result.Contains("发送成功"))
+            {
+                await RedisClient.SetAsync($"{CacheKeys.RETRIEVEPWDCAPTCHA}{email}", captchaNumber, new TimeSpan(0, expireMinutes, 0));
+            }
+
+            return response.Succeed("发送成功");
+        }
+
+        /// <summary>
+        /// 找回密码 -- 修改当前用户密码
+        /// </summary>
+        /// <param name="retrievePwdParam"></param>
+        /// <returns></returns>
+        public async Task<ResponseModel<bool>> RetrievePwd(RetrievePwdParam retrievePwdParam)
+        {
+            var result = new ResponseModel<bool>();
+            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, retrievePwdParam.Email, retrievePwdParam.Captcha);
+            if (verificationResult != "验证通过")
+            {
+                return result.Fail(verificationResult, false);
+            }
+
+            var update = await SysUserDao.RetrievePwdAsync(retrievePwdParam);
+            return update ? result.Succeed(true) : result.Fail("修改密码失败，请稍后再试");
+        }
+
+        #endregion
+
         /// <summary>
         /// 修改密码
         /// </summary>
@@ -226,9 +279,8 @@ namespace LionFrame.Business
                 var updateResult = await SysUserDao.ModifyPwd(modifyPwdParam, currentUser.UserId);
                 if (updateResult)
                 {
-                    await RedisClient.DeleteAsync(CacheKeys.USER + currentUser.UserId);
-                    LionMemoryCache.Remove(CacheKeys.USER + currentUser.UserId);
-
+                    // 修改成功 登出 重新登录
+                    await Logout(currentUser);
                     return result.Succeed("修改成功,请重新登录");
                 }
                 return result.Fail(ResponseCode.Fail, "修改失败，请稍后再试");
