@@ -79,18 +79,19 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="retrievePwdParam"></param>
         /// <returns></returns>
-        public async Task<bool> RetrievePwdAsync(RetrievePwdParam retrievePwdParam)
+        public bool RetrievePwd(RetrievePwdParam retrievePwdParam,out long uid)
         {
-            //var user = CurrentDbContext.SysUsers.First(c => c.Email == retrievePwdParam.Email);
-            //user.PassWord = retrievePwdParam.Pwd.Md5Encrypt();
-            //user.UpdatedTime = DateTime.Now;
-            //var result = await SaveChangesAsync();
+            var user = CurrentDbContext.SysUsers.First(c => c.Email == retrievePwdParam.Email);
+            user.PassWord = retrievePwdParam.Pwd.Md5Encrypt();
+            user.UpdatedTime = DateTime.Now;
+            uid = user.UserId;//找回密码 删除token
+            var result = SaveChanges();
 
-            var result = await CurrentDbContext.SysUsers.Where(c => c.Email == retrievePwdParam.Email).BatchUpdateAsync(c => new SysUser()
-            {
-                PassWord = retrievePwdParam.Pwd.Md5Encrypt(),
-                UpdatedTime = DateTime.Now
-            });
+            //var result = await CurrentDbContext.SysUsers.Where(c => c.Email == retrievePwdParam.Email).BatchUpdateAsync(c => new SysUser()
+            //{
+            //    PassWord = retrievePwdParam.Pwd.Md5Encrypt(),
+            //    UpdatedTime = DateTime.Now
+            //});
             return result > 0;
         }
     }

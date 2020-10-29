@@ -132,12 +132,23 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<string> GetRegisterCaptchaAsync(string emailTo)
         {
+            var key = $"{CacheKeys.REGISTERCAPTCHA}{emailTo}";
+            var expireMinutes = 5;
+
+            if (await RedisClient.ExistAsync(key))
+            {
+                var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
+                if (timeSpanLess.TotalMinutes + 2 > expireMinutes)
+                {
+                    return "获取验证码过于频繁，请稍后再获取";
+                }
+            }
             var captchaNumber = CaptchaHelper.CreateRandomNumber(6);
-            var htmlEmail = SystemBll.GetMailContent("注册账号", captchaNumber, 10);
+            var htmlEmail = SystemBll.GetMailContent("注册账号", captchaNumber, expireMinutes);
             var result = await SystemBll.SendSystemMailAsync("LionFrame-注册账号", htmlEmail, emailTo);
             if (result.Contains("发送成功"))
             {
-                await RedisClient.SetAsync($"{CacheKeys.REGISTERCAPTCHA}{emailTo}", captchaNumber, new TimeSpan(0, 10, 0));
+                await RedisClient.SetAsync(key, captchaNumber, new TimeSpan(0, expireMinutes, 0));
             }
             return result;
         }
@@ -150,7 +161,7 @@ namespace LionFrame.Business
         public async Task<ResponseModel<bool>> RegisterUserAsync(RegisterUserParam registerUserParam)
         {
             var result = new ResponseModel<bool>();
-            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, registerUserParam.Email, registerUserParam.Captcha);
+            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, registerUserParam.Email, registerUserParam.Captcha,false);
             if (verificationResult != "验证通过")
             {
                 result.Fail(ResponseCode.Fail, verificationResult, false);
@@ -223,18 +234,28 @@ namespace LionFrame.Business
                 return response.Fail("邮箱格式错误");
             }
 
+            var key = $"{CacheKeys.RETRIEVEPWDCAPTCHA}{email}";
+            var expireMinutes = 2;
+            if (await RedisClient.ExistAsync(key))
+            {
+                var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
+                if (timeSpanLess.TotalMinutes + 2 > expireMinutes)
+                {
+                    return response.Fail("获取验证码过于频繁，请稍后再获取");
+                }
+            }
+
             if (!await ExistUserAsync(2, email))
             {
                 return response.Fail("该邮箱尚未注册或无效");
             }
 
-            var expireMinutes = 5;
             var captchaNumber = CaptchaHelper.CreateRandomNumber(6);
             var htmlEmail = SystemBll.GetMailContent("找回密码", captchaNumber, expireMinutes);
             var result = await SystemBll.SendSystemMailAsync("LionFrame-找回密码", htmlEmail, email);
             if (result.Contains("发送成功"))
             {
-                await RedisClient.SetAsync($"{CacheKeys.RETRIEVEPWDCAPTCHA}{email}", captchaNumber, new TimeSpan(0, expireMinutes, 0));
+                await RedisClient.SetAsync(key, captchaNumber, new TimeSpan(0, expireMinutes, 0));
             }
 
             return response.Succeed("发送成功");
@@ -248,13 +269,17 @@ namespace LionFrame.Business
         public async Task<ResponseModel<bool>> RetrievePwd(RetrievePwdParam retrievePwdParam)
         {
             var result = new ResponseModel<bool>();
-            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, retrievePwdParam.Email, retrievePwdParam.Captcha);
+            var verificationResult = await VerificationCaptchaAsync(CacheKeys.RETRIEVEPWDCAPTCHA, retrievePwdParam.Email, retrievePwdParam.Captcha,false);
             if (verificationResult != "验证通过")
             {
                 return result.Fail(verificationResult, false);
             }
 
-            var update = await SysUserDao.RetrievePwdAsync(retrievePwdParam);
+            var update = SysUserDao.RetrievePwd(retrievePwdParam,out long uid);
+            if(update)
+            {
+                await LogoutAsync(new UserCacheBo(){UserId = uid });
+            }
             return update ? result.Succeed(true) : result.Fail("修改密码失败，请稍后再试");
         }
 
@@ -280,7 +305,7 @@ namespace LionFrame.Business
                 if (updateResult)
                 {
                     // 修改成功 登出 重新登录
-                    await Logout(currentUser);
+                    await LogoutAsync(currentUser);
                     return result.Succeed("修改成功,请重新登录");
                 }
                 return result.Fail(ResponseCode.Fail, "修改失败，请稍后再试");
@@ -294,7 +319,7 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public async Task Logout(UserCacheBo currentUser)
+        public async Task LogoutAsync(UserCacheBo currentUser)
         {
             await RedisClient.DeleteAsync(CacheKeys.USER + currentUser.UserId);
             await RedisClient.DeleteAsync(CacheKeys.MENU_TREE + currentUser.UserId);

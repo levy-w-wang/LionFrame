@@ -43,10 +43,10 @@ namespace LionFrame.Controller
         /// <param name="emailTo"></param>
         /// <returns></returns>
         [Route("registercaptcha"), HttpGet, AllowAnonymous]
-        public async Task<ActionResult> GetRegisterCaptcha([RegularExpression(@"^[A-Za-z0-9\u4e00-\u9fa5_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", ErrorMessage = "邮件格式不正确")] string emailTo)
+        public async Task<ActionResult> GetRegisterCaptcha([RegularExpression(@"^[A-Za-z0-9\u4e00-\u9fa5_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", ErrorMessage = "邮件格式不正确"), Required(ErrorMessage = "邮箱未输入")] string emailTo)
         {
             var result = await UserBll.GetRegisterCaptchaAsync(emailTo);
-            return result.Contains("发送成功") ? Succeed() : Fail("获取邮件失败", ResponseCode.Fail);
+            return result.Contains("发送成功") ? Succeed() : Fail(result);
         }
 
         /// <summary>
@@ -70,6 +70,10 @@ namespace LionFrame.Controller
         [Route("exist"), HttpGet, AllowAnonymous]
         public async Task<ActionResult> ExistUser(int type, string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return Fail("不能为空");
+            }
             var result = await UserBll.ExistUserAsync(type, str);
             if (result)
             {
@@ -94,7 +98,8 @@ namespace LionFrame.Controller
         }
 
         /// <summary>
-        /// 找回密码 - 获取验证码
+        /// 找回密码 - 获取验证码 
+        /// 所需参数 dic["email"]
         /// </summary>
         /// <returns></returns>
         [Route("send-email-reset-pwd"), HttpPost, AllowAnonymous]
@@ -109,12 +114,10 @@ namespace LionFrame.Controller
         /// 找回密码
         /// </summary>
         /// <returns></returns>
-        [Route("retrievepwd"), HttpPost,AllowAnonymous]
+        [Route("retrievepwd"), HttpPost, AllowAnonymous]
         public async Task<ActionResult> RetrievePwd(RetrievePwdParam retrievePwdParam)
         {
-            var dic = GetJsonParams<Dictionary<string, string>>();
             var result = await UserBll.RetrievePwd(retrievePwdParam);
-
             return MyJson(result);
         }
         /// <summary>
@@ -124,7 +127,7 @@ namespace LionFrame.Controller
         [Route("logout"), HttpPost]
         public async Task<ActionResult> Logout()
         {
-            await UserBll.Logout(CurrentUser);
+            await UserBll.LogoutAsync(CurrentUser);
             return Succeed();
         }
     }

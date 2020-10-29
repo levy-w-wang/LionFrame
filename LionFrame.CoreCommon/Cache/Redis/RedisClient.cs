@@ -161,6 +161,16 @@ namespace LionFrame.CoreCommon.Cache.Redis
             var number = _db.StringDecrement(key, value);
             return number;
         }
+        /// <summary>
+        /// 获取剩余过期时间
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public TimeSpan KeyTimeToLive(string key)
+        {
+            var timeSpan = _db.KeyTimeToLive(key);
+            return timeSpan ?? new TimeSpan();
+        }
 
         #region 异步
 
@@ -274,6 +284,16 @@ namespace LionFrame.CoreCommon.Cache.Redis
             return number;
         }
 
+        /// <summary>
+        /// 获取剩余过期时间
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public async Task<TimeSpan> KeyTimeToLiveAsync(string key)
+        {
+            var timeSpan = await _db.KeyTimeToLiveAsync(key);
+            return timeSpan ?? new TimeSpan();
+        }
         #endregion
 
         public IServer GetServer()

@@ -77,11 +77,20 @@ namespace LionFrame.CoreCommon.Controllers
         /// <param name="code"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        internal ActionResult Fail(ResponseCode code, string content = "")
+        internal ActionResult Fail(string content,ResponseCode code = ResponseCode.Fail)
         {
             return MyJson(new ResponseModel().Fail(code, content, null));
         }
 
+        /// <summary>
+        /// 带错误返回数据
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        protected ActionResult Fail(string content)
+        {
+            return MyJson(new ResponseModel<string>().Fail(ResponseCode.Fail, content, content));
+        }
         /// <summary>
         /// 带错误返回数据
         /// </summary>
@@ -90,14 +99,9 @@ namespace LionFrame.CoreCommon.Controllers
         /// <param name="code"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        protected ActionResult Fail<T>(T data, ResponseCode code = ResponseCode.Fail, string content = "")
+        protected ActionResult Fail<T>(T data, string content,ResponseCode code = ResponseCode.Fail)
         {
             return MyJson(new ResponseModel().Fail(code, content, data));
-        }
-
-        protected ActionResult Fail<T>(ResponseCode code = ResponseCode.Fail, string content = "")
-        {
-            return MyJson(new ResponseModel().Fail(code, content));
         }
         /// <summary>
         /// 请求开始前的处理

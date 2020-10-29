@@ -52,7 +52,7 @@ namespace LionFrame.Business
             var captcha = await RedisClient.GetAsync<string>(key);
             if (captcha == null)
             {
-                return "验证码已失效";
+                return "验证码错误或已失效";
             }
 
             await RedisClient.DeleteAsync(key);
