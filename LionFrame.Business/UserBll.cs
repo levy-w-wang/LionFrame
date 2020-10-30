@@ -123,6 +123,25 @@ namespace LionFrame.Business
             return str;
         }
 
+        /// <summary>
+        /// 是否频繁获取验证码
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="expireMinutes">过期时间</param>
+        /// <param name="bufferMinutes">缓冲时间</param>
+        /// <returns></returns>
+        private async Task<bool> FrequentlyGetCaptchaAsync(string key, int expireMinutes, int bufferMinutes)
+        {
+            if (await RedisClient.ExistAsync(key))
+            {
+                var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
+                if (timeSpanLess.TotalMinutes + bufferMinutes > expireMinutes)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         #region 注册用户
 
         /// <summary>
@@ -135,13 +154,9 @@ namespace LionFrame.Business
             var key = $"{CacheKeys.REGISTERCAPTCHA}{emailTo}";
             var expireMinutes = 5;
 
-            if (await RedisClient.ExistAsync(key))
+            if (await FrequentlyGetCaptchaAsync(key, expireMinutes, 2))
             {
-                var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
-                if (timeSpanLess.TotalMinutes + 2 > expireMinutes)
-                {
-                    return "获取验证码过于频繁，请稍后再获取";
-                }
+                return "获取验证码过于频繁，请稍后再获取";
             }
             var captchaNumber = CaptchaHelper.CreateRandomNumber(6);
             var htmlEmail = SystemBll.GetMailContent("注册账号", captchaNumber, expireMinutes);
@@ -161,7 +176,7 @@ namespace LionFrame.Business
         public async Task<ResponseModel<bool>> RegisterUserAsync(RegisterUserParam registerUserParam)
         {
             var result = new ResponseModel<bool>();
-            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, registerUserParam.Email, registerUserParam.Captcha,false);
+            var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, registerUserParam.Email, registerUserParam.Captcha, false);
             if (verificationResult != "验证通过")
             {
                 result.Fail(ResponseCode.Fail, verificationResult, false);
@@ -235,14 +250,10 @@ namespace LionFrame.Business
             }
 
             var key = $"{CacheKeys.RETRIEVEPWDCAPTCHA}{email}";
-            var expireMinutes = 2;
-            if (await RedisClient.ExistAsync(key))
+            var expireMinutes = 5;
+            if (await FrequentlyGetCaptchaAsync(key, expireMinutes, 2))
             {
-                var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
-                if (timeSpanLess.TotalMinutes + 2 > expireMinutes)
-                {
-                    return response.Fail("获取验证码过于频繁，请稍后再获取");
-                }
+                return response.Fail("获取验证码过于频繁，请稍后再获取");
             }
 
             if (!await ExistUserAsync(2, email))
@@ -269,16 +280,16 @@ namespace LionFrame.Business
         public async Task<ResponseModel<bool>> RetrievePwd(RetrievePwdParam retrievePwdParam)
         {
             var result = new ResponseModel<bool>();
-            var verificationResult = await VerificationCaptchaAsync(CacheKeys.RETRIEVEPWDCAPTCHA, retrievePwdParam.Email, retrievePwdParam.Captcha,false);
+            var verificationResult = await VerificationCaptchaAsync(CacheKeys.RETRIEVEPWDCAPTCHA, retrievePwdParam.Email, retrievePwdParam.Captcha, false);
             if (verificationResult != "验证通过")
             {
                 return result.Fail(verificationResult, false);
             }
 
-            var update = SysUserDao.RetrievePwd(retrievePwdParam,out long uid);
-            if(update)
+            var update = SysUserDao.RetrievePwd(retrievePwdParam, out long uid);
+            if (update)
             {
-                await LogoutAsync(new UserCacheBo(){UserId = uid });
+                await LogoutAsync(new UserCacheBo() { UserId = uid });
             }
             return update ? result.Succeed(true) : result.Fail("修改密码失败，请稍后再试");
         }
