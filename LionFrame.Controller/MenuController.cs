@@ -34,5 +34,15 @@ namespace LionFrame.Controller
             var result = await MenuBll.AddMenu(CurrentUser, incrementMenu);
             return MyJson(result);
         }
+        /// <summary>
+        /// 获取系统的菜单管理
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("manage"), PopedomFilter(true, 1)]
+        public async Task<ActionResult> MenuManage()
+        {
+            var result = await Task.FromResult(MenuBll.GetMenuManage());
+            return Succeed(result);
+        }
     }
 }

@@ -49,12 +49,14 @@ namespace LionFrame.Data.BasicData
                 RoleName = "系统管理员",
                 RoleDesc = "系统创建",
                 Operable = false,
+                CreatedTime = DateTime.Now,
             }, new SysRole()
             {
                 RoleId = 2L,
                 RoleName = "超级管理员",
                 RoleDesc = "系统创建",
                 Operable = false,
+                CreatedTime = DateTime.Now,
             });
 
             #endregion
@@ -65,14 +67,17 @@ namespace LionFrame.Data.BasicData
             {
                 RoleId = 1L,
                 UserId = 1L,
+                CreatedTime = DateTime.Now,
             }, new SysUserRoleRelation()
             {
                 RoleId = 2L,
                 UserId = 2L,
+                CreatedTime = DateTime.Now,
             }, new SysUserRoleRelation()
             {
                 RoleId = 2L,
                 UserId = 1L,
+                CreatedTime = DateTime.Now,
             });
 
             #endregion
@@ -91,6 +96,7 @@ namespace LionFrame.Data.BasicData
                     Level = 1,
                     Icon = "el-icon-setting",
                     OrderIndex = 1,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -102,6 +108,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-wind-power",
                     OrderIndex = 2,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -113,6 +120,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-ice-cream-round",
                     OrderIndex = 3,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -124,6 +132,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-ice-cream-round",
                     OrderIndex = 4,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -135,6 +144,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-user",
                     OrderIndex = 1,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -146,6 +156,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-menu",
                     OrderIndex = 2,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -157,6 +168,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-milk-tea",
                     OrderIndex = 1,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -168,6 +180,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-potato-strips",
                     OrderIndex = 2,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -179,6 +192,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-lollipop",
                     OrderIndex = 3,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -190,6 +204,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-milk-tea",
                     OrderIndex = 1,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -201,6 +216,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-potato-strips",
                     OrderIndex = 2,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -212,6 +228,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-milk-tea",
                     OrderIndex = 1,
+                    CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
                 {
@@ -223,6 +240,7 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-potato-strips",
                     OrderIndex = 2,
+                    CreatedTime = DateTime.Now,
                 }
             };
             modelBuilder.Entity<SysMenu>().HasData(menus);
@@ -236,14 +254,16 @@ namespace LionFrame.Data.BasicData
                     roleMenus.Add(new SysRoleMenuRelation()
                     {
                         MenuId = m.MenuId,
-                        RoleId = 1L
+                        RoleId = 1L,
+                        CreatedTime = DateTime.Now,
                     });
                     if (m.MenuId != "M102")//非系统管理员不能管理菜单
                     {
                         roleMenus.Add(new SysRoleMenuRelation()
                         {
                             MenuId = m.MenuId,
-                            RoleId = 2L
+                            RoleId = 2L,
+                            CreatedTime = DateTime.Now,
                         });
                     }
                 }

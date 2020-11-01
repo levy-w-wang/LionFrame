@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.SystemParams;
@@ -22,25 +24,28 @@ namespace LionFrame.Business
         public SysMenuDao SysMenuDao { get; set; }
         public RedisClient RedisClient { get; set; }
         public LionMemoryCache Cache { get; set; }
+        public IConfigurationProvider MapperProvider { get; set; }
+
+        #region 获取菜单权限
 
         /// <summary>
         /// 获取菜单对象
         /// </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public List<MenuDto> GetCurrentMenuTree(UserCacheBo currentUser)
+        public List<MenuPermsDto> GetCurrentMenuTree(UserCacheBo currentUser)
         {
             var menuKey = $"{CacheKeys.MENU_TREE}{currentUser.UserId}";
             var cacheMenus = GetMenuTreeCache(menuKey);
             if (cacheMenus != null)
             {
-                return cacheMenus.MapToList<MenuDto>();
+                return cacheMenus.MapToList<MenuPermsDto>();
             }
 
             var roleIds = currentUser.RoleCacheBos.Select(c => c.RoleId).ToList();
             cacheMenus = GetMenuTreeDb(roleIds, menuKey);
 
-            return cacheMenus.MapToList<MenuDto>();
+            return cacheMenus.MapToList<MenuPermsDto>();
         }
 
         /// <summary>
@@ -103,15 +108,22 @@ namespace LionFrame.Business
         }
 
         /// <summary>
-        /// 获取当前菜单的权限组合
+        /// 获取当前页面按钮的权限组合
         /// </summary>
         /// <param name="menu"></param>
         /// <param name="menuMenuId"></param>
         /// <returns></returns>
-        private List<string> GetButtonPerms(List<MenuCacheBo> menu, string menuMenuId)
+        private List<ButtonPermsDto> GetButtonPerms(List<MenuCacheBo> menu, string menuMenuId)
         {
-            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => c.MenuName).Distinct().ToList();
+            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => new ButtonPermsDto()
+            {
+                MenuName = c.MenuName,
+                MenuId = c.MenuId,
+                ParentMenuId = c.ParentMenuId
+            }).Distinct().ToList();
         }
+
+        #endregion
 
         /// <summary>
         /// 增加菜单
@@ -141,9 +153,58 @@ namespace LionFrame.Business
             sysMenu.CreatedTime = DateTime.Now;
             sysMenu.CreatedBy = currentUser.UserId;
             sysMenu.UpdatedBy = currentUser.UserId;
-            await SysMenuDao.AddAsync(sysMenu); 
+            await SysMenuDao.AddAsync(sysMenu);
             var count = await SysMenuDao.SaveChangesAsync();
             return count > 0 ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "保存失败");
         }
+
+        #region 系统菜单管理用
+
+        public List<MenuManageDto> GetMenuManage()
+        {
+            var menuManageDtos = SysMenuDao.CurrentDbContext.SysMenus.ProjectTo<MenuManageDto>(MapperProvider).ToList();
+            var result = GetChildManage(menuManageDtos);
+            return result;
+        }
+        /// <summary>
+        /// 系统递归获取菜单结构
+        /// </summary>
+        /// <param name="menus"></param>
+        /// <param name="parentMenuId">第一层是空字符串</param>
+        /// <param name="level">菜单等级 1 2 3 4</param>
+        /// <returns></returns>
+        private List<MenuManageDto> GetChildManage(List<MenuManageDto> menus, string parentMenuId = "", int level = 1)
+        {
+            return menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu).Select(menu => new MenuManageDto()
+            {
+                MenuId = menu.MenuId,
+                MenuName = menu.MenuName,
+                ParentMenuId = menu.ParentMenuId,
+                Url = menu.Url,
+                Type = menu.Type,
+                Icon = menu.Icon,
+                OrderIndex = menu.OrderIndex,
+                ChildMenus = GetChildManage(menus, menu.MenuId, menu.Level + 1),
+                ButtonPerms = GetButtonManagePerms(menus, menu.MenuId),
+                Deleted = menu.Deleted
+            }).OrderBy(c => c.OrderIndex).ToList();
+        }
+        /// <summary>
+        /// 系统获取页面的菜单权限组
+        /// </summary>
+        /// <param name="menu"></param>
+        /// <param name="menuMenuId"></param>
+        /// <returns></returns>
+        private List<ButtonManageDto> GetButtonManagePerms(List<MenuManageDto> menu, string menuMenuId)
+        {
+            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => new ButtonManageDto()
+            {
+                MenuName = c.MenuName,
+                MenuId = c.MenuId,
+                ParentMenuId = c.ParentMenuId,
+                Deleted = c.Deleted
+            }).Distinct().ToList();
+        }
+        #endregion
     }
 }

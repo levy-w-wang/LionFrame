@@ -24,8 +24,9 @@ namespace LionFrame.CoreCommon.AutoMapperCfg
 
             #region menu
 
-            CreateMap<MenuCacheBo, MenuDto>();
+            CreateMap<MenuCacheBo, MenuPermsDto>();
             CreateMap<IncrementMenuParam, SysMenu>();
+            CreateMap<SysMenu, MenuManageDto>();
 
             #endregion
         }

@@ -1,5 +1,6 @@
 ﻿using LionFrame.Config;
 using System.Collections.Generic;
+using LionFrame.Model.ResponseDto.SystemDto;
 
 namespace LionFrame.Model.SystemBo
 {
@@ -61,6 +62,6 @@ namespace LionFrame.Model.SystemBo
         /// 在 watch $route 中，将每次点击的路由的权限放在vuex中
         /// 在页面中通过指令来权限判断
         /// </summary>
-        public List<string> ButtonPerms { get; set; }
+        public List<ButtonPermsDto> ButtonPerms { get; set; }
     }
 }
