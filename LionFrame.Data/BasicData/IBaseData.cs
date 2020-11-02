@@ -25,7 +25,15 @@ namespace LionFrame.Data.BasicData
         int Count<T>(Expression<Func<T, bool>> countLambda) where T : BaseModel, new();
 
         T First<T>(Expression<Func<T, bool>> firstLambda) where T : BaseModel, new();
-
+        /// <summary>
+        /// 根据某个条件  排序后 获取第一条
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TOrderKey"></typeparam>
+        /// <param name="match"></param>
+        /// <param name="orderFun"></param>
+        /// <returns></returns>
+        T FirstOrderByDesc<T, TOrderKey>(Expression<Func<T, bool>> match, Expression<Func<T, TOrderKey>> orderFun) where T : BaseModel, new();
         IQueryable<T> LoadEntities<T>(Expression<Func<T, bool>> whereLambda = null) where T : BaseModel, new();
 
         List<T> LoadPageEntities<T, TKey>(int pageIndex, int pageSize,

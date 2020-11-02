@@ -142,7 +142,7 @@ namespace LionFrame.Business
                     RoleId = 1
                 }
             };
-            if (incrementMenu.AssignAdmin)
+            if (incrementMenu.AssignAdmin == 2)
             {
                 sysMenu.SysRoleMenuRelations.Add(new SysRoleMenuRelation()
                 {
@@ -183,6 +183,7 @@ namespace LionFrame.Business
                 Url = menu.Url,
                 Type = menu.Type,
                 Icon = menu.Icon,
+                Level = menu.Level,
                 OrderIndex = menu.OrderIndex,
                 ChildMenus = GetChildManage(menus, menu.MenuId, menu.Level + 1),
                 ButtonPerms = GetButtonManagePerms(menus, menu.MenuId),

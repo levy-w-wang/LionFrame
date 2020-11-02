@@ -105,6 +105,19 @@ namespace LionFrame.Data.BasicData
         }
 
         /// <summary>
+        /// 根据某个条件  排序后 获取第一条
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TOrderKey"></typeparam>
+        /// <param name="match"></param>
+        /// <param name="orderFun"></param>
+        /// <returns></returns>
+        public T FirstOrderByDesc<T, TOrderKey>(Expression<Func<T, bool>> match, Expression<Func<T, TOrderKey>> orderFun) where T : BaseModel, new()
+        {
+            return CurrentDbContext.Set<T>().Where(match).OrderByDescending(orderFun).FirstOrDefault();
+        }
+
+        /// <summary>
         /// 得到IQueryable数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
