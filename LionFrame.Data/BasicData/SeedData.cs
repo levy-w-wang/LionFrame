@@ -248,6 +248,10 @@ namespace LionFrame.Data.BasicData
             #endregion
 
             #region 菜单用户关系
+
+            //非系统管理员不能管理菜单 
+            var noPerms = new List<string>(){"m102",};
+
             var roleMenus = new List<SysRoleMenuRelation>();
             menus.ForEach(m =>
                 {
@@ -257,13 +261,25 @@ namespace LionFrame.Data.BasicData
                         RoleId = 1L,
                         CreatedTime = DateTime.Now,
                     });
-                    if (m.MenuId != "M102")//非系统管理员不能管理菜单
+                    if (noPerms.Contains(m.MenuId))
+                    {
+                        // 全部都将设置关系，只是关系是是否为逻辑删除状态
+                        roleMenus.Add(new SysRoleMenuRelation()
+                        {
+                            MenuId = m.MenuId,
+                            RoleId = 2L,
+                            CreatedTime = DateTime.Now,
+                            Deleted = true
+                        });
+                    }
+                    else
                     {
                         roleMenus.Add(new SysRoleMenuRelation()
                         {
                             MenuId = m.MenuId,
                             RoleId = 2L,
                             CreatedTime = DateTime.Now,
+                            Deleted = false
                         });
                     }
                 }

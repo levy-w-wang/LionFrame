@@ -12,16 +12,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using EFCore.BulkExtensions;
+using LionFrame.Data.BasicData;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.ResponseDto.ResultModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace LionFrame.Business
 {
     public class MenuBll : IScopedDependency
     {
         public SysMenuDao SysMenuDao { get; set; }
+        public SysRoleMenuRelationDao SysRoleMenuRelationDao { get; set; }
         public RedisClient RedisClient { get; set; }
         public LionMemoryCache Cache { get; set; }
         public IConfigurationProvider MapperProvider { get; set; }
@@ -125,6 +129,8 @@ namespace LionFrame.Business
 
         #endregion
 
+        #region 系统菜单管理用
+
         /// <summary>
         /// 增加菜单
         /// </summary>
@@ -139,17 +145,18 @@ namespace LionFrame.Business
             {
                 new SysRoleMenuRelation()
                 {
-                    RoleId = 1
+                    RoleId = 1,
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = currentUser.UserId,
+                },
+                new SysRoleMenuRelation()
+                {
+                    RoleId = 2,
+                    Deleted = true,//默认不分配给下级看  需单独分配 
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = currentUser.UserId, 
                 }
             };
-            if (incrementMenu.AssignAdmin == 2)
-            {
-                sysMenu.SysRoleMenuRelations.Add(new SysRoleMenuRelation()
-                {
-                    RoleId = 2
-                });
-            }
-
             sysMenu.CreatedTime = DateTime.Now;
             sysMenu.CreatedBy = currentUser.UserId;
             sysMenu.UpdatedBy = currentUser.UserId;
@@ -158,14 +165,69 @@ namespace LionFrame.Business
             return count > 0 ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "保存失败");
         }
 
-        #region 系统菜单管理用
+        /// <summary>
+        /// 修改菜单
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <param name="incrementMenu"></param>
+        /// <returns></returns>
+        public async Task<BaseResponseModel> UpdateMenu(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
+        {
+            var responseModel = new ResponseModel<bool>();
+            var count = await SysMenuDao.UpdateMenuAsync(currentUser, incrementMenu);
+            return count ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "修改失败");
+        }
 
+        /// <summary>
+        /// 获取当前所有菜单
+        /// </summary>
+        /// <returns></returns>
         public List<MenuManageDto> GetMenuManage()
         {
-            var menuManageDtos = SysMenuDao.CurrentDbContext.SysMenus.ProjectTo<MenuManageDto>(MapperProvider).ToList();
+            var menuManageDtos = SysMenuDao.CurrentDbContext.SysMenus
+                .ProjectTo<MenuManageDto>(MapperProvider).ToList();
             var result = GetChildManage(menuManageDtos);
             return result;
         }
+
+        /// <summary>
+        /// 分配菜单
+        /// </summary>
+        /// <param name="menuIds"></param>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        public async Task<BaseResponseModel> AssignMenuAsync(List<string> menuIds, long uid)
+        {
+            var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations
+                .Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1)
+                .BatchUpdateAsync(c => new SysRoleMenuRelation()
+                {
+                    Deleted = false,
+                    UpdatedBy = uid,
+                });
+            var result = new ResponseModel<bool>();
+            return count > 0 ? result.Succeed(true) : result.Fail("分配菜单失败");
+        }
+
+        /// <summary>
+        /// 取消分配菜单
+        /// </summary>
+        /// <param name="menuIds"></param>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        public async Task<BaseResponseModel> CancelAssignMenuAsync(List<string> menuIds, long uid)
+        {
+            var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations
+                .Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1)
+                .BatchUpdateAsync(c => new SysRoleMenuRelation()
+                {
+                    Deleted = true,
+                    UpdatedBy = uid,
+                });
+            var result = new ResponseModel<bool>();
+            return count > 0 ? result.Succeed(true) : result.Fail("分配菜单失败");
+        }
+
         /// <summary>
         /// 系统递归获取菜单结构
         /// </summary>
@@ -175,21 +237,23 @@ namespace LionFrame.Business
         /// <returns></returns>
         private List<MenuManageDto> GetChildManage(List<MenuManageDto> menus, string parentMenuId = "", int level = 1)
         {
-            return menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu).Select(menu => new MenuManageDto()
-            {
-                MenuId = menu.MenuId,
-                MenuName = menu.MenuName,
-                ParentMenuId = menu.ParentMenuId,
-                Url = menu.Url,
-                Type = menu.Type,
-                Icon = menu.Icon,
-                Level = menu.Level,
-                OrderIndex = menu.OrderIndex,
-                ChildMenus = GetChildManage(menus, menu.MenuId, menu.Level + 1),
-                ButtonPerms = GetButtonManagePerms(menus, menu.MenuId),
-                Deleted = menu.Deleted
-            }).OrderBy(c => c.OrderIndex).ToList();
+            return menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu)
+                .Select(menu => new MenuManageDto()
+                {
+                    MenuId = menu.MenuId,
+                    MenuName = menu.MenuName,
+                    ParentMenuId = menu.ParentMenuId,
+                    Url = menu.Url,
+                    Type = menu.Type,
+                    Icon = menu.Icon,
+                    Level = menu.Level,
+                    OrderIndex = menu.OrderIndex,
+                    ChildMenus = GetChildManage(menus, menu.MenuId, menu.Level + 1),
+                    ButtonPerms = GetButtonManagePerms(menus, menu.MenuId),
+                    Deleted = menu.Deleted
+                }).OrderBy(c => c.OrderIndex).ToList();
         }
+
         /// <summary>
         /// 系统获取页面的菜单权限组
         /// </summary>
@@ -198,13 +262,35 @@ namespace LionFrame.Business
         /// <returns></returns>
         private List<ButtonManageDto> GetButtonManagePerms(List<MenuManageDto> menu, string menuMenuId)
         {
-            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => new ButtonManageDto()
+            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "")
+                .Select(c => new ButtonManageDto()
+                {
+                    MenuName = c.MenuName,
+                    MenuId = c.MenuId,
+                    ParentMenuId = c.ParentMenuId,
+                    Deleted = c.Deleted
+                }).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 物理删除菜单及关系 事务AOP处理
+        /// </summary>
+        /// <param name="menuId"></param>
+        /// <returns></returns>
+        [DbTransactionInterceptor]
+        public virtual async Task<BaseResponseModel> DeleteMenuAsync(string menuId)
+        {
+            var result = new ResponseModel<string>();
+            var db = SysMenuDao.CurrentDbContext;
+            var isExistChildren = await db.SysMenus.AnyAsync(c => c.ParentMenuId == menuId);
+            if (isExistChildren)
             {
-                MenuName = c.MenuName,
-                MenuId = c.MenuId,
-                ParentMenuId = c.ParentMenuId,
-                Deleted = c.Deleted
-            }).Distinct().ToList();
+                return result.Fail("请先删除子菜单后再删除父菜单");
+            }
+            await db.SysMenus.Where(c => c.MenuId == menuId).BatchDeleteAsync();
+            await db.SysRoleMenuRelations.Where(c => c.MenuId == menuId).BatchDeleteAsync();
+
+            return result.Succeed("删除成功");
         }
         #endregion
     }

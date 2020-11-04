@@ -1,8 +1,13 @@
 ﻿using LionFrame.Data.BasicData;
+using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.SystemBo;
 using Microsoft.EntityFrameworkCore.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using EFCore.BulkExtensions;
+using LionFrame.Domain.SystemDomain;
 
 namespace LionFrame.Data.SystemDao
 {
@@ -31,6 +36,41 @@ namespace LionFrame.Data.SystemDao
                             OrderIndex = menu.OrderIndex,
                         };
             return menus.Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 更新按钮
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <param name="incrementMenu"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateMenuAsync(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
+        {
+            var count = await CurrentDbContext.SysMenus.Where(c=>c.MenuId == incrementMenu.MenuId).BatchUpdateAsync(c=>new SysMenu()
+            {
+            Deleted = incrementMenu.Deleted,
+            MenuName = incrementMenu.MenuName,
+            OrderIndex = incrementMenu.OrderIndex,
+            Icon = incrementMenu.Icon,
+            Url = incrementMenu.Url,
+            UpdatedBy = currentUser.UserId,
+            UpdatedTime = DateTime.Now,
+            });
+            return count > 0;
+            //var menu = await FindAsync<SysMenu>(incrementMenu.MenuId);
+            //if (menu != null)
+            //{
+            //    menu.Deleted = incrementMenu.Deleted;
+            //    menu.MenuName = incrementMenu.MenuName;
+            //    menu.OrderIndex = incrementMenu.OrderIndex;
+            //    menu.Icon = incrementMenu.Icon;
+            //    menu.Url = incrementMenu.Url;
+            //    menu.UpdatedBy = currentUser.UserId;
+            //    menu.UpdatedTime = DateTime.Now;
+            //    Update(menu);
+            //}
+            //return await SaveChangesAsync() > 0;
+            
         }
     }
 }

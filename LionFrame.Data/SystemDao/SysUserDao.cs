@@ -87,11 +87,6 @@ namespace LionFrame.Data.SystemDao
             uid = user.UserId;//找回密码 删除token
             var result = SaveChanges();
 
-            //var result = await CurrentDbContext.SysUsers.Where(c => c.Email == retrievePwdParam.Email).BatchUpdateAsync(c => new SysUser()
-            //{
-            //    PassWord = retrievePwdParam.Pwd.Md5Encrypt(),
-            //    UpdatedTime = DateTime.Now
-            //});
             return result > 0;
         }
     }

@@ -320,7 +320,7 @@ namespace LionFrame.Data.BasicData
             var entity = await CurrentDbContext.Set<T>().FindAsync(keyValues);
             CurrentDbContext.Entry(entity).State = EntityState.Deleted;
         }
-
+        
         #endregion
 
         #region 查询方法
@@ -368,6 +368,20 @@ namespace LionFrame.Data.BasicData
         {
             return await CurrentDbContext.Set<T>().FirstOrDefaultAsync(firstLambda);
         }
+
+        /// <summary>
+        /// 根据某个条件  排序后 获取第一条
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TOrderKey"></typeparam>
+        /// <param name="match"></param>
+        /// <param name="orderFun"></param>
+        /// <returns></returns>
+        public async Task<T> FirstOrderByDescAsync<T, TOrderKey>(Expression<Func<T, bool>> match, Expression<Func<T, TOrderKey>> orderFun) where T : BaseModel, new()
+        {
+            return await CurrentDbContext.Set<T>().Where(match).OrderByDescending(orderFun).FirstOrDefaultAsync();
+        }
+
         /// <summary>
         /// 返回分页模型
         /// </summary>

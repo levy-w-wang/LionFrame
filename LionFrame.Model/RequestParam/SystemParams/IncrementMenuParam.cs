@@ -64,14 +64,7 @@ namespace LionFrame.Model.RequestParam.SystemParams
         /// 是否逻辑删除
         /// </summary>
         public bool Deleted { get; set; }
-
-        /// <summary>
-        /// 超级管理员是roleId是1,管理员是2  用户权限默认是2
-        /// 默认都会设置到超级管理员下  可以设定是否分配给管理员
-        /// 2:分配  3:取消分配
-        /// </summary>
-        public int AssignAdmin { get; set; }
-
+        
         /// <summary>
         /// 是否是更新操作
         /// </summary>
