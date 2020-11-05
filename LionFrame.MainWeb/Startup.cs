@@ -62,7 +62,19 @@ namespace LionFrame.MainWeb
             // 迁移用  -- 貌似在autofac下，在数据层开启了属性注入时，数据库上下文也能属性注入进去
             services.AddDbContext<LionDbContext>(options =>
             {
-                options.UseSqlServer(connectionString: Configuration.GetConnectionString("SqlServerConnection"));
+                var db = Configuration.GetSection("DB").Value;
+                switch (db)
+                {
+                    case "MsSql":
+                        options.UseSqlServer(connectionString: Configuration.GetConnectionString("MsSqlConnection"));
+                        break;
+                    case "MySql":
+                        options.UseMySql(connectionString: Configuration.GetConnectionString("MySqlConnection"));
+                        break;
+                    default:
+                        options.UseSqlServer(connectionString: Configuration.GetConnectionString("MsSqlConnection"));
+                        break;
+                }
                 options.EnableSensitiveDataLogging();
                 options.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
                 options.UseLoggerFactory(loggerFactory: DbConsoleLoggerFactory);

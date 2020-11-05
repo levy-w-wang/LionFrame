@@ -1,5 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using LionFrame.Basic.Encryptions;
+﻿using LionFrame.Basic.Encryptions;
 using LionFrame.Data.BasicData;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
@@ -9,6 +8,7 @@ using LionFrame.Model.SystemBo;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Z.EntityFramework.Plus;
 
 namespace LionFrame.Data.SystemDao
 {
@@ -67,7 +67,7 @@ namespace LionFrame.Data.SystemDao
         /// <returns></returns>
         public async Task<bool> ModifyPwd(ModifyPwdParam modifyPwdParam, long uid)
         {
-            var result = await CurrentDbContext.SysUsers.Where(c => c.UserId == uid).BatchUpdateAsync(c => new SysUser()
+            var result = await CurrentDbContext.SysUsers.Where(c => c.UserId == uid).UpdateFromQueryAsync(c => new SysUser()
             {// 使用这种方式只会修改这两个字段
                 PassWord = modifyPwdParam.NewPassWord.Md5Encrypt(),
                 UpdatedTime = DateTime.Now

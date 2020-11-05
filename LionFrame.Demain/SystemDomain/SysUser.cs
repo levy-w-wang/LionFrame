@@ -13,13 +13,13 @@ namespace LionFrame.Domain.SystemDomain
         [Key]
         public long UserId { get; set; }
 
-        [Column(TypeName = "varchar(128)"), Required]
+        [MaxLength(128), Required]
         public string UserName { get; set; }
 
-        [Column(TypeName = "varchar(512)"), Required]
+        [MaxLength(512), Required]
         public string PassWord { get; set; }
 
-        [Column(TypeName = "varchar(256)"), Required]
+        [MaxLength(128), Required]
         [DefaultValue("")]
         public string Email { get; set; }
 
@@ -33,10 +33,8 @@ namespace LionFrame.Domain.SystemDomain
         /// </summary>
         public int Status { get; set; }
 
-        [Column(TypeName = "datetime2(7)")]
         public DateTime CreatedTime { get; set; }
 
-        [Column(TypeName = "datetime2(7)")]
         public DateTime UpdatedTime { get; set; }
 
         public List<SysUserRoleRelation> SysUserRoleRelations { get; set; }

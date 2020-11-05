@@ -12,13 +12,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using EFCore.BulkExtensions;
 using LionFrame.Data.BasicData;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model;
 using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.EntityFrameworkCore;
+using Z.EntityFramework.Plus;
 
 namespace LionFrame.Business
 {
@@ -137,29 +137,34 @@ namespace LionFrame.Business
         /// <param name="currentUser"></param>
         /// <param name="incrementMenu"></param>
         /// <returns></returns>
-        public async Task<BaseResponseModel> AddMenu(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
+        [DbTransactionInterceptor]
+        public virtual async Task<BaseResponseModel> AddMenu(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
         {
             var responseModel = new ResponseModel<bool>();
             var sysMenu = incrementMenu.MapTo<SysMenu>();
-            sysMenu.SysRoleMenuRelations = new List<SysRoleMenuRelation>()
+            sysMenu.CreatedTime = DateTime.Now;
+            sysMenu.CreatedBy = currentUser.UserId;
+            sysMenu.UpdatedBy = currentUser.UserId;
+
+            var relations = new List<SysRoleMenuRelation>()
             {
                 new SysRoleMenuRelation()
                 {
+                    MenuId = sysMenu.MenuId,
                     RoleId = 1,
                     CreatedTime = DateTime.Now,
                     CreatedBy = currentUser.UserId,
                 },
                 new SysRoleMenuRelation()
                 {
+                    MenuId = sysMenu.MenuId,
                     RoleId = 2,
-                    Deleted = true,//默认不分配给下级看  需单独分配 
+                    Deleted = true, //默认不分配给下级看  需单独分配 
                     CreatedTime = DateTime.Now,
-                    CreatedBy = currentUser.UserId, 
+                    CreatedBy = currentUser.UserId,
                 }
             };
-            sysMenu.CreatedTime = DateTime.Now;
-            sysMenu.CreatedBy = currentUser.UserId;
-            sysMenu.UpdatedBy = currentUser.UserId;
+            await SysMenuDao.CurrentDbContext.BulkInsertAsync(relations);
             await SysMenuDao.AddAsync(sysMenu);
             var count = await SysMenuDao.SaveChangesAsync();
             return count > 0 ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "保存失败");
@@ -200,7 +205,7 @@ namespace LionFrame.Business
         {
             var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations
                 .Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1)
-                .BatchUpdateAsync(c => new SysRoleMenuRelation()
+                .UpdateFromQueryAsync(c => new SysRoleMenuRelation()
                 {
                     Deleted = false,
                     UpdatedBy = uid,
@@ -219,7 +224,7 @@ namespace LionFrame.Business
         {
             var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations
                 .Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1)
-                .BatchUpdateAsync(c => new SysRoleMenuRelation()
+                .UpdateFromQueryAsync(c => new SysRoleMenuRelation()
                 {
                     Deleted = true,
                     UpdatedBy = uid,
@@ -287,8 +292,8 @@ namespace LionFrame.Business
             {
                 return result.Fail("请先删除子菜单后再删除父菜单");
             }
-            await db.SysMenus.Where(c => c.MenuId == menuId).BatchDeleteAsync();
-            await db.SysRoleMenuRelations.Where(c => c.MenuId == menuId).BatchDeleteAsync();
+            await db.SysMenus.Where(c => c.MenuId == menuId).DeleteFromQueryAsync();
+            await db.SysRoleMenuRelations.Where(c => c.MenuId == menuId).DeleteFromQueryAsync();
 
             return result.Succeed("删除成功");
         }

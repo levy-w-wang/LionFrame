@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AspectCore.DynamicProxy;
+using LionFrame.Basic;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace  LionFrame.Data.BasicData
@@ -25,7 +26,7 @@ namespace  LionFrame.Data.BasicData
                 catch (Exception ex)
                 {
                     dbContext.Database.RollbackTransaction();
-                    throw ex;
+                    LogHelper.Logger.Fatal(ex,"数据库处理异常");
                 }
             }
             else

@@ -17,7 +17,7 @@ namespace LionFrame.Domain.SystemDomain
         /// 菜单层级3 10101 20101
         /// 菜单层级4 1010101 2010101
         /// </summary>
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None), MaxLength(128)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None), MaxLength(40)]
         public string MenuId { get; set; }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace LionFrame.Domain.SystemDomain
         /// <summary>
         /// 父级ID
         /// </summary>
-        [MaxLength(128)]
+        [MaxLength(40)]
         public string ParentMenuId { get; set; }
 
         /// <summary>

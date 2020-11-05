@@ -12,10 +12,10 @@ namespace LionFrame.Domain.SystemDomain
         [Key]
         public long RoleId { get; set; }
 
-        [Column(TypeName = "nvarchar(128)"), Required]
+        [MaxLength(128), Required]
         public string RoleName { get; set; }
 
-        [Column(TypeName = "nvarchar(128)")]
+        [MaxLength(128)]
         public string RoleDesc { get; set; }
 
         /// <summary>

@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EFCore.BulkExtensions;
 using LionFrame.Domain.SystemDomain;
+using Z.EntityFramework.Plus;
 
 namespace LionFrame.Data.SystemDao
 {
@@ -46,7 +46,7 @@ namespace LionFrame.Data.SystemDao
         /// <returns></returns>
         public async Task<bool> UpdateMenuAsync(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
         {
-            var count = await CurrentDbContext.SysMenus.Where(c=>c.MenuId == incrementMenu.MenuId).BatchUpdateAsync(c=>new SysMenu()
+            var count = await CurrentDbContext.SysMenus.Where(c=>c.MenuId == incrementMenu.MenuId).UpdateFromQueryAsync(c=>new SysMenu()
             {
             Deleted = incrementMenu.Deleted,
             MenuName = incrementMenu.MenuName,
