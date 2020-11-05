@@ -36,6 +36,7 @@ using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 using LionFrame.CoreCommon.CustomMiddler;
+using Z.EntityFramework.Extensions;
 
 namespace LionFrame.MainWeb
 {
@@ -59,7 +60,7 @@ namespace LionFrame.MainWeb
             services.AddSingleton(HtmlEncoder.Create(UnicodeRanges.All));
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            // 迁移用  -- 貌似在autofac下，在数据层开启了属性注入时，数据库上下文也能属性注入进去
+
             services.AddDbContext<LionDbContext>(options =>
             {
                 var db = Configuration.GetSection("DB").Value;
@@ -101,7 +102,7 @@ namespace LionFrame.MainWeb
                 //验证错误最大个数，避免返回一长串错误
                 options.MaxModelValidationErrors = 3;
                 // 3.异常过滤器--处理mvc中未捕捉的异常
-                //options.Filters.Add<ExceptionFilter>();
+                options.Filters.Add<ExceptionFilter>();
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .ConfigureApiBehaviorOptions(options =>
@@ -255,7 +256,7 @@ namespace LionFrame.MainWeb
         {
             // 全局异常处理的三种方式
             // 1.自定义的异常拦截管道 - - 放在第一位处理全局未捕捉的异常
-            // app.UseExceptionHandler(build => build.Use(CustomExceptionHandler));
+            app.UseExceptionHandler(build => build.Use(CustomExceptionHandler));
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -265,9 +266,11 @@ namespace LionFrame.MainWeb
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
+            // Z.EntityFramework.Extensions 扩展包需要  --无法显示日志
+            EntityFrameworkManager.ContextFactory = context => app.ApplicationServices.GetRequiredService<LionDbContext>();
 
             // 2.使用自定义异常处理中间件  处理该中间件以后未捕捉的异常
-            app.UseMiddleware<CustomExceptionMiddleware>();
+            //app.UseMiddleware<CustomExceptionMiddleware>();
 
             //autofac 新增 
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();
@@ -356,7 +359,7 @@ namespace LionFrame.MainWeb
                 {
 #if DEBUG
                     Console.WriteLine(ex);
-                    var content = ex.ToJson();
+                    var content = ex.Message;
 #else
                     var content = "系统错误，请稍后再试或联系管理人员。";
 #endif

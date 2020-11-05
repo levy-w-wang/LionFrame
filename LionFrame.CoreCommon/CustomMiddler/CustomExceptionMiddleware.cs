@@ -46,7 +46,7 @@ namespace LionFrame.CoreCommon.CustomMiddler
                 {
 #if DEBUG
                     Console.WriteLine(ex);
-                    var content = ex.ToJson();
+                    var content = ex.Message;
 #else
                     var content = "系统错误，请稍后再试或联系管理人员。";
 #endif

@@ -26,7 +26,7 @@ namespace  LionFrame.Data.BasicData
                 catch (Exception ex)
                 {
                     dbContext.Database.RollbackTransaction();
-                    LogHelper.Logger.Fatal(ex,"数据库处理异常");
+                    throw ex;                    
                 }
             }
             else

@@ -39,11 +39,12 @@ namespace LionFrame.CoreCommon.CustomFilter
             }
             else
             {
+                var content = "";
 #if DEBUG
                 Console.WriteLine(filterContext.Exception);
-                var content = filterContext.Exception.ToJson();
+                content = filterContext.Exception.Message;                           
 #else
-                var content = "系统错误，请稍后再试或联系管理人员。";
+                content = "系统错误，请稍后再试或联系管理人员。";
 #endif
                 filterContext.Result = new CustomHttpStatusCodeResult(200, ResponseCode.UnknownEx, content);
             }
