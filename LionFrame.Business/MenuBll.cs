@@ -154,14 +154,16 @@ namespace LionFrame.Business
                     RoleId = 1,
                     CreatedTime = DateTime.Now,
                     CreatedBy = currentUser.UserId,
+                    State = 1,
                 },
                 new SysRoleMenuRelation()
                 {
                     MenuId = sysMenu.MenuId,
                     RoleId = 2,
-                    Deleted = true, //默认不分配给下级看  需单独分配 
+                    Deleted = true, //默认不分配给系统管理员看  需单独分配 
                     CreatedTime = DateTime.Now,
                     CreatedBy = currentUser.UserId,
+                    State = 1,
                 }
             };
             await SysMenuDao.CurrentDbContext.BulkInsertAsync(relations);

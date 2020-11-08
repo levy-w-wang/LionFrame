@@ -17,7 +17,11 @@ using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using LionFrame.Data.BasicData;
+using LionFrame.Model.ResponseDto.UserDtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace LionFrame.Business
 {
@@ -142,6 +146,8 @@ namespace LionFrame.Business
             }
             return false;
         }
+
+
         #region 注册用户
 
         /// <summary>
@@ -219,11 +225,15 @@ namespace LionFrame.Business
                 Status = 1,
                 CreatedTime = DateTime.Now,
                 UpdatedTime = DateTime.Now,
+                ParentUid = 0,
+                UpdatedBy = 0,
                 SysUserRoleRelations = new List<SysUserRoleRelation>()
                 {
                     new SysUserRoleRelation()
                     {
-                        RoleId = 2 // 这里固定为种子数据中的超级管理员权限
+                        RoleId = 2, // 这里固定为种子数据中的系统管理员权限
+                        State = 1,
+                        CreatedTime = DateTime.Now,
                     }
                 }
             };
@@ -336,6 +346,137 @@ namespace LionFrame.Business
             await RedisClient.DeleteAsync(CacheKeys.MENU_TREE + currentUser.UserId);
             LionMemoryCache.Remove(CacheKeys.USER + currentUser.UserId);
             LionMemoryCache.Remove(CacheKeys.MENU_TREE + currentUser.UserId);
+        }
+
+        /// <summary>
+        /// 用户管理获取一览数据
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pageSize"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="email"></param>
+        /// <param name="userName"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<UserManagerDto>> GetManagerUserAsync(int pageSize, int currentPage, string email, string userName, UserCacheBo currentUser)
+        {
+            var result = await SysUserDao.GetManagerUserAsync(pageSize, currentPage, email, userName, currentUser);
+            return result;
+        }
+
+        /// <summary>
+        /// 用户管理界面创建用户
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<BaseResponseModel> CreateManagerUserAsync(CreateUserParam param, UserCacheBo currentUser)
+        {
+            var result = new ResponseModel<bool>();
+            //long类型前后端传值存在精度丢失
+            //不能分配系统管理员角色权限和管理员权限
+            if (param.RoleIds.Contains(1) || param.RoleIds.Contains(2))
+            {
+                result.Fail(ResponseCode.Fail, "角色选择错误", false);
+                return result;
+            }
+            if (await ExistUserAsync(1, param.UserName))
+            {
+                result.Fail(ResponseCode.Fail, "用户名已存在，请切换", false);
+                return result;
+            }
+
+            if (await ExistUserAsync(2, param.Email))
+            {
+                result.Fail(ResponseCode.Fail, "该邮箱已存在，请切换", false);
+                return result;
+            }
+            var sysUser = new SysUser()
+            {
+                UserName = param.UserName,
+                PassWord = param.Pwd.Md5Encrypt(),
+                Email = param.Email,
+                Sex = 1,
+                Status = 1,
+                CreatedTime = DateTime.Now,
+                UpdatedTime = DateTime.Now,
+                ParentUid = currentUser.UserId,
+                UpdatedBy = 0,
+                SysUserRoleRelations = new List<SysUserRoleRelation>()
+            };
+            param.RoleIds.ForEach(roleId =>
+            {
+                sysUser.SysUserRoleRelations.Add(new SysUserRoleRelation()
+                {
+                    RoleId = roleId, // 这里固定为种子数据中的系统管理员权限
+                    State = 1,
+                    CreatedTime = DateTime.Now,
+                    CreatedBy = currentUser.UserId,
+                    Deleted = false,
+                });
+            });
+            SysUserDao.Add(sysUser);
+            var count = await SysUserDao.SaveChangesAsync();
+            return count > 0 ? result.Succeed(true) : result.Fail("保存失败", false);
+        }
+
+        /// <summary>
+        /// 用户管理界面编辑用户信息
+        /// </summary>
+        /// <param name="modifyUserParam"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<BaseResponseModel> ModifyManagerUserAsync(ModifyUserParam modifyUserParam, UserCacheBo currentUser)
+        {
+            var result = new ResponseModel<bool>();
+            //不能分配系统管理员角色权限和管理员权限
+            if (long.TryParse(modifyUserParam.UserId, out var uid) || uid <= 1)
+            {
+                result.Fail(ResponseCode.Fail, "用户选择错误", false);
+                return result;
+            }
+            //不能分配系统管理员角色权限和管理员权限
+            if (modifyUserParam.RoleIds.Contains(1) || modifyUserParam.RoleIds.Contains(2))
+            {
+                result.Fail("角色选择错误", false);
+                return result;
+            }
+            result = await SysUserDao.ModifyManagerUserAsync(uid, modifyUserParam.RoleIds, modifyUserParam.Email, currentUser);
+            return result;
+        }
+
+        /// <summary>
+        /// 用户管理界面删除用户
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        [DbTransactionInterceptor]
+        public async Task<BaseResponseModel> RemoveManagerUserAsync(long uid, UserCacheBo currentUser)
+        {
+            var result = new ResponseModel<bool>();
+            //获取当前用户所拥有的角色
+            var existRoleIds = await SysUserDao.CurrentDbContext.SysUserRoleRelations
+                .Where(c => c.UserId == uid && !c.Deleted && c.State == 1)
+                .Select(c => c.RoleId).ToListAsync();
+            //种子数据 2是管理员 1是系统管理员
+            if (existRoleIds.Contains(1) || existRoleIds.Contains(2))
+            {
+                return result.Fail("管理员只读");
+            }
+
+            var db = SysUserDao.CurrentDbContext;
+
+            if (!db.SysUsers.Any(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1))
+            {
+                return result.Fail("账号ID不存在");
+            }
+
+            await db.SysUsers.Where(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1).DeleteFromQueryAsync();
+            await db.SysUserRoleRelations.Where(c => c.UserId == uid).DeleteFromQueryAsync();
+
+            var count = await db.SaveChangesAsync();
+            return count > 0 ? result.Succeed(true) : result.Fail("删除失败");
         }
     }
 }

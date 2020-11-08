@@ -9,6 +9,8 @@ using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace LionFrame.Data.BasicData
 {
@@ -21,7 +23,7 @@ namespace LionFrame.Data.BasicData
         /// 属性注入数据库上下文
         /// </summary>
         public LionDbContext CurrentDbContext { get; set; }
-
+        public IConfigurationProvider MapperProvider { get; set; }
         /// <summary>
         /// 建议每个只查询的方法 加上关闭数据跟踪
         /// </summary>
@@ -320,7 +322,7 @@ namespace LionFrame.Data.BasicData
             var entity = await CurrentDbContext.Set<T>().FindAsync(keyValues);
             CurrentDbContext.Entry(entity).State = EntityState.Deleted;
         }
-        
+
         #endregion
 
         #region 查询方法
@@ -449,6 +451,42 @@ namespace LionFrame.Data.BasicData
                 rest.Data = await temp.OrderByDescending(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ToListAsync();
+            }
+            return rest;
+        }
+
+        /// <summary>
+        ///  ProjectTo 转对象的分页模型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="isAsc">true升序 false降序</param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<TResult>> LoadPageEntitiesProjectToAsync<T, TKey, TResult>(IQueryable<T> query, int currentPage, int pageSize, bool isAsc, Expression<Func<T, TKey>> orderBy) where T : class, new() where TResult : class, new()
+        {
+            currentPage = currentPage < 1 ? 1 : currentPage;
+            pageSize = pageSize < 1 ? 20 : pageSize;
+            var rest = new PageResponse<TResult>();
+            IQueryable<T> temp = query.AsNoTracking();
+            rest.PageSize = pageSize;
+            rest.CurrentPage = currentPage;
+            rest.RecordTotal = await temp.CountAsync();
+            if (isAsc)
+            {
+                rest.Data = await temp.OrderBy(orderBy)
+                    .Skip(pageSize * (currentPage - 1))
+                    .Take(pageSize).ProjectTo<TResult>(MapperProvider).ToListAsync();
+            }
+            else
+            {
+                rest.Data = await temp.OrderByDescending(orderBy)
+                    .Skip(pageSize * (currentPage - 1))
+                    .Take(pageSize).ProjectTo<TResult>(MapperProvider).ToListAsync();
             }
             return rest;
         }

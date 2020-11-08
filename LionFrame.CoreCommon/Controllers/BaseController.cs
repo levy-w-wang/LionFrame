@@ -75,21 +75,21 @@ namespace LionFrame.CoreCommon.Controllers
         /// 无错误返回数据
         /// </summary>
         /// <param name="code"></param>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <returns></returns>
-        internal ActionResult Fail(string content,ResponseCode code = ResponseCode.Fail)
+        internal ActionResult Fail(string message, ResponseCode code = ResponseCode.Fail)
         {
-            return MyJson(new ResponseModel().Fail(code, content, null));
+            return MyJson(new ResponseModel().Fail(code, message, null));
         }
 
         /// <summary>
         /// 带错误返回数据
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <returns></returns>
-        protected ActionResult Fail(string content)
+        protected ActionResult Fail(string message)
         {
-            return MyJson(new ResponseModel<string>().Fail(ResponseCode.Fail, content, content));
+            return MyJson(new ResponseModel<string>().Fail(ResponseCode.Fail, message, message));
         }
         /// <summary>
         /// 带错误返回数据
@@ -97,11 +97,11 @@ namespace LionFrame.CoreCommon.Controllers
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>
         /// <param name="code"></param>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <returns></returns>
-        protected ActionResult Fail<T>(T data, string content,ResponseCode code = ResponseCode.Fail)
+        protected ActionResult Fail<T>(T data, string message, ResponseCode code = ResponseCode.Fail)
         {
-            return MyJson(new ResponseModel().Fail(code, content, data));
+            return MyJson(new ResponseModel().Fail(code, message, data));
         }
         /// <summary>
         /// 请求开始前的处理

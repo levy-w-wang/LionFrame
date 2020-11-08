@@ -24,6 +24,7 @@ namespace LionFrame.Data.SystemDao
             var menus = from rlaRoleMenu in CurrentDbContext.SysRoleMenuRelations
                         join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
                         where roleIds.Contains(rlaRoleMenu.RoleId) && !rlaRoleMenu.Deleted && !menu.Deleted
+                            && rlaRoleMenu.State == 1
                         select new MenuCacheBo()
                         {
                             MenuId = menu.MenuId,
@@ -46,15 +47,15 @@ namespace LionFrame.Data.SystemDao
         /// <returns></returns>
         public async Task<bool> UpdateMenuAsync(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
         {
-            var count = await CurrentDbContext.SysMenus.Where(c=>c.MenuId == incrementMenu.MenuId).UpdateFromQueryAsync(c=>new SysMenu()
+            var count = await CurrentDbContext.SysMenus.Where(c => c.MenuId == incrementMenu.MenuId).UpdateFromQueryAsync(c => new SysMenu()
             {
-            Deleted = incrementMenu.Deleted,
-            MenuName = incrementMenu.MenuName,
-            OrderIndex = incrementMenu.OrderIndex,
-            Icon = incrementMenu.Icon,
-            Url = incrementMenu.Url,
-            UpdatedBy = currentUser.UserId,
-            UpdatedTime = DateTime.Now,
+                Deleted = incrementMenu.Deleted,
+                MenuName = incrementMenu.MenuName,
+                OrderIndex = incrementMenu.OrderIndex,
+                Icon = incrementMenu.Icon,
+                Url = incrementMenu.Url,
+                UpdatedBy = currentUser.UserId,
+                UpdatedTime = DateTime.Now,
             });
             return count > 0;
             //var menu = await FindAsync<SysMenu>(incrementMenu.MenuId);
@@ -70,7 +71,7 @@ namespace LionFrame.Data.SystemDao
             //    Update(menu);
             //}
             //return await SaveChangesAsync() > 0;
-            
+
         }
     }
 }

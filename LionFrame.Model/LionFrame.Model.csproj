@@ -19,4 +19,8 @@
     <ProjectReference Include="..\LionFrame.Config\LionFrame.Config.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ResponseDto\MenuDtos\" />
+  </ItemGroup>
+
 </Project>

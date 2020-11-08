@@ -16,7 +16,7 @@ namespace LionFrame.CoreCommon.Controllers
         /// </summary>
         protected UserCacheBo CurrentUser
         {
-            get => _user ?? (_user = LionUser.CurrentUser);
+            get => _user ??= LionUser.CurrentUser;
             set
             {
                 LionUser.CurrentUser = value;

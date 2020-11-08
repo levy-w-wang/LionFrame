@@ -35,7 +35,9 @@ namespace LionFrame.Domain.SystemDomain
 
         public DateTime CreatedTime { get; set; }
 
+        public long ParentUid { get; set; }
         public DateTime UpdatedTime { get; set; }
+        public long UpdatedBy { get; set; }
 
         public List<SysUserRoleRelation> SysUserRoleRelations { get; set; }
     }

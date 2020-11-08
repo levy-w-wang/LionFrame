@@ -5,10 +5,10 @@
     /// </summary>
     public class ResponseModel : ResponseModel<object>
     {
-        public new ResponseModel Fail(ResponseCode code, string content)
+        public new ResponseModel Fail(ResponseCode code, string message)
         {
             Code = code;
-            Message = content;
+            Message = message;
             return this;
         }
     }
@@ -25,27 +25,27 @@
         /// 失败返回
         /// </summary>
         /// <param name="code"></param>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public ResponseModel<T> Fail(ResponseCode code, string content, T data)
+        public ResponseModel<T> Fail(ResponseCode code, string message, T data)
         {
             Code = code;
-            Message = content;
+            Message = message;
             Data = data;
             return this;
         }
         /// <summary>
         /// 通用错误返回
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <param name="data"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        public ResponseModel<T> Fail(string content, T data, ResponseCode code = ResponseCode.Fail)
+        public ResponseModel<T> Fail(string message, T data, ResponseCode code = ResponseCode.Fail)
         {
             Code = code;
-            Message = content;
+            Message = message;
             Data = data;
             return this;
         }
@@ -53,28 +53,28 @@
         /// <summary>
         /// 错误返回 - 自定义错误码
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        public ResponseModel<T> Fail(ResponseCode code, string content)
+        public ResponseModel<T> Fail(ResponseCode code, string message)
         {
             Code = code;
-            Message = content;
-            Data = default;
+            Message = message;
+            Data = default(T);
             return this;
         }
 
         /// <summary>
         /// 通用错误返回
         /// </summary>
-        /// <param name="content"></param>
+        /// <param name="message"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        public ResponseModel<T> Fail( string content,ResponseCode code = ResponseCode.Fail)
+        public ResponseModel<T> Fail(string message, ResponseCode code = ResponseCode.Fail)
         {
             Code = code;
-            Message = content;
-            Data = default;
+            Message = message;
+            Data = default(T);
             return this;
         }
         /// <summary>
@@ -89,6 +89,17 @@
             Code = code;
             Message = msg;
             Data = data;
+            return this;
+        }
+        /// <summary>
+        /// 成功默认返回
+        /// </summary>
+        /// <returns></returns>
+        public ResponseModel<T> Succeed()
+        {
+            Code = ResponseCode.Success;
+            Message = "success";
+            Data = default(T);
             return this;
         }
     }

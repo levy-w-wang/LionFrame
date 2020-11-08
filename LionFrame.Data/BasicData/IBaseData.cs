@@ -83,6 +83,19 @@ namespace LionFrame.Data.BasicData
 
         Task<PageResponse<T>> LoadPageEntitiesAsync<T, TKey>(IQueryable<T> query, int currentPage, int pageSize, bool isAsc, Expression<Func<T, TKey>> orderBy) where T : class, new();
 
+        /// <summary>
+        /// ProjectTo 转对象的分页模型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="isAsc">true升序 false降序</param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        Task<PageResponse<TResult>> LoadPageEntitiesProjectToAsync<T, TKey, TResult>(IQueryable<T> query, int currentPage, int pageSize, bool isAsc, Expression<Func<T, TKey>> orderBy) where T : class, new() where TResult : class, new();
         Task<int> SaveChangesAsync();
     }
 }

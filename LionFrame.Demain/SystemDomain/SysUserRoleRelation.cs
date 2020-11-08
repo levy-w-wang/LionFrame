@@ -11,5 +11,10 @@ namespace LionFrame.Domain.SystemDomain
 
         public long RoleId { get; set; }
         public SysRole SysRole { get; set; }
+
+        /// <summary>
+        /// 可用状态1 其它待定
+        /// </summary>
+        public int State { get; set; }
     }
 }

@@ -78,7 +78,7 @@ namespace LionFrame.Controller
             if (result)
             {
                 var info = type == 1 ? "用户名" : "邮箱";
-                return Fail($"{info}已存在，请切换", content: $"{info}已存在，请切换");
+                return Fail($"{info}已存在，请切换", $"{info}已存在，请切换");
             }
             return Succeed();
         }
@@ -110,6 +110,7 @@ namespace LionFrame.Controller
 
             return MyJson(result);
         }
+
         /// <summary>
         /// 找回密码
         /// </summary>
@@ -120,6 +121,7 @@ namespace LionFrame.Controller
             var result = await UserBll.RetrievePwd(retrievePwdParam);
             return MyJson(result);
         }
+
         /// <summary>
         /// 登出
         /// </summary>
@@ -129,6 +131,64 @@ namespace LionFrame.Controller
         {
             await UserBll.LogoutAsync(CurrentUser);
             return Succeed();
+        }
+
+        /// <summary>
+        /// 用户管理获取用户一览数据
+        /// </summary>
+        /// <param name="pageSize"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="email"></param>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        [HttpGet, Route("page/{pageSize}/{currentPage}")]
+        public async Task<ActionResult> GetManagerUser([Range(1, 100, ErrorMessage = "页大小范围1-100")][FromRoute] int pageSize, [FromRoute] int currentPage, string email, string userName)
+        {
+            var result = await UserBll.GetManagerUserAsync(pageSize, currentPage, email, userName, CurrentUser);
+            return Succeed(result);
+        }
+
+        /// <summary>
+        /// 用户管理界面创建用户
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [Route("add"), HttpPost]
+        public async Task<ActionResult> CreateManagerUser(CreateUserParam param)
+        {
+            var result = await UserBll.CreateManagerUserAsync(param, CurrentUser);
+            return MyJson(result);
+        }
+
+        /// <summary>
+        /// 用户管理界面编辑用户
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [Route("modify"), HttpPut]
+        public async Task<ActionResult> ModifyManagerUser(ModifyUserParam param)
+        {
+            if (param.UserId == CurrentUser.UserId.ToString())
+            {
+                return Fail("不允许编辑自己");
+            }
+            var result = await UserBll.ModifyManagerUserAsync(param, CurrentUser);
+            return MyJson(result);
+        }
+
+        /// <summary>
+        /// 用户管理界面删除用户
+        /// </summary>
+        /// <returns></returns>
+        [Route("remove/{uid}"), HttpDelete]
+        public async Task<ActionResult> RemoveManagerUser([FromRoute] long uid)
+        {
+            if (uid == CurrentUser.UserId || uid < 1)
+            {
+                return Fail("操作错误");
+            }
+            var result = await UserBll.RemoveManagerUserAsync(uid, CurrentUser);
+            return MyJson(result);
         }
     }
 }

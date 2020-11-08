@@ -26,7 +26,9 @@ namespace LionFrame.Data.BasicData
                 Sex = 1,
                 Status = 1,
                 CreatedTime = DateTime.Now,
-                UpdatedTime = DateTime.Now
+                UpdatedTime = DateTime.Now,
+                ParentUid = 0,
+                UpdatedBy = 0,
             }, new SysUser()
             {
                 UserId = 2L,
@@ -36,7 +38,9 @@ namespace LionFrame.Data.BasicData
                 Sex = 1,
                 Status = 1,
                 CreatedTime = DateTime.Now,
-                UpdatedTime = DateTime.Now
+                UpdatedTime = DateTime.Now,
+                ParentUid = 0,
+                UpdatedBy = 0,
             });
 
             #endregion
@@ -48,14 +52,12 @@ namespace LionFrame.Data.BasicData
                 RoleId = 1L,
                 RoleName = "系统管理员",
                 RoleDesc = "系统创建",
-                Operable = false,
                 CreatedTime = DateTime.Now,
             }, new SysRole()
             {
                 RoleId = 2L,
                 RoleName = "超级管理员",
                 RoleDesc = "系统创建",
-                Operable = false,
                 CreatedTime = DateTime.Now,
             });
 
@@ -68,16 +70,19 @@ namespace LionFrame.Data.BasicData
                 RoleId = 1L,
                 UserId = 1L,
                 CreatedTime = DateTime.Now,
+                State = 1,
             }, new SysUserRoleRelation()
             {
                 RoleId = 2L,
                 UserId = 2L,
                 CreatedTime = DateTime.Now,
+                State = 1,
             }, new SysUserRoleRelation()
             {
                 RoleId = 2L,
                 UserId = 1L,
                 CreatedTime = DateTime.Now,
+                State = 1,
             });
 
             #endregion
@@ -250,7 +255,7 @@ namespace LionFrame.Data.BasicData
             #region 菜单用户关系
 
             //非系统管理员不能管理菜单 
-            var noPerms = new List<string>(){"m102",};
+            var noPerms = new List<string>() { "m102", };
 
             var roleMenus = new List<SysRoleMenuRelation>();
             menus.ForEach(m =>
@@ -260,6 +265,7 @@ namespace LionFrame.Data.BasicData
                         MenuId = m.MenuId,
                         RoleId = 1L,
                         CreatedTime = DateTime.Now,
+                        State = 1,
                     });
                     if (noPerms.Contains(m.MenuId))
                     {
@@ -269,7 +275,8 @@ namespace LionFrame.Data.BasicData
                             MenuId = m.MenuId,
                             RoleId = 2L,
                             CreatedTime = DateTime.Now,
-                            Deleted = true
+                            Deleted = true,
+                            State = 1,
                         });
                     }
                     else
@@ -279,7 +286,8 @@ namespace LionFrame.Data.BasicData
                             MenuId = m.MenuId,
                             RoleId = 2L,
                             CreatedTime = DateTime.Now,
-                            Deleted = false
+                            Deleted = false,
+                            State = 1,
                         });
                     }
                 }
