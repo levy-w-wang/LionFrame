@@ -168,7 +168,7 @@ namespace LionFrame.Controller
         [Route("modify"), HttpPut]
         public async Task<ActionResult> ModifyManagerUser(ModifyUserParam param)
         {
-            if (param.UserId == CurrentUser.UserId.ToString())
+            if (param.UserId == CurrentUser.UserId)
             {
                 return Fail("不允许编辑自己");
             }

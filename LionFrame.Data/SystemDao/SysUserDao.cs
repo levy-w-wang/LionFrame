@@ -159,7 +159,7 @@ namespace LionFrame.Data.SystemDao
         /// <param name="roleIds"></param>
         /// <returns></returns>
         [DbTransactionInterceptor]
-        public async Task<ResponseModel<bool>> ModifyManagerUserAsync(long uid, List<long> roleIds, string email, UserCacheBo currentUser)
+        public virtual async Task<ResponseModel<bool>> ModifyManagerUserAsync(long uid, List<long> roleIds, string email, UserCacheBo currentUser)
         {
             var result = new ResponseModel<bool>();
             var user = await CurrentDbContext.SysUsers.FirstOrDefaultAsync(c => c.UserId == uid && c.Status == 1 && c.ParentUid == currentUser.UserId);

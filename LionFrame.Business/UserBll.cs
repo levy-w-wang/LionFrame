@@ -430,7 +430,7 @@ namespace LionFrame.Business
         {
             var result = new ResponseModel<bool>();
             //不能分配系统管理员角色权限和管理员权限
-            if (long.TryParse(modifyUserParam.UserId, out var uid) || uid <= 1)
+            if (modifyUserParam.UserId <= 1)
             {
                 result.Fail(ResponseCode.Fail, "用户选择错误", false);
                 return result;
@@ -441,7 +441,7 @@ namespace LionFrame.Business
                 result.Fail("角色选择错误", false);
                 return result;
             }
-            result = await SysUserDao.ModifyManagerUserAsync(uid, modifyUserParam.RoleIds, modifyUserParam.Email, currentUser);
+            result = await SysUserDao.ModifyManagerUserAsync(modifyUserParam.UserId, modifyUserParam.RoleIds, modifyUserParam.Email, currentUser);
             return result;
         }
 
@@ -452,11 +452,12 @@ namespace LionFrame.Business
         /// <param name="currentUser"></param>
         /// <returns></returns>
         [DbTransactionInterceptor]
-        public async Task<BaseResponseModel> RemoveManagerUserAsync(long uid, UserCacheBo currentUser)
+        public virtual async Task<BaseResponseModel> RemoveManagerUserAsync(long uid, UserCacheBo currentUser)
         {
             var result = new ResponseModel<bool>();
+            var db = SysUserDao.CurrentDbContext;
             //获取当前用户所拥有的角色
-            var existRoleIds = await SysUserDao.CurrentDbContext.SysUserRoleRelations
+            var existRoleIds = await db.SysUserRoleRelations
                 .Where(c => c.UserId == uid && !c.Deleted && c.State == 1)
                 .Select(c => c.RoleId).ToListAsync();
             //种子数据 2是管理员 1是系统管理员
@@ -464,9 +465,7 @@ namespace LionFrame.Business
             {
                 return result.Fail("管理员只读");
             }
-
-            var db = SysUserDao.CurrentDbContext;
-
+            
             if (!db.SysUsers.Any(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1))
             {
                 return result.Fail("账号ID不存在");

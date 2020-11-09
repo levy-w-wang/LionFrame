@@ -56,17 +56,19 @@ namespace LionFrame.Business
         {
             var result = new ResponseModel<string>();
             var db = SysRoleDao.CurrentDbContext;
-            var role = await db.SysRoles.FirstOrDefaultAsync(c => c.CreatedBy == currentUser.UserId && !c.Deleted && c.RoleId == incrementRoleParam.RoleId);
+            if (await db.SysRoles.AnyAsync(c => c.CreatedBy == currentUser.UserId && !c.Deleted && c.RoleName == incrementRoleParam.RoleName))
+            {
+                return result.Fail("角色名已存在");
+            }
+            var role = await db.SysRoles.FirstOrDefaultAsync(c => !c.Deleted && c.RoleId == incrementRoleParam.RoleId);
             if (role == null)
             {
                 return result.Fail("角色不存在", "角色不存在");
             }
-            if (await db.SysRoles.AnyAsync(c => c.CreatedBy == currentUser.UserId
-                && !c.Deleted && c.RoleName == incrementRoleParam.RoleName))
+            if (role.RoleId != currentUser.UserId)
             {
-                return result.Fail("角色名已存在");
+                return result.Fail("非自建角色只读", "非自建角色只读");
             }
-
             role.RoleName = incrementRoleParam.RoleName;
             role.RoleDesc = incrementRoleParam.RoleDesc ?? "";
             role.UpdatedBy = currentUser.UserId;
