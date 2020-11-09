@@ -37,17 +37,17 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public List<MenuPermsDto> GetCurrentMenuTree(UserCacheBo currentUser)
+        public async Task<List<MenuPermsDto>> GetCurrentMenuTreeAsync(UserCacheBo currentUser)
         {
             var menuKey = $"{CacheKeys.MENU_TREE}{currentUser.UserId}";
-            var cacheMenus = GetMenuTreeCache(menuKey);
+            var cacheMenus = await GetMenuTreeCacheAsync(menuKey);
             if (cacheMenus != null)
             {
                 return cacheMenus.MapToList<MenuPermsDto>();
             }
 
             var roleIds = currentUser.RoleCacheBos.Select(c => c.RoleId).ToList();
-            cacheMenus = GetMenuTreeDb(roleIds, menuKey);
+            cacheMenus = await GetMenuTreeDbAsync(roleIds, menuKey);
 
             return cacheMenus.MapToList<MenuPermsDto>();
         }
@@ -57,14 +57,14 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="menuKey"></param>
         /// <returns></returns>
-        private List<MenuCacheBo> GetMenuTreeCache(string menuKey)
+        private async Task<List<MenuCacheBo>> GetMenuTreeCacheAsync(string menuKey)
         {
             var cacheMenus = Cache.Get<List<MenuCacheBo>>(menuKey);
             if (cacheMenus != null)
             {
                 return cacheMenus;
             }
-            cacheMenus = RedisClient.Get<List<MenuCacheBo>>(menuKey);
+            cacheMenus = await RedisClient.GetAsync<List<MenuCacheBo>>(menuKey);
             if (cacheMenus != null)
             {
                 Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
@@ -79,11 +79,11 @@ namespace LionFrame.Business
         /// <param name="roleIds"></param>
         /// <param name="menuKey"></param>
         /// <returns></returns>
-        private List<MenuCacheBo> GetMenuTreeDb(List<long> roleIds, string menuKey)
+        private async Task<List<MenuCacheBo>> GetMenuTreeDbAsync(List<long> roleIds, string menuKey)
         {
-            var menus = SysMenuDao.GetMenus(roleIds);
+            var menus = await SysMenuDao.GetMenusAsync(roleIds);
             var cacheMenus = GetMenus(menus);
-            RedisClient.Set(menuKey, cacheMenus, new TimeSpan(7, 0, 0, 0));
+            await RedisClient.SetAsync(menuKey, cacheMenus, new TimeSpan(7, 0, 0, 0));
             Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             return cacheMenus;
         }

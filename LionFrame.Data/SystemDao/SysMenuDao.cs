@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LionFrame.Domain.SystemDomain;
+using LionFrame.Model.ResponseDto.SystemDto;
+using Microsoft.EntityFrameworkCore;
 using Z.EntityFramework.Plus;
 
 namespace LionFrame.Data.SystemDao
@@ -18,7 +20,7 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="roleIds"></param>
         /// <returns></returns>
-        public List<MenuCacheBo> GetMenus(List<long> roleIds)
+        public async Task<List<MenuCacheBo>> GetMenusAsync(List<long> roleIds)
         {
             CloseTracking();
             var menus = from rlaRoleMenu in CurrentDbContext.SysRoleMenuRelations
@@ -36,7 +38,34 @@ namespace LionFrame.Data.SystemDao
                             Icon = menu.Icon,
                             OrderIndex = menu.OrderIndex,
                         };
-            return menus.Distinct().ToList();
+            return await menus.Distinct().ToListAsync();
+        }
+
+        /// <summary>
+        /// 获取当前角色能访问的页面按钮
+        /// </summary>
+        /// <param name="roleId"></param>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        public async Task<List<MenuPermsDto>> GetMenusAsync(long roleId,long uid)
+        {
+            CloseTracking();
+            var menus = from rlaRoleMenu in CurrentDbContext.SysRoleMenuRelations
+                        join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
+                        where rlaRoleMenu.RoleId == roleId && !rlaRoleMenu.Deleted && !menu.Deleted
+                            && rlaRoleMenu.State == 1 && rlaRoleMenu.CreatedBy == uid
+                        select new MenuPermsDto()
+                        {
+                            MenuId = menu.MenuId,
+                            MenuName = menu.MenuName,
+                            ParentMenuId = menu.ParentMenuId,
+                            Url = menu.Url,
+                            Level = menu.Level,
+                            Type = menu.Type,
+                            Icon = menu.Icon,
+                            OrderIndex = menu.OrderIndex,
+                        };
+            return await menus.Distinct().ToListAsync();
         }
 
         /// <summary>

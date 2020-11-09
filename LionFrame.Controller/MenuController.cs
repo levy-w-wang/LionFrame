@@ -22,7 +22,7 @@ namespace LionFrame.Controller
         [HttpGet, Route("menutree")]
         public async Task<ActionResult> GetMenuTree()
         {
-            var result = await Task.FromResult(MenuBll.GetCurrentMenuTree(CurrentUser));
+            var result = await MenuBll.GetCurrentMenuTreeAsync(CurrentUser);
             return Succeed(result);
         }
 
