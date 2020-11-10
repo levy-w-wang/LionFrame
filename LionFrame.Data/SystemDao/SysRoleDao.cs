@@ -26,7 +26,7 @@ namespace LionFrame.Data.SystemDao
             Expression<Func<SysRole, bool>> roleExpression = s => !s.Deleted;
             if (!rolePageParam.RoleName.IsNullOrEmpty())
             {
-                roleExpression = roleExpression.And(c => rolePageParam.RoleName.Contains(c.RoleName));
+                roleExpression = roleExpression.And(c => c.RoleName.Contains(rolePageParam.RoleName));
             }
 
             var roleIds = currentUser.RoleIdList;

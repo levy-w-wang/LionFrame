@@ -33,22 +33,34 @@ namespace LionFrame.Business
         #region 获取菜单权限
 
         /// <summary>
+        /// 获取当前用户的原始权限 并设置缓存
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<List<MenuCacheBo>> GetCurrentMenuAsync(UserCacheBo currentUser)
+        {
+            var menuKey = $"{CacheKeys.MENU_TREE}{currentUser.UserId}";
+            var cacheMenus = await GetMenuTreeCacheAsync(menuKey);
+            if (cacheMenus != null)
+            {
+                return cacheMenus;
+            }
+            //从数据库中获取菜单树 由于菜单不经常变化故设置redis存储7天  本地缓存设置1天
+            var roleIds = currentUser.RoleCacheBos.Select(c => c.RoleId).ToList();
+            cacheMenus = await SysMenuDao.GetMenusAsync(roleIds);
+            await RedisClient.SetAsync(menuKey, cacheMenus, new TimeSpan(7, 0, 0, 0));
+            Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
+            return cacheMenus;
+        }
+
+        /// <summary>
         /// 获取菜单对象
         /// </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
         public async Task<List<MenuPermsDto>> GetCurrentMenuTreeAsync(UserCacheBo currentUser)
         {
-            var menuKey = $"{CacheKeys.MENU_TREE}{currentUser.UserId}";
-            var cacheMenus = await GetMenuTreeCacheAsync(menuKey);
-            if (cacheMenus != null)
-            {
-                return cacheMenus.MapToList<MenuPermsDto>();
-            }
-
-            var roleIds = currentUser.RoleCacheBos.Select(c => c.RoleId).ToList();
-            cacheMenus = await GetMenuTreeDbAsync(roleIds, menuKey);
-
+            var cacheMenus = await GetCurrentMenuAsync(currentUser);
             return cacheMenus.MapToList<MenuPermsDto>();
         }
 
@@ -69,22 +81,6 @@ namespace LionFrame.Business
             {
                 Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             }
-            return cacheMenus;
-        }
-
-        /// <summary>
-        /// 从数据库中获取菜单树
-        /// 由于菜单不经常变化故设置redis存储7天  本地缓存设置1天
-        /// </summary>
-        /// <param name="roleIds"></param>
-        /// <param name="menuKey"></param>
-        /// <returns></returns>
-        private async Task<List<MenuCacheBo>> GetMenuTreeDbAsync(List<long> roleIds, string menuKey)
-        {
-            var menus = await SysMenuDao.GetMenusAsync(roleIds);
-            var cacheMenus = GetMenus(menus);
-            await RedisClient.SetAsync(menuKey, cacheMenus, new TimeSpan(7, 0, 0, 0));
-            Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             return cacheMenus;
         }
 
@@ -300,5 +296,65 @@ namespace LionFrame.Business
             return result.Succeed("删除成功");
         }
         #endregion
+
+        /// <summary>
+        /// 获取当前用户的权限菜单树 - 按钮放置于页面下
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<List<MenuPermsDto>> GetCurrentMenuListAsync(UserCacheBo currentUser)
+        {
+            var cacheMenus = await GetCurrentMenuAsync(currentUser);
+            var permsDto = cacheMenus.MapToList<MenuPermsDto>();
+            var resultMenus = GetMenuList(permsDto);
+            return resultMenus;
+        }
+
+        /// <summary>
+        /// 递归 获取当前用户的权限菜单树 - 按钮放置于页面下
+        /// </summary>
+        /// <param name="menus"></param>
+        /// <param name="parentMenuId"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public List<MenuPermsDto> GetMenuList(List<MenuPermsDto> menus, string parentMenuId = "", int level = 1)
+        {
+            var pageMenus = menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu).Select(menu =>
+           {
+               var tempMenu = new MenuPermsDto()
+               {
+                   MenuId = menu.MenuId,
+                   MenuName = menu.MenuName,
+                   ParentMenuId = menu.ParentMenuId,
+                   Url = menu.Url,
+                   Type = menu.Type,
+                   Icon = menu.Icon,
+                   OrderIndex = menu.OrderIndex,
+                   ChildMenus = GetMenuList(menus, menu.MenuId, menu.Level + 1)
+               };
+               tempMenu.ChildMenus.AddRange(GetButtonList(menus, menu.MenuId));
+               return tempMenu;
+           }).OrderBy(c => c.OrderIndex).ToList();
+            return pageMenus;
+        }
+
+        /// <summary>
+        /// 获取当前页面下的按钮权限
+        /// </summary>
+        /// <param name="menus"></param>
+        /// <param name="parentMenuId"></param>
+        /// <returns></returns>
+        private IEnumerable<MenuPermsDto> GetButtonList(List<MenuPermsDto> menus, string parentMenuId)
+        {
+            return menus.Where(c => c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Button)
+                .Select(menu => new MenuPermsDto()
+                {
+                    MenuId = menu.MenuId,
+                    MenuName = menu.MenuName,
+                    ParentMenuId = menu.ParentMenuId,
+                    Type = menu.Type,
+                    ChildMenus = new List<MenuPermsDto>()
+                });
+        }
     }
 }

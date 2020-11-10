@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LionFrame.Basic.AutofacDependency;
-using LionFrame.Config;
+using LionFrame.Basic.Extensions;
 using LionFrame.Data.BasicData;
 using LionFrame.Data.SystemDao;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model.RequestParam.RoleParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Model.ResponseDto.RoleDtos;
-using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.SystemBo;
 using Microsoft.EntityFrameworkCore;
 using Z.EntityFramework.Plus;
@@ -21,6 +19,7 @@ namespace LionFrame.Business
     {
         public SysRoleDao SysRoleDao { get; set; }
         public SysMenuDao SysMenuDao { get; set; }
+        public MenuBll MenuBll { get; set; }
 
         /// <summary>
         /// 新增角色
@@ -66,19 +65,19 @@ namespace LionFrame.Business
         {
             var result = new ResponseModel<string>();
             var db = SysRoleDao.CurrentDbContext;
-            if (await db.SysRoles.AnyAsync(c => c.CreatedBy == currentUser.UserId && !c.Deleted && c.RoleName == incrementRoleParam.RoleName))
+            if (await db.SysRoles.AnyAsync(c => c.CreatedBy == currentUser.UserId && !c.Deleted && c.RoleName == incrementRoleParam.RoleName && c.RoleId != incrementRoleParam.RoleId))
             {
                 return result.Fail("角色名已存在");
             }
+
+            var checkResult = await RoleIdCheckAsync(incrementRoleParam.RoleId, currentUser);
+            if (!checkResult.IsNullOrEmpty())
+            {
+                return result.Fail(checkResult);
+            }
+
             var role = await db.SysRoles.FirstOrDefaultAsync(c => !c.Deleted && c.RoleId == incrementRoleParam.RoleId);
-            if (role == null)
-            {
-                return result.Fail("角色不存在", "角色不存在");
-            }
-            if (role.RoleId != currentUser.UserId)
-            {
-                return result.Fail("非自建角色只读", "非自建角色只读");
-            }
+
             role.RoleName = incrementRoleParam.RoleName;
             role.RoleDesc = incrementRoleParam.RoleDesc ?? "";
             role.UpdatedBy = currentUser.UserId;
@@ -111,21 +110,13 @@ namespace LionFrame.Business
         {
             var result = new ResponseModel<string>();
             var db = SysRoleDao.CurrentDbContext;
-            var role = await db.SysRoles.FirstOrDefaultAsync(c => c.RoleId == roleId && !c.Deleted);
-            if (role == null)
+
+            var checkResult = await RoleIdCheckAsync(roleId, currentUser);
+            if (!checkResult.IsNullOrEmpty())
             {
-                return result.Fail("角色不存在");
+                return result.Fail(checkResult);
             }
 
-            if (role.RoleId == 1 || role.RoleId == 2)
-            {
-                return result.Fail("系统角色只读");
-            }
-
-            if (role.CreatedBy != currentUser.UserId && !currentUser.RoleIdList.Contains(1))
-            {
-                return result.Fail("非自建角色只读");
-            }
             var count = await db.SysRoles.Where(c => c.RoleId == roleId && !c.Deleted).DeleteFromQueryAsync();
             count += await db.SysUserRoleRelations.Where(c => c.RoleId == roleId).DeleteFromQueryAsync();
             count += await db.SysRoleMenuRelations.Where(c => c.RoleId == roleId).DeleteFromQueryAsync();
@@ -160,7 +151,6 @@ namespace LionFrame.Business
             return new ResponseModel().Succeed(result);
         }
 
-        #region 获取当前角色能访问的按钮
         /// <summary>
         /// 获取当前角色能访问的按钮
         /// </summary>
@@ -170,48 +160,82 @@ namespace LionFrame.Business
         public async Task<BaseResponseModel> GetRoleMenuAsync(long roleId, UserCacheBo currentUser)
         {
             var menus = await SysMenuDao.GetMenusAsync(roleId, currentUser.UserId);
-            var result = GetMenus(menus);
+            var result = MenuBll.GetMenuList(menus);
             return new ResponseModel().Succeed(result);
         }
+
         /// <summary>
-        /// 递归获取菜单结构
+        /// 修改当前角色能访问的页面
         /// </summary>
-        /// <param name="menus"></param>
-        /// <param name="parentMenuId">第一层是空字符串</param>
-        /// <param name="level">菜单等级 1 2 3 4</param>
+        /// <param name="roleMenuParam"></param>
+        /// <param name="currentUser"></param>
         /// <returns></returns>
-        private List<MenuPermsDto> GetMenus(List<MenuPermsDto> menus, string parentMenuId = "", int level = 1)
+        [DbTransactionInterceptor]
+        public virtual async Task<BaseResponseModel> ModifyRoleMenuAsync(ModifyRoleMenuParam roleMenuParam, UserCacheBo currentUser)
         {
-            return menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu).Select(menu => new MenuPermsDto()
+            var result = new ResponseModel<string>();
+
+            var checkResult = await RoleIdCheckAsync(roleMenuParam.RoleId, currentUser);
+            if (!checkResult.IsNullOrEmpty())
             {
-                MenuId = menu.MenuId,
-                MenuName = menu.MenuName,
-                ParentMenuId = menu.ParentMenuId,
-                Url = menu.Url,
-                Type = menu.Type,
-                Icon = menu.Icon,
-                OrderIndex = menu.OrderIndex,
-                ChildMenus = GetMenus(menus, menu.MenuId, menu.Level + 1),
-                ButtonPerms = GetButtonPerms(menus, menu.MenuId)
-            }).OrderBy(c => c.OrderIndex).ToList();
+                return result.Fail(checkResult);
+            }
+
+            var currentUserMenus = await MenuBll.GetCurrentMenuAsync(currentUser);
+            var currentMenuIds = currentUserMenus.Select(c => c.MenuId).ToList();
+            var crossMenuIds = roleMenuParam.MenuIds.Intersect(currentMenuIds).ToList();
+
+            var dbMenuIds = await SysMenuDao.LoadEntities<SysRoleMenuRelation>(c => c.RoleId == roleMenuParam.RoleId).Select(c => c.MenuId).ToListAsync();
+            var dIds = dbMenuIds.Except(crossMenuIds).ToList();//需要删除的权限
+            var iIds = crossMenuIds.Except(dbMenuIds).ToList();//需要插入的新权限
+
+            var db = SysRoleDao.CurrentDbContext;
+            if (dIds.Count > 0)
+            {
+                await db.SysRoleMenuRelations.Where(c => dIds.Contains(c.MenuId) && c.RoleId == roleMenuParam.RoleId).DeleteAsync();
+            }
+            if (iIds.Count > 0)
+            {
+                var roleMenuRelations = iIds.Select(iId => new SysRoleMenuRelation()
+                {
+                    CreatedBy = currentUser.UserId,
+                    CreatedTime = DateTime.Now,
+                    MenuId = iId,
+                    State = 1,
+                    Deleted = false,
+                    RoleId = roleMenuParam.RoleId,
+                    UpdatedBy = 0,
+                    UpdatedTime = DateTime.Now,
+                })
+                    .ToList();
+                await db.SysRoleMenuRelations.AddRangeAsync(roleMenuRelations);
+            }
+            await db.SaveChangesAsync();
+            return result.Succeed("修改成功");
         }
 
         /// <summary>
-        /// 获取当前页面按钮的权限组合
+        /// 校验当前角色是否能操作
         /// </summary>
-        /// <param name="menu"></param>
-        /// <param name="menuMenuId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="currentUser"></param>
         /// <returns></returns>
-        private List<ButtonPermsDto> GetButtonPerms(List<MenuPermsDto> menu, string menuMenuId)
+        private async Task<string> RoleIdCheckAsync(long roleId, UserCacheBo currentUser)
         {
-            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => new ButtonPermsDto()
+            if (roleId == 1 || roleId == 2)
             {
-                MenuName = c.MenuName,
-                MenuId = c.MenuId,
-                ParentMenuId = c.ParentMenuId
-            }).Distinct().ToList();
+                return "系统角色只读";
+            }
+            var role = await SysRoleDao.FirstAsync<SysRole>(c => c.RoleId == roleId && !c.Deleted);
+            if (role == null)
+            {
+                return "角色不存在";
+            }
+            if (role.CreatedBy == currentUser.UserId || currentUser.RoleIdList.Contains(1))
+            {
+                return "";
+            }
+            return "操作异常，请刷新重试";
         }
-
-        #endregion
     }
 }

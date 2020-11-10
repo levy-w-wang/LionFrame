@@ -80,5 +80,17 @@ namespace LionFrame.Controller
             var result = await RoleBll.GetRoleUserAsync(roleId, CurrentUser);
             return MyJson(result);
         }
+
+        /// <summary>
+        /// 修改角色能访问的页面权限
+        /// </summary>
+        /// <param name="roleMenuParam"></param>
+        /// <returns></returns>
+        [HttpPost, Route("menu/modify")]
+        public async Task<ActionResult> ModifyRoleMenu(ModifyRoleMenuParam roleMenuParam)
+        {
+            var result = await RoleBll.ModifyRoleMenuAsync(roleMenuParam, CurrentUser);
+            return MyJson(result);
+        }
     }
 }

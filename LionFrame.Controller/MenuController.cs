@@ -16,13 +16,24 @@ namespace LionFrame.Controller
         public MenuBll MenuBll { get; set; }
 
         /// <summary>
-        /// 获取当前用户可以访问的菜单树
+        /// 获取当前用户可以访问的菜单树 递归生成菜单结构体
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("menutree")]
         public async Task<ActionResult> GetMenuTree()
         {
             var result = await MenuBll.GetCurrentMenuTreeAsync(CurrentUser);
+            return Succeed(result);
+        }
+
+        /// <summary>
+        /// 获取当前用户可以访问的菜单树 按钮放置于页面下，方便分配权限
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("menulist")]
+        public async Task<ActionResult> GetMenuList()
+        {
+            var result = await MenuBll.GetCurrentMenuListAsync(CurrentUser);
             return Succeed(result);
         }
 

@@ -129,9 +129,9 @@ namespace LionFrame.Data.BasicData
         {
             if (whereLambda == null)
             {
-                return CurrentDbContext.Set<T>().AsQueryable();
+                return CurrentDbContext.Set<T>().Where(c => true);
             }
-            return CurrentDbContext.Set<T>().Where(whereLambda).AsQueryable();
+            return CurrentDbContext.Set<T>().Where(whereLambda);
         }
 
         /// <summary>
