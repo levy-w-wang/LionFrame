@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LionFrame.Basic.AutofacDependency;
@@ -145,6 +146,7 @@ namespace LionFrame.Business
                        select new
                        {
                            roleId = ur2 == null ? -1 : ur2.RoleId,
+                           userId = user.UserId,
                            userName = user.UserName
                        };
             var result = await data.Distinct().ToListAsync();
@@ -180,11 +182,12 @@ namespace LionFrame.Business
             {
                 return result.Fail(checkResult);
             }
-
             var currentUserMenus = await MenuBll.GetCurrentMenuAsync(currentUser);
             var currentMenuIds = currentUserMenus.Select(c => c.MenuId).ToList();
+            //检查提交的按钮是否存在当前用户管理菜单数据中，只操作存在部分 即交集
             var crossMenuIds = roleMenuParam.MenuIds.Intersect(currentMenuIds).ToList();
 
+            // 这里不是做的全量操作，而且新增部分做插入 数据库中的不在提交数据中的部分做删除  提交的和数据库相交叉的部分不做变动
             var dbMenuIds = await SysMenuDao.LoadEntities<SysRoleMenuRelation>(c => c.RoleId == roleMenuParam.RoleId).Select(c => c.MenuId).ToListAsync();
             var dIds = dbMenuIds.Except(crossMenuIds).ToList();//需要删除的权限
             var iIds = crossMenuIds.Except(dbMenuIds).ToList();//需要插入的新权限
@@ -236,6 +239,50 @@ namespace LionFrame.Business
                 return "";
             }
             return "操作异常，请刷新重试";
+        }
+
+        /// <summary>
+        /// 修改角色所关联的用户
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        [DbTransactionInterceptor]
+        public virtual async Task<BaseResponseModel> ModifyUserRoleAsync(ModifyUserRoleParam param, UserCacheBo currentUser)
+        {
+            var result = new ResponseModel<string>();
+            var checkResult = await RoleIdCheckAsync(param.RoleId, currentUser);
+            if (!checkResult.IsNullOrEmpty())
+            {
+                return result.Fail(checkResult);
+            }
+
+            var db = SysRoleDao.CurrentDbContext;
+            var dbUserIds = await db.SysUsers.Where(c => c.ParentUid == currentUser.UserId).Select(c=>c.UserId).ToListAsync();
+            var crossUserIds = param.UserIds.Intersect(dbUserIds).ToList();//检查修改的用户是否是自己管理的用户ID，谨防其它手段上传的数据
+            //直接全量修改 原有角色用户关系删除 直接新增现加的
+            await db.SysUserRoleRelations.Where(c => c.RoleId == param.RoleId && c.CreatedBy == currentUser.UserId).DeleteFromQueryAsync();
+            if (crossUserIds.Count > 0)
+            {
+                var userRoles = new List<SysUserRoleRelation>();
+                crossUserIds.ForEach(uid =>
+                {
+                    userRoles.Add(new SysUserRoleRelation()
+                    {
+                        UserId = uid,
+                        RoleId = param.RoleId,
+                        State = 1,
+                        CreatedBy = currentUser.UserId,
+                        CreatedTime = DateTime.Now,
+                        Deleted = false,
+                        UpdatedBy = 0,
+                        UpdatedTime = DateTime.Now,
+                    });
+                });
+                await db.SysUserRoleRelations.BulkInsertAsync<SysUserRoleRelation>(userRoles);
+            }
+            await db.SaveChangesAsync();
+            return result.Succeed("修改成功");
         }
     }
 }

@@ -86,10 +86,22 @@ namespace LionFrame.Controller
         /// </summary>
         /// <param name="roleMenuParam"></param>
         /// <returns></returns>
-        [HttpPost, Route("menu/modify")]
+        [HttpPut, Route("menu/modify")]
         public async Task<ActionResult> ModifyRoleMenu(ModifyRoleMenuParam roleMenuParam)
         {
             var result = await RoleBll.ModifyRoleMenuAsync(roleMenuParam, CurrentUser);
+            return MyJson(result);
+        }
+
+        /// <summary>
+        /// 修改角色关联的用户
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpPut,Route("user/modify")]
+        public async Task<ActionResult> ModifyUserRole(ModifyUserRoleParam param)
+        {
+            var result = await RoleBll.ModifyUserRoleAsync(param, CurrentUser);
             return MyJson(result);
         }
     }
