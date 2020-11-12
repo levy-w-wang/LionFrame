@@ -45,6 +45,7 @@ namespace LionFrame.Business
             {
                 return cacheMenus;
             }
+
             //从数据库中获取菜单树 由于菜单不经常变化故设置redis存储7天  本地缓存设置1天
             var roleIds = currentUser.RoleCacheBos.Select(c => c.RoleId).ToList();
             cacheMenus = await SysMenuDao.GetMenusAsync(roleIds);
@@ -60,7 +61,8 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<List<MenuPermsDto>> GetCurrentMenuTreeAsync(UserCacheBo currentUser)
         {
-            var currentMenus = await GetCurrentMenuAsync(currentUser); ;
+            var currentMenus = await GetCurrentMenuAsync(currentUser);
+
             var cacheMenus = GetMenus(currentMenus);
             return cacheMenus.MapToList<MenuPermsDto>();
         }
@@ -77,11 +79,13 @@ namespace LionFrame.Business
             {
                 return cacheMenus;
             }
+
             cacheMenus = await RedisClient.GetAsync<List<MenuCacheBo>>(menuKey);
             if (cacheMenus != null)
             {
                 Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             }
+
             return cacheMenus;
         }
 
@@ -189,8 +193,7 @@ namespace LionFrame.Business
         /// <returns></returns>
         public List<MenuManageDto> GetMenuManage()
         {
-            var menuManageDtos = SysMenuDao.CurrentDbContext.SysMenus
-                .ProjectTo<MenuManageDto>(MapperProvider).ToList();
+            var menuManageDtos = SysMenuDao.CurrentDbContext.SysMenus.ProjectTo<MenuManageDto>(MapperProvider).ToList();
             var result = GetChildManage(menuManageDtos);
             return result;
         }
@@ -203,13 +206,11 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<BaseResponseModel> AssignMenuAsync(List<string> menuIds, long uid)
         {
-            var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations
-                .Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1)
-                .UpdateFromQueryAsync(c => new SysRoleMenuRelation()
-                {
-                    Deleted = false,
-                    UpdatedBy = uid,
-                });
+            var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations.Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1).UpdateFromQueryAsync(c => new SysRoleMenuRelation()
+            {
+                Deleted = false,
+                UpdatedBy = uid,
+            });
             var result = new ResponseModel<bool>();
             return count > 0 ? result.Succeed(true) : result.Fail("分配菜单失败");
         }
@@ -222,13 +223,11 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<BaseResponseModel> CancelAssignMenuAsync(List<string> menuIds, long uid)
         {
-            var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations
-                .Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1)
-                .UpdateFromQueryAsync(c => new SysRoleMenuRelation()
-                {
-                    Deleted = true,
-                    UpdatedBy = uid,
-                });
+            var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations.Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1).UpdateFromQueryAsync(c => new SysRoleMenuRelation()
+            {
+                Deleted = true,
+                UpdatedBy = uid,
+            });
             var result = new ResponseModel<bool>();
             return count > 0 ? result.Succeed(true) : result.Fail("分配菜单失败");
         }
@@ -242,21 +241,20 @@ namespace LionFrame.Business
         /// <returns></returns>
         private List<MenuManageDto> GetChildManage(List<MenuManageDto> menus, string parentMenuId = "", int level = 1)
         {
-            return menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu)
-                .Select(menu => new MenuManageDto()
-                {
-                    MenuId = menu.MenuId,
-                    MenuName = menu.MenuName,
-                    ParentMenuId = menu.ParentMenuId,
-                    Url = menu.Url,
-                    Type = menu.Type,
-                    Icon = menu.Icon,
-                    Level = menu.Level,
-                    OrderIndex = menu.OrderIndex,
-                    ChildMenus = GetChildManage(menus, menu.MenuId, menu.Level + 1),
-                    ButtonPerms = GetButtonManagePerms(menus, menu.MenuId),
-                    Deleted = menu.Deleted
-                }).OrderBy(c => c.OrderIndex).ToList();
+            return menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu).Select(menu => new MenuManageDto()
+            {
+                MenuId = menu.MenuId,
+                MenuName = menu.MenuName,
+                ParentMenuId = menu.ParentMenuId,
+                Url = menu.Url,
+                Type = menu.Type,
+                Icon = menu.Icon,
+                Level = menu.Level,
+                OrderIndex = menu.OrderIndex,
+                ChildMenus = GetChildManage(menus, menu.MenuId, menu.Level + 1),
+                ButtonPerms = GetButtonManagePerms(menus, menu.MenuId),
+                Deleted = menu.Deleted
+            }).OrderBy(c => c.OrderIndex).ToList();
         }
 
         /// <summary>
@@ -267,15 +265,14 @@ namespace LionFrame.Business
         /// <returns></returns>
         private List<ButtonManageDto> GetButtonManagePerms(List<MenuManageDto> menu, string menuMenuId)
         {
-            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "")
-                .Select(c => new ButtonManageDto()
-                {
-                    MenuName = c.MenuName,
-                    MenuId = c.MenuId,
-                    Url = c.Url,
-                    ParentMenuId = c.ParentMenuId,
-                    Deleted = c.Deleted
-                }).Distinct().ToList();
+            return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => new ButtonManageDto()
+            {
+                MenuName = c.MenuName,
+                MenuId = c.MenuId,
+                Url = c.Url,
+                ParentMenuId = c.ParentMenuId,
+                Deleted = c.Deleted
+            }).Distinct().ToList();
         }
 
         /// <summary>
@@ -293,11 +290,13 @@ namespace LionFrame.Business
             {
                 return result.Fail("请先删除子菜单后再删除父菜单");
             }
+
             await db.SysMenus.Where(c => c.MenuId == menuId).DeleteFromQueryAsync();
             await db.SysRoleMenuRelations.Where(c => c.MenuId == menuId).DeleteFromQueryAsync();
 
             return result.Succeed("删除成功");
         }
+
         #endregion
 
         /// <summary>
@@ -323,21 +322,21 @@ namespace LionFrame.Business
         public List<MenuPermsDto> GetMenuList(List<MenuPermsDto> menus, string parentMenuId = "", int level = 1)
         {
             var pageMenus = menus.Where(c => c.Level == level && c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Menu).Select(menu =>
-           {
-               var tempMenu = new MenuPermsDto()
-               {
-                   MenuId = menu.MenuId,
-                   MenuName = menu.MenuName,
-                   ParentMenuId = menu.ParentMenuId,
-                   Url = menu.Url,
-                   Type = menu.Type,
-                   Icon = menu.Icon,
-                   OrderIndex = menu.OrderIndex,
-                   ChildMenus = GetMenuList(menus, menu.MenuId, menu.Level + 1)
-               };
-               tempMenu.ChildMenus.AddRange(GetButtonList(menus, menu.MenuId));
-               return tempMenu;
-           }).OrderBy(c => c.OrderIndex).ToList();
+            {
+                var tempMenu = new MenuPermsDto()
+                {
+                    MenuId = menu.MenuId,
+                    MenuName = menu.MenuName,
+                    ParentMenuId = menu.ParentMenuId,
+                    Url = menu.Url,
+                    Type = menu.Type,
+                    Icon = menu.Icon,
+                    OrderIndex = menu.OrderIndex,
+                    ChildMenus = GetMenuList(menus, menu.MenuId, menu.Level + 1)
+                };
+                tempMenu.ChildMenus.AddRange(GetButtonList(menus, menu.MenuId));
+                return tempMenu;
+            }).OrderBy(c => c.OrderIndex).ToList();
             return pageMenus;
         }
 
@@ -349,15 +348,14 @@ namespace LionFrame.Business
         /// <returns></returns>
         private IEnumerable<MenuPermsDto> GetButtonList(List<MenuPermsDto> menus, string parentMenuId)
         {
-            return menus.Where(c => c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Button)
-                .Select(menu => new MenuPermsDto()
-                {
-                    MenuId = menu.MenuId,
-                    MenuName = menu.MenuName,
-                    ParentMenuId = menu.ParentMenuId,
-                    Type = menu.Type,
-                    ChildMenus = new List<MenuPermsDto>()
-                });
+            return menus.Where(c => c.ParentMenuId == parentMenuId && c.Type == SysConstants.MenuType.Button).Select(menu => new MenuPermsDto()
+            {
+                MenuId = menu.MenuId,
+                MenuName = menu.MenuName,
+                ParentMenuId = menu.ParentMenuId,
+                Type = menu.Type,
+                ChildMenus = new List<MenuPermsDto>()
+            });
         }
     }
 }

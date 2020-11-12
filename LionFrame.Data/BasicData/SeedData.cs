@@ -1,12 +1,15 @@
-﻿using LionFrame.Basic.Encryptions;
-using LionFrame.Config;
-using LionFrame.Domain.SystemDomain;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-
-namespace LionFrame.Data.BasicData
+﻿namespace LionFrame.Data.BasicData
 {
+    using System;
+    using System.Collections.Generic;
+    using LionFrame.Basic.Encryptions;
+    using LionFrame.Config;
+    using LionFrame.Domain.SystemDomain;
+    using Microsoft.EntityFrameworkCore;
+
+    /// <summary>
+    /// The seed data.
+    /// </summary>
     public static class SeedData
     {
         /// <summary>
@@ -95,8 +98,8 @@ namespace LionFrame.Data.BasicData
                 {
                     MenuId = "M1",
                     MenuName = "系统管理",
-                    ParentMenuId = "",
-                    Url = "",
+                    ParentMenuId = string.Empty,
+                    Url = string.Empty,
                     Type = SysConstants.MenuType.Menu,
                     Level = 1,
                     Icon = "el-icon-setting",
@@ -107,7 +110,7 @@ namespace LionFrame.Data.BasicData
                 {
                     MenuId = "M2",
                     MenuName = "一级菜单",
-                    ParentMenuId = "",
+                    ParentMenuId = string.Empty,
                     Url = "menu/singleMenu/index",
                     Level = 1,
                     Type = SysConstants.MenuType.Menu,
@@ -119,8 +122,8 @@ namespace LionFrame.Data.BasicData
                 {
                     MenuId = "M3",
                     MenuName = "二级菜单",
-                    ParentMenuId = "",
-                    Url = "",
+                    ParentMenuId = string.Empty,
+                    Url = string.Empty,
                     Level = 1,
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-ice-cream-round",
@@ -131,8 +134,8 @@ namespace LionFrame.Data.BasicData
                 {
                     MenuId = "M4",
                     MenuName = "三级多级菜单",
-                    ParentMenuId = "",
-                    Url = "",
+                    ParentMenuId = string.Empty,
+                    Url = string.Empty,
                     Level = 1,
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-ice-cream-round",
@@ -149,6 +152,103 @@ namespace LionFrame.Data.BasicData
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-user",
                     OrderIndex = 1,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_R_ADD",
+                    MenuName = "角色-添加",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "r_add",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_R_RELATION",
+                    MenuName = "角色-关联角色",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "r_relation",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_R_PERMS_CONFIG",
+                    MenuName = "角色-配置权限",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "r_perms_config",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_R_DELETE",
+                    MenuName = "角色-删除",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "r_delete",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_R_EDIT",
+                    MenuName = "角色-编辑",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "r_edit",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_U_ADD",
+                    MenuName = "用户-增加",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "u_add",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+
+                new SysMenu()
+                {
+                    MenuId = "B101_U_DELETE",
+                    MenuName = "用户-删除",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "u_delete",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
+                    CreatedTime = DateTime.Now,
+                },
+                new SysMenu()
+                {
+                    MenuId = "B101_U_EDIT",
+                    MenuName = "用户-编辑",
+                    ParentMenuId = "M101",
+                    Level = 1,
+                    Url = "u_edit",
+                    Type = SysConstants.MenuType.Button,
+                    Icon = string.Empty,
+                    OrderIndex = 0,
                     CreatedTime = DateTime.Now,
                 },
                 new SysMenu()
@@ -217,7 +317,7 @@ namespace LionFrame.Data.BasicData
                     MenuName = "三级1-2",
                     ParentMenuId = "M4",
                     Level = 2,
-                    Url = "",
+                    Url = string.Empty,
                     Type = SysConstants.MenuType.Menu,
                     Icon = "el-icon-potato-strips",
                     OrderIndex = 2,
@@ -255,43 +355,45 @@ namespace LionFrame.Data.BasicData
             #region 菜单用户关系
 
             //非系统管理员不能管理菜单 
-            var noPerms = new List<string>() { "m102", };
+            var noPerms = new List<string>()
+            {
+                "m102",
+            };
 
             var roleMenus = new List<SysRoleMenuRelation>();
             menus.ForEach(m =>
+            {
+                roleMenus.Add(new SysRoleMenuRelation()
+                {
+                    MenuId = m.MenuId,
+                    RoleId = 1L,
+                    CreatedTime = DateTime.Now,
+                    State = 1,
+                });
+                if (noPerms.Contains(m.MenuId))
+                {
+                    // 全部都将设置关系，只是关系是是否为逻辑删除状态
+                    roleMenus.Add(new SysRoleMenuRelation()
+                    {
+                        MenuId = m.MenuId,
+                        RoleId = 2L,
+                        CreatedTime = DateTime.Now,
+                        Deleted = true,
+                        State = 1,
+                    });
+                }
+                else
                 {
                     roleMenus.Add(new SysRoleMenuRelation()
                     {
                         MenuId = m.MenuId,
-                        RoleId = 1L,
+                        RoleId = 2L,
                         CreatedTime = DateTime.Now,
+                        Deleted = false,
                         State = 1,
                     });
-                    if (noPerms.Contains(m.MenuId))
-                    {
-                        // 全部都将设置关系，只是关系是是否为逻辑删除状态
-                        roleMenus.Add(new SysRoleMenuRelation()
-                        {
-                            MenuId = m.MenuId,
-                            RoleId = 2L,
-                            CreatedTime = DateTime.Now,
-                            Deleted = true,
-                            State = 1,
-                        });
-                    }
-                    else
-                    {
-                        roleMenus.Add(new SysRoleMenuRelation()
-                        {
-                            MenuId = m.MenuId,
-                            RoleId = 2L,
-                            CreatedTime = DateTime.Now,
-                            Deleted = false,
-                            State = 1,
-                        });
-                    }
                 }
-            );
+            });
             modelBuilder.Entity<SysRoleMenuRelation>().HasData(roleMenus);
 
             #endregion
