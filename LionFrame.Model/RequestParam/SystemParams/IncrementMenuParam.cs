@@ -40,7 +40,7 @@ namespace LionFrame.Model.RequestParam.SystemParams
         /// <summary>
         /// 菜单地址
         /// </summary>
-        [MaxLength(256, ErrorMessage = "菜单地址超过长度限制")]
+        [Required,MaxLength(256, ErrorMessage = "菜单地址超过长度限制")]
         public string Url { get; set; } = "";
 
         /// <summary>

@@ -11,6 +11,7 @@ namespace LionFrame.Model.ResponseDto.SystemDto
     {
         public string MenuId { get; set; }
         public string MenuName { get; set; }
+        public string Url { get; set; }
         public string ParentMenuId { get; set; }
     }
 }

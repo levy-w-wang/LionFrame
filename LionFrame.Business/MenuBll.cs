@@ -60,7 +60,8 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<List<MenuPermsDto>> GetCurrentMenuTreeAsync(UserCacheBo currentUser)
         {
-            var cacheMenus = await GetCurrentMenuAsync(currentUser);
+            var currentMenus = await GetCurrentMenuAsync(currentUser); ;
+            var cacheMenus = GetMenus(currentMenus);
             return cacheMenus.MapToList<MenuPermsDto>();
         }
 
@@ -118,6 +119,7 @@ namespace LionFrame.Business
             return menu.Where(c => c.ParentMenuId == menuMenuId && c.Type == SysConstants.MenuType.Button && c.MenuName != "").Select(c => new ButtonPermsDto()
             {
                 MenuName = c.MenuName,
+                Url = c.Url,
                 MenuId = c.MenuId,
                 ParentMenuId = c.ParentMenuId
             }).Distinct().ToList();
@@ -270,6 +272,7 @@ namespace LionFrame.Business
                 {
                     MenuName = c.MenuName,
                     MenuId = c.MenuId,
+                    Url = c.Url,
                     ParentMenuId = c.ParentMenuId,
                     Deleted = c.Deleted
                 }).Distinct().ToList();
