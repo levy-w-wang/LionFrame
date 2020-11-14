@@ -49,5 +49,26 @@ namespace LionFrame.Data.SystemDao
             var result = await LoadPageEntitiesAsync(resultQueryable, rolePageParam.CurrentPage, rolePageParam.PageSize, false, c => c.RoleId);
             return result;
         }
+
+        /// <summary>
+        /// 用户管理界面获取可关联角色
+        /// </summary>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<RoleListDto>> GetCanRelationRoleList(UserCacheBo currentUser)
+        {
+             CloseTracking();
+            Expression<Func<SysRole, bool>> roleExpression = s => !s.Deleted;
+            var tempQueryable = CurrentDbContext.SysRoles.Where(roleExpression);
+            var rolesQueryable = tempQueryable.Where(r => r.CreatedBy == currentUser.UserId);
+            var resultQueryable = from sysRole in rolesQueryable
+                                  select new RoleListDto()
+                                  {
+                                      RoleId = sysRole.RoleId.ToString(),
+                                      RoleName = sysRole.RoleName,
+                                  };
+            var result = await LoadPageEntitiesAsync(resultQueryable, 1, 1000, false, c => c.RoleId);
+            return result;
+        }
     }
 }

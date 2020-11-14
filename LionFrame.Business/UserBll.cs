@@ -465,16 +465,17 @@ namespace LionFrame.Business
             {
                 return result.Fail("管理员只读");
             }
-            
+
             if (!db.SysUsers.Any(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1))
             {
                 return result.Fail("账号ID不存在");
             }
 
-            await db.SysUsers.Where(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1).DeleteFromQueryAsync();
-            await db.SysUserRoleRelations.Where(c => c.UserId == uid).DeleteFromQueryAsync();
+            var count = 0;
+            count += await db.SysUsers.Where(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1).DeleteFromQueryAsync();
+            count += await db.SysUserRoleRelations.Where(c => c.UserId == uid).DeleteFromQueryAsync();
 
-            var count = await db.SaveChangesAsync();
+            count += await db.SaveChangesAsync();
             return count > 0 ? result.Succeed(true) : result.Fail("删除失败");
         }
     }

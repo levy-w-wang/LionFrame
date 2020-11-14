@@ -119,7 +119,7 @@ namespace LionFrame.Data.SystemDao
             }
             if (!userName.IsNullOrEmpty())
             {
-                userExpression = userExpression.And(c => userName.Contains(c.UserName));
+                userExpression = userExpression.And(c => c.UserName.Contains(userName));
             }
 
             var sysUserQueryable = CurrentDbContext.SysUsers.Where(userExpression);

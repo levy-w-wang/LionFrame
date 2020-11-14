@@ -99,7 +99,17 @@ namespace LionFrame.Business
             PageResponse<RoleListDto> roleList = await SysRoleDao.RoleListAsync(rolePageParam, currentUser);
             return roleList;
         }
-
+        /// <summary>
+        /// 用户管理界面获取可关联角色
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<RoleListDto>> GetCanRelationRoleList(UserCacheBo currentUser)
+        {
+            PageResponse<RoleListDto> roleList = await SysRoleDao.GetCanRelationRoleList(currentUser);
+            return roleList;
+        }
         /// <summary>
         /// 角色删除
         /// </summary>
@@ -258,7 +268,7 @@ namespace LionFrame.Business
             }
 
             var db = SysRoleDao.CurrentDbContext;
-            var dbUserIds = await db.SysUsers.Where(c => c.ParentUid == currentUser.UserId).Select(c=>c.UserId).ToListAsync();
+            var dbUserIds = await db.SysUsers.Where(c => c.ParentUid == currentUser.UserId).Select(c => c.UserId).ToListAsync();
             var crossUserIds = param.UserIds.Intersect(dbUserIds).ToList();//检查修改的用户是否是自己管理的用户ID，谨防其它手段上传的数据
             //直接全量修改 原有角色用户关系删除 直接新增现加的
             await db.SysUserRoleRelations.Where(c => c.RoleId == param.RoleId && c.CreatedBy == currentUser.UserId).DeleteFromQueryAsync();

@@ -357,7 +357,7 @@
             //非系统管理员不能管理菜单 
             var noPerms = new List<string>()
             {
-                "m102",
+                "M102",
             };
 
             var roleMenus = new List<SysRoleMenuRelation>();

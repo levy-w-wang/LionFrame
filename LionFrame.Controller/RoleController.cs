@@ -22,7 +22,16 @@ namespace LionFrame.Controller
             var result = await RoleBll.RoleListAsync(param, CurrentUser);
             return Succeed(result);
         }
-
+        /// <summary>
+        /// 用户一览获取可关联的角色一览
+        /// </summary>
+        /// <returns></returns>
+        [Route("page"), HttpGet]
+        public async Task<ActionResult> GetCanRelationRoleList()
+        {
+            var result = await RoleBll.GetCanRelationRoleList(CurrentUser);
+            return Succeed(result);
+        }
         /// <summary>
         /// 新增角色
         /// </summary>
@@ -98,7 +107,7 @@ namespace LionFrame.Controller
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        [HttpPut,Route("user/modify")]
+        [HttpPut, Route("user/modify")]
         public async Task<ActionResult> ModifyUserRole(ModifyUserRoleParam param)
         {
             var result = await RoleBll.ModifyUserRoleAsync(param, CurrentUser);
