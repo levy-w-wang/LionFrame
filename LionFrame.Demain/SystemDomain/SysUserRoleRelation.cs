@@ -12,6 +12,8 @@ namespace LionFrame.Domain.SystemDomain
         public long RoleId { get; set; }
         public SysRole SysRole { get; set; }
 
+        public long TenantId { get; set; }
+
         /// <summary>
         /// 可用状态1 其它待定
         /// </summary>

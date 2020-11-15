@@ -11,7 +11,7 @@ namespace LionFrame.Domain.SystemDomain
 
         public string MenuId { get; set; }
         public SysMenu SysMenu { get; set; }
-
+        public long TenantId { get; set; }
         public int State { get; set; }
 
     }

@@ -48,7 +48,7 @@ namespace LionFrame.Business
 
             //从数据库中获取菜单树 由于菜单不经常变化故设置redis存储7天  本地缓存设置1天
             var roleIds = currentUser.RoleCacheBos.Select(c => c.RoleId).ToList();
-            cacheMenus = await SysMenuDao.GetMenusAsync(roleIds);
+            cacheMenus = await SysMenuDao.GetMenusAsync(roleIds, currentUser.TenantId);
             await RedisClient.SetAsync(menuKey, cacheMenus, new TimeSpan(7, 0, 0, 0));
             Cache.Set(menuKey, cacheMenus, new TimeSpan(1, 0, 0, 0));
             return cacheMenus;

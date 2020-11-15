@@ -30,7 +30,7 @@ namespace LionFrame.Data.SystemDao
         {
             CloseTracking();
             var response = new ResponseModel<UserCacheBo>();
-            var user = First<SysUser>(c => c.UserName == loginParam.UserName && c.Status == 1);
+            var user = First<SysUser>(c => c.Email == loginParam.Email && c.State == 1);
             if (user == null)
             {
                 return response.Fail(ResponseCode.LoginFail, "账号不存在", null);
@@ -38,14 +38,16 @@ namespace LionFrame.Data.SystemDao
             if (user.PassWord == loginParam.Password.Md5Encrypt())
             {
                 var dbData = from sysUser in CurrentDbContext.SysUsers
-                             where sysUser.UserId == user.UserId && sysUser.Status == 1
+                             where sysUser.UserId == user.UserId && sysUser.State == 1
                              select new UserCacheBo
                              {
                                  UserId = sysUser.UserId,
-                                 UserName = sysUser.UserName,
+                                 TenantId = sysUser.TenantId,
+                                 NickName = sysUser.NickName,
                                  PassWord = sysUser.PassWord,
                                  Email = sysUser.Email,
                                  Sex = sysUser.Sex,
+                                 CreatedBy = sysUser.CreatedBy,
                                  RoleCacheBos = from userRoleRelation in CurrentDbContext.SysUserRoleRelations
                                                 join sysRole in CurrentDbContext.SysRoles on userRoleRelation.RoleId equals sysRole.RoleId
                                                 where userRoleRelation.UserId == sysUser.UserId && !userRoleRelation.Deleted && !sysRole.Deleted
@@ -53,6 +55,7 @@ namespace LionFrame.Data.SystemDao
                                                 select new RoleCacheBo()
                                                 {
                                                     RoleId = sysRole.RoleId,
+                                                    TenantId = sysRole.TenantId,
                                                     RoleDesc = sysRole.RoleDesc,
                                                     RoleName = sysRole.RoleName,
                                                 }
@@ -74,7 +77,7 @@ namespace LionFrame.Data.SystemDao
         /// <returns></returns>
         public async Task<bool> ModifyPwd(ModifyPwdParam modifyPwdParam, long uid)
         {
-            var result = await CurrentDbContext.SysUsers.Where(c => c.UserId == uid).UpdateFromQueryAsync(c => new SysUser()
+            var result = await CurrentDbContext.SysUsers.Where(c => c.UserId == uid).UpdateFromQueryAsync(c => new SysUser
             {// 使用这种方式只会修改这两个字段
                 PassWord = modifyPwdParam.NewPassWord.Md5Encrypt(),
                 UpdatedTime = DateTime.Now,
@@ -105,32 +108,36 @@ namespace LionFrame.Data.SystemDao
         /// <param name="pageSize"></param>
         /// <param name="currentPage"></param>
         /// <param name="email"></param>
-        /// <param name="userName"></param>
+        /// <param name="nickName"></param>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public async Task<PageResponse<UserManagerDto>> GetManagerUserAsync(int pageSize, int currentPage, string email, string userName, UserCacheBo currentUser)
+        public async Task<PageResponse<UserManagerDto>> GetManagerUserAsync(int pageSize, int currentPage, string email, string nickName, UserCacheBo currentUser)
         {
             CloseTracking();
-            Expression<Func<SysUser, bool>> userExpression = sysUser => sysUser.Status == 1;
+            Expression<Func<SysUser, bool>> userExpression = sysUser => sysUser.State == 1 && sysUser.TenantId == currentUser.TenantId;
 
             if (!email.IsNullOrEmpty())
             {
                 userExpression = userExpression.And(c => c.Email == email);
             }
-            if (!userName.IsNullOrEmpty())
+            if (!nickName.IsNullOrEmpty())
             {
-                userExpression = userExpression.And(c => c.UserName.Contains(userName));
+                userExpression = userExpression.And(c => c.NickName.Contains(nickName));
             }
 
+            // 分配用户管理界面 则可以管理当前所有用户
             var sysUserQueryable = CurrentDbContext.SysUsers.Where(userExpression);
-            var userConcat = sysUserQueryable.Where(c => c.UserId == currentUser.UserId)
-                .Union(sysUserQueryable.Where(c => c.ParentUid == currentUser.UserId));
-            var result = await LoadPageEntitiesProjectToAsync<SysUser, long, UserManagerDto>(userConcat, currentPage, pageSize, false, u => u.UserId);
+            if (currentUser.CreatedBy > 0)
+            {
+                //非超级管理员不读取超级管理员信息
+                sysUserQueryable = sysUserQueryable.Where(c => c.CreatedBy > 0);
+            }
+            var result = await LoadPageEntitiesProjectToAsync<SysUser, long, UserManagerDto>(sysUserQueryable, currentPage, pageSize, false, u => u.UserId);
 
             var uids = result.Data.Select(c => long.Parse(c.UserId));
             var rolesQueryable = from userRoleRelation in CurrentDbContext.SysUserRoleRelations
                                  join sysRole in CurrentDbContext.SysRoles on userRoleRelation.RoleId equals sysRole.RoleId
-                                 where !userRoleRelation.Deleted && userRoleRelation.State == 1 && !sysRole.Deleted
+                                 where !userRoleRelation.Deleted && userRoleRelation.State == 1 && !sysRole.Deleted && sysRole.TenantId == currentUser.TenantId  && userRoleRelation.TenantId == currentUser.TenantId
                                  && uids.Contains(userRoleRelation.UserId)
                                  select new
                                  {
@@ -154,34 +161,29 @@ namespace LionFrame.Data.SystemDao
         /// 修改管理的用户信息
         /// </summary>
         /// <param name="uid"></param>
-        /// <param name="email"></param>
+        /// <param name="nickName"></param>
         /// <param name="currentUser"></param>
         /// <param name="roleIds"></param>
         /// <returns></returns>
         [DbTransactionInterceptor]
-        public virtual async Task<ResponseModel<bool>> ModifyManagerUserAsync(long uid, List<long> roleIds, string email, UserCacheBo currentUser)
+        public virtual async Task<ResponseModel<bool>> ModifyManagerUserAsync(long uid, List<long> roleIds, string nickName, UserCacheBo currentUser)
         {
             var result = new ResponseModel<bool>();
-            var user = await CurrentDbContext.SysUsers.FirstOrDefaultAsync(c => c.UserId == uid && c.Status == 1 && c.ParentUid == currentUser.UserId);
+            var user = await CurrentDbContext.SysUsers.FirstOrDefaultAsync(c => c.UserId == uid && c.State == 1 && c.TenantId == currentUser.TenantId);
             if (user == null)
             {
                 return result.Fail("修改的用户信息不存在");
             }
-            //获取当前用户所拥有的角色
-            var existRoleIds = await CurrentDbContext.SysUserRoleRelations.Where(c => c.UserId == uid && !c.Deleted && c.State == 1)
-                .Select(c => c.RoleId).ToListAsync();
-            //种子数据 2是管理员 1是系统管理员
-            if (existRoleIds.Contains(1) || existRoleIds.Contains(2))
+            if (user.CreatedBy == 0)
             {
                 return result.Fail("管理员只读");
             }
 
-            if (await ExistAsync<SysUser>(c => c.UserId != uid && c.Status == 1 && c.Email == email))
-            {
-                return result.Fail("修改的邮箱已存在");
-            }
+            //获取当前用户所拥有的角色
+            var existRoleIds = await CurrentDbContext.SysUserRoleRelations.Where(c => c.UserId == uid && !c.Deleted && c.State == 1 && c.TenantId == currentUser.TenantId && c.CreatedBy > 0)
+                .Select(c => c.RoleId).ToListAsync();
 
-            user.Email = email;
+            user.NickName = nickName;
 
             var dRoleIds = existRoleIds.Except(roleIds).ToList();//删除此前分配的角色 不在这次保存角色中的
             var iRoleIds = roleIds.Except(existRoleIds).ToList();//插入这次新增的不在之前角色中的
@@ -189,7 +191,7 @@ namespace LionFrame.Data.SystemDao
             if (dRoleIds.Any())
             {
                 // 删除
-                await CurrentDbContext.SysUserRoleRelations.Where(c => c.UserId == uid && dRoleIds.Contains(c.RoleId)).DeleteFromQueryAsync();
+                await CurrentDbContext.SysUserRoleRelations.Where(c => c.UserId == uid && dRoleIds.Contains(c.RoleId)&& c.TenantId == currentUser.TenantId).DeleteFromQueryAsync();
             }
 
             if (iRoleIds.Count > 0)
@@ -200,6 +202,7 @@ namespace LionFrame.Data.SystemDao
                 {
                     userRoleRelations.Add(new SysUserRoleRelation()
                     {
+                        TenantId = currentUser.TenantId,
                         CreatedBy = currentUser.UserId,
                         CreatedTime = DateTime.Now,
                         RoleId = roleId,

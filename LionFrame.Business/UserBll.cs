@@ -34,6 +34,7 @@ namespace LionFrame.Business
         public SystemBll SystemBll { get; set; }
         public RedisClient RedisClient { get; set; }
         public LionMemoryCache LionMemoryCache { get; set; }
+        public IdWorker IdWorker { get; set; }
 
         /// <summary>
         /// 用户登录 业务层
@@ -49,6 +50,7 @@ namespace LionFrame.Business
                 result.Fail(ResponseCode.LoginFail, verificationResult, null);
                 return result;
             }
+
             var responseResult = SysUserDao.Login(loginParam);
             if (responseResult.Success)
             {
@@ -57,6 +59,7 @@ namespace LionFrame.Business
                 var userDto = userCache.MapTo<UserDto>();
                 result.Succeed(userDto);
             }
+
             return result;
         }
 
@@ -73,12 +76,13 @@ namespace LionFrame.Business
             var dic = new Dictionary<string, string>()
             {
                 { "uid", userCache.UserId.ToString() },
-                { "sessionId", userCache.SessionId }//一个账号仅允许在一个地方登录
+                { "tenantId", userCache.TenantId.ToString() },
+                { "sessionId", userCache.SessionId } //一个账号仅允许在一个地方登录
             };
             var token = TokenManager.GenerateToken(dic.ToJson(), 3 * 24);
             LionWeb.HttpContext.Response.Headers["token"] = token;
             userCache.UserToken = token;
-            LionWeb.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "token";//多个以逗号分隔 eg:token,sid
+            LionWeb.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "token"; //多个以逗号分隔 eg:token,sid
 
             LionUserCache.CreateUserCache(userCache);
         }
@@ -86,20 +90,11 @@ namespace LionFrame.Business
         /// <summary>
         /// 验证是否存在该用户数据
         /// </summary>
-        /// <param name="type">1：用户名  2：邮箱</param>
-        /// <param name="str"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
-        public async Task<bool> ExistUserAsync(int type, string str)
+        public async Task<bool> ExistUserAsync(string email)
         {
-            switch (type)
-            {
-                case 1:
-                    return await SysUserDao.ExistAsync<SysUser>(c => c.UserName == str && c.Status == 1);
-                case 2:
-                    return await SysUserDao.ExistAsync<SysUser>(c => c.Email == str && c.Status == 1);
-            }
-
-            throw new CustomSystemException("验证类型错误", ResponseCode.DataTypeError);
+            return await SysUserDao.ExistAsync<SysUser>(c => c.Email == email && c.State == 1);
         }
 
         /// <summary>
@@ -118,12 +113,14 @@ namespace LionFrame.Business
             {
                 return "验证码错误或已失效";
             }
+
             var str = !string.Equals(sendCaptcha, captcha, StringComparison.OrdinalIgnoreCase) ? "验证码错误" : "验证通过";
             // 当验证通过 或设定 只要获取过验证码就删除  重新获取验证码
             if (str == "验证通过" || deleteCaptcha)
             {
                 await RedisClient.DeleteAsync(key);
             }
+
             return str;
         }
 
@@ -144,6 +141,7 @@ namespace LionFrame.Business
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -164,6 +162,7 @@ namespace LionFrame.Business
             {
                 return "获取验证码过于频繁，请稍后再获取";
             }
+
             var captchaNumber = CaptchaHelper.CreateRandomNumber(6);
             var htmlEmail = SystemBll.GetMailContent("注册账号", captchaNumber, expireMinutes);
             var result = await SystemBll.SendSystemMailAsync("LionFrame-注册账号", htmlEmail, emailTo);
@@ -171,6 +170,7 @@ namespace LionFrame.Business
             {
                 await RedisClient.SetAsync(key, captchaNumber, new TimeSpan(0, expireMinutes, 0));
             }
+
             return result;
         }
 
@@ -179,7 +179,8 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="registerUserParam"></param>
         /// <returns></returns>
-        public async Task<ResponseModel<bool>> RegisterUserAsync(RegisterUserParam registerUserParam)
+        [DbTransactionInterceptor]
+        public virtual async Task<ResponseModel<bool>> RegisterUserAsync(RegisterUserParam registerUserParam)
         {
             var result = new ResponseModel<bool>();
             var verificationResult = await VerificationCaptchaAsync(CacheKeys.REGISTERCAPTCHA, registerUserParam.Email, registerUserParam.Captcha, false);
@@ -189,17 +190,12 @@ namespace LionFrame.Business
                 return result;
             }
 
-            if (await ExistUserAsync(1, registerUserParam.UserName))
+            if (await ExistUserAsync(registerUserParam.Email))
             {
-                result.Fail(ResponseCode.Fail, "用户名已存在，请切换", false);
+                result.Fail(ResponseCode.Fail, "该邮箱已存在，请切换或找回密码", false);
                 return result;
             }
 
-            if (await ExistUserAsync(2, registerUserParam.Email))
-            {
-                result.Fail(ResponseCode.Fail, "该邮箱已存在，请切换", false);
-                return result;
-            }
             var count = await SaveRegisterUserAsync(registerUserParam);
             if (count > 0)
             {
@@ -216,28 +212,69 @@ namespace LionFrame.Business
         /// <returns></returns>
         private async Task<int> SaveRegisterUserAsync(RegisterUserParam registerUserParam)
         {
+            var tenantUser = new TenantInfo()
+            {
+                //TenantId = IdWorker.NextId(),
+                CreatedTime = DateTime.Now,
+                TenantName = registerUserParam.TenantName,
+                Remark = "注册",
+                State = 1,
+            };
+            SysUserDao.Add(tenantUser);
+            await SysUserDao.SaveChangesAsync();
+
+            var currentRoleMenu = new List<SysRoleMenuRelation>();
+            SeedData.InitNormalRoleMenuRelations.ForEach(roleMenu =>
+            {
+                currentRoleMenu.Add(new SysRoleMenuRelation()
+                {
+                    TenantId = tenantUser.TenantId,
+                    CreatedTime = DateTime.Now,
+                    MenuId = roleMenu.MenuId,
+                    State = 1,
+                });
+            });
+
             var sysUser = new SysUser()
             {
-                UserName = registerUserParam.UserName,
+                NickName = registerUserParam.NickName,
                 PassWord = registerUserParam.PassWord.Md5Encrypt(),
                 Email = registerUserParam.Email,
                 Sex = 1,
-                Status = 1,
+                State = 1,
                 CreatedTime = DateTime.Now,
                 UpdatedTime = DateTime.Now,
-                ParentUid = 0,
                 UpdatedBy = 0,
+                CreatedBy = 0,
+                TenantId = tenantUser.TenantId,
                 SysUserRoleRelations = new List<SysUserRoleRelation>()
                 {
                     new SysUserRoleRelation()
                     {
-                        RoleId = 2, // 这里固定为种子数据中的系统管理员权限
                         State = 1,
+                        TenantId = tenantUser.TenantId,
                         CreatedTime = DateTime.Now,
+                        SysRole = new SysRole()
+                        {
+                            CreatedTime = DateTime.Now,
+                            RoleName = "超级管理员",
+                            RoleDesc = string.Empty,
+                            TenantId = tenantUser.TenantId,
+                            SysRoleMenuRelations = currentRoleMenu
+                        }
                     }
                 }
             };
             SysUserDao.Add(sysUser);
+            //var role = new SysRole()
+            //{
+            //    CreatedTime = DateTime.Now,
+            //    RoleName = "超级管理员",
+            //    RoleDesc = String.Empty,
+            //    TenantId = tenantUser.TenantId,
+
+            //};
+
             var count = await SysUserDao.SaveChangesAsync();
             return count;
         }
@@ -266,7 +303,7 @@ namespace LionFrame.Business
                 return response.Fail("获取验证码过于频繁，请稍后再获取");
             }
 
-            if (!await ExistUserAsync(2, email))
+            if (!await ExistUserAsync(email))
             {
                 return response.Fail("该邮箱尚未注册或无效");
             }
@@ -299,8 +336,12 @@ namespace LionFrame.Business
             var update = SysUserDao.RetrievePwd(retrievePwdParam, out long uid);
             if (update)
             {
-                await LogoutAsync(new UserCacheBo() { UserId = uid });
+                await LogoutAsync(new UserCacheBo()
+                {
+                    UserId = uid
+                });
             }
+
             return update ? result.Succeed(true) : result.Fail("修改密码失败，请稍后再试");
         }
 
@@ -329,6 +370,7 @@ namespace LionFrame.Business
                     await LogoutAsync(currentUser);
                     return result.Succeed("修改成功,请重新登录");
                 }
+
                 return result.Fail(ResponseCode.Fail, "修改失败，请稍后再试");
             }
 
@@ -355,13 +397,35 @@ namespace LionFrame.Business
         /// <param name="pageSize"></param>
         /// <param name="currentPage"></param>
         /// <param name="email"></param>
-        /// <param name="userName"></param>
+        /// <param name="nickName"></param>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public async Task<PageResponse<UserManagerDto>> GetManagerUserAsync(int pageSize, int currentPage, string email, string userName, UserCacheBo currentUser)
+        public async Task<PageResponse<UserManagerDto>> GetManagerUserAsync(int pageSize, int currentPage, string email, string nickName, UserCacheBo currentUser)
         {
-            var result = await SysUserDao.GetManagerUserAsync(pageSize, currentPage, email, userName, currentUser);
+            var result = await SysUserDao.GetManagerUserAsync(pageSize, currentPage, email, nickName, currentUser);
             return result;
+        }
+
+        /// <summary>
+        /// 检查角色是否可操作
+        /// </summary>
+        /// <param name="roleIds"></param>
+        /// <param name="currentUser"></param>
+        /// <returns></returns>
+        public async Task<string> CheckRoleIds(List<long> roleIds, UserCacheBo currentUser)
+        {
+           var userRoles = await SysUserDao.CurrentDbContext.SysUserRoleRelations.Where(c => c.TenantId == currentUser.TenantId && !c.Deleted && roleIds.Contains(c.RoleId) && c.State == 1).ToListAsync();
+           if (userRoles.Any(c=>c.CreatedBy <= 0))
+           {
+               return "系统角色只读";
+           }
+
+           if (userRoles.Any(c=>currentUser.RoleIdList.Contains(c.RoleId)))
+           {
+               return "自身角色不可操作";
+           }
+
+           return "";
         }
 
         /// <summary>
@@ -373,42 +437,40 @@ namespace LionFrame.Business
         public async Task<BaseResponseModel> CreateManagerUserAsync(CreateUserParam param, UserCacheBo currentUser)
         {
             var result = new ResponseModel<bool>();
-            //long类型前后端传值存在精度丢失
-            //不能分配系统管理员角色权限和管理员权限
-            if (param.RoleIds.Contains(1) || param.RoleIds.Contains(2))
+
+            // 考虑是否验证上传的角色是当前租户下的
+            var checkResult = await CheckRoleIds(param.RoleIds, currentUser);
+            if (!checkResult.IsNullOrEmpty())
             {
-                result.Fail(ResponseCode.Fail, "角色选择错误", false);
-                return result;
+                return result.Fail(checkResult);
             }
-            if (await ExistUserAsync(1, param.UserName))
+
+            if (await ExistUserAsync(param.Email))
             {
-                result.Fail(ResponseCode.Fail, "用户名已存在，请切换", false);
+                result.Fail(ResponseCode.Fail, "该邮箱已存在", false);
                 return result;
             }
 
-            if (await ExistUserAsync(2, param.Email))
-            {
-                result.Fail(ResponseCode.Fail, "该邮箱已存在，请切换", false);
-                return result;
-            }
             var sysUser = new SysUser()
             {
-                UserName = param.UserName,
+                NickName = param.NickName,
                 PassWord = param.Pwd.Md5Encrypt(),
                 Email = param.Email,
                 Sex = 1,
-                Status = 1,
+                State = 1,
                 CreatedTime = DateTime.Now,
                 UpdatedTime = DateTime.Now,
-                ParentUid = currentUser.UserId,
+                TenantId = currentUser.TenantId,
                 UpdatedBy = 0,
+                CreatedBy = currentUser.UserId,
                 SysUserRoleRelations = new List<SysUserRoleRelation>()
             };
             param.RoleIds.ForEach(roleId =>
             {
                 sysUser.SysUserRoleRelations.Add(new SysUserRoleRelation()
                 {
-                    RoleId = roleId, // 这里固定为种子数据中的系统管理员权限
+                    TenantId = currentUser.TenantId,
+                    RoleId = roleId,
                     State = 1,
                     CreatedTime = DateTime.Now,
                     CreatedBy = currentUser.UserId,
@@ -428,20 +490,13 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<BaseResponseModel> ModifyManagerUserAsync(ModifyUserParam modifyUserParam, UserCacheBo currentUser)
         {
-            var result = new ResponseModel<bool>();
-            //不能分配系统管理员角色权限和管理员权限
-            if (modifyUserParam.UserId <= 1)
+             // 考虑是否验证上传的角色是当前租户下的
+             var checkResult = await CheckRoleIds(modifyUserParam.RoleIds, currentUser);
+            if (!checkResult.IsNullOrEmpty())
             {
-                result.Fail(ResponseCode.Fail, "用户选择错误", false);
-                return result;
+                return new ResponseModel().Fail(checkResult);
             }
-            //不能分配系统管理员角色权限和管理员权限
-            if (modifyUserParam.RoleIds.Contains(1) || modifyUserParam.RoleIds.Contains(2))
-            {
-                result.Fail("角色选择错误", false);
-                return result;
-            }
-            result = await SysUserDao.ModifyManagerUserAsync(modifyUserParam.UserId, modifyUserParam.RoleIds, modifyUserParam.Email, currentUser);
+            var  result = await SysUserDao.ModifyManagerUserAsync(modifyUserParam.UserId, modifyUserParam.RoleIds, modifyUserParam.NickName, currentUser);
             return result;
         }
 
@@ -456,24 +511,21 @@ namespace LionFrame.Business
         {
             var result = new ResponseModel<bool>();
             var db = SysUserDao.CurrentDbContext;
-            //获取当前用户所拥有的角色
-            var existRoleIds = await db.SysUserRoleRelations
-                .Where(c => c.UserId == uid && !c.Deleted && c.State == 1)
-                .Select(c => c.RoleId).ToListAsync();
-            //种子数据 2是管理员 1是系统管理员
-            if (existRoleIds.Contains(1) || existRoleIds.Contains(2))
+
+            var deleteUser = await db.SysUsers.FirstOrDefaultAsync(c => c.UserId == uid && c.TenantId == currentUser.UserId && c.State == 1);
+            if (deleteUser == null)
+            {
+                return result.Fail("账号不存在");
+            }
+            // 管理员创建者都是0  注册的
+            if (deleteUser.CreatedBy <= 0)
             {
                 return result.Fail("管理员只读");
             }
 
-            if (!db.SysUsers.Any(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1))
-            {
-                return result.Fail("账号ID不存在");
-            }
-
             var count = 0;
-            count += await db.SysUsers.Where(c => c.UserId == uid && c.ParentUid == currentUser.UserId && c.Status == 1).DeleteFromQueryAsync();
-            count += await db.SysUserRoleRelations.Where(c => c.UserId == uid).DeleteFromQueryAsync();
+            count += await db.SysUsers.Where(c => c.UserId == uid && c.TenantId == currentUser.TenantId).DeleteFromQueryAsync();
+            count += await db.SysUserRoleRelations.Where(c => c.UserId == uid && c.TenantId == currentUser.TenantId).DeleteFromQueryAsync();
 
             count += await db.SaveChangesAsync();
             return count > 0 ? result.Succeed(true) : result.Fail("删除失败");

@@ -35,11 +35,13 @@ namespace LionFrame.Data.BasicData
             //}
             #endregion
 
-            modelBuilder.Entity<SysUser>().HasIndex(c => c.UserName).IsUnique();
+            modelBuilder.Entity<SysUser>().HasIndex(c => new {c.TenantId,c.UserId});
             modelBuilder.Entity<SysUser>().HasIndex(c => c.Email).IsUnique();
 
+            modelBuilder.Entity<SysRole>().HasIndex(c => new {c.TenantId,c.RoleId});
+
             modelBuilder.Entity<SysUserRoleRelation>()
-                .HasKey(t => new { t.RoleId, t.UserId });
+                .HasKey(t => new { t.RoleId, t.UserId,t.TenantId });
             modelBuilder.Entity<SysUserRoleRelation>()
                 .HasOne(ur => ur.SysUser)
                 .WithMany(r => r.SysUserRoleRelations)
@@ -50,7 +52,7 @@ namespace LionFrame.Data.BasicData
                 .HasForeignKey(c => c.RoleId);
 
             modelBuilder.Entity<SysRoleMenuRelation>()
-                .HasKey(t => new { t.RoleId, t.MenuId });
+                .HasKey(t => new { t.RoleId, t.MenuId,t.TenantId });
             modelBuilder.Entity<SysRoleMenuRelation>()
                 .HasOne(rm => rm.SysRole)
                 .WithMany(r => r.SysRoleMenuRelations)
@@ -59,7 +61,6 @@ namespace LionFrame.Data.BasicData
                 .HasOne(rm => rm.SysMenu)
                 .WithMany(r => r.SysRoleMenuRelations)
                 .HasForeignKey(c => c.MenuId);
-
 
             // 初始数据
             modelBuilder.InitData();

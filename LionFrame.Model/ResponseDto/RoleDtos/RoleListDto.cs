@@ -11,6 +11,6 @@ namespace LionFrame.Model.ResponseDto.RoleDtos
         public string RoleId { get; set; }
         public string RoleName { get; set; }
         public string RoleDesc { get; set; }
-        public IEnumerable<string> UserNames { get; set; }
+        public IEnumerable<string> NickNames { get; set; }
     }
 }

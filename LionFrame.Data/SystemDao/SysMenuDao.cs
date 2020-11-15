@@ -19,25 +19,25 @@ namespace LionFrame.Data.SystemDao
         /// 获取当前用户可访问的菜单
         /// </summary>
         /// <param name="roleIds"></param>
+        /// <param name="tenantId"></param>
         /// <returns></returns>
-        public async Task<List<MenuCacheBo>> GetMenusAsync(List<long> roleIds)
+        public async Task<List<MenuCacheBo>> GetMenusAsync(List<long> roleIds, long tenantId)
         {
             CloseTracking();
             var menus = from rlaRoleMenu in CurrentDbContext.SysRoleMenuRelations
-                        join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
-                        where roleIds.Contains(rlaRoleMenu.RoleId) && !rlaRoleMenu.Deleted && !menu.Deleted
-                            && rlaRoleMenu.State == 1
-                        select new MenuCacheBo()
-                        {
-                            MenuId = menu.MenuId,
-                            MenuName = menu.MenuName,
-                            ParentMenuId = menu.ParentMenuId,
-                            Url = menu.Url,
-                            Level = menu.Level,
-                            Type = menu.Type,
-                            Icon = menu.Icon,
-                            OrderIndex = menu.OrderIndex,
-                        };
+                join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
+                where roleIds.Contains(rlaRoleMenu.RoleId) && !rlaRoleMenu.Deleted && !menu.Deleted && rlaRoleMenu.State == 1 && rlaRoleMenu.TenantId == tenantId
+                select new MenuCacheBo()
+                {
+                    MenuId = menu.MenuId,
+                    MenuName = menu.MenuName,
+                    ParentMenuId = menu.ParentMenuId,
+                    Url = menu.Url,
+                    Level = menu.Level,
+                    Type = menu.Type,
+                    Icon = menu.Icon,
+                    OrderIndex = menu.OrderIndex,
+                };
             return await menus.Distinct().ToListAsync();
         }
 
@@ -45,26 +45,25 @@ namespace LionFrame.Data.SystemDao
         /// 获取当前角色能访问的页面按钮
         /// </summary>
         /// <param name="roleId"></param>
-        /// <param name="uid"></param>
+        /// <param name="tenantId"></param>
         /// <returns></returns>
-        public async Task<List<MenuPermsDto>> GetMenusAsync(long roleId,long uid)
+        public async Task<List<MenuPermsDto>> GetMenusAsync(long roleId, long tenantId)
         {
             CloseTracking();
             var menus = from rlaRoleMenu in CurrentDbContext.SysRoleMenuRelations
-                        join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
-                        where rlaRoleMenu.RoleId == roleId && !rlaRoleMenu.Deleted && !menu.Deleted
-                            && rlaRoleMenu.State == 1 && rlaRoleMenu.CreatedBy == uid
-                        select new MenuPermsDto()
-                        {
-                            MenuId = menu.MenuId,
-                            MenuName = menu.MenuName,
-                            ParentMenuId = menu.ParentMenuId,
-                            Url = menu.Url,
-                            Level = menu.Level,
-                            Type = menu.Type,
-                            Icon = menu.Icon,
-                            OrderIndex = menu.OrderIndex,
-                        };
+                join menu in CurrentDbContext.SysMenus on rlaRoleMenu.MenuId equals menu.MenuId
+                where rlaRoleMenu.RoleId == roleId && !rlaRoleMenu.Deleted && !menu.Deleted && rlaRoleMenu.State == 1 && rlaRoleMenu.TenantId == tenantId
+                select new MenuPermsDto()
+                {
+                    MenuId = menu.MenuId,
+                    MenuName = menu.MenuName,
+                    ParentMenuId = menu.ParentMenuId,
+                    Url = menu.Url,
+                    Level = menu.Level,
+                    Type = menu.Type,
+                    Icon = menu.Icon,
+                    OrderIndex = menu.OrderIndex,
+                };
             return await menus.Distinct().ToListAsync();
         }
 
@@ -100,7 +99,6 @@ namespace LionFrame.Data.SystemDao
             //    Update(menu);
             //}
             //return await SaveChangesAsync() > 0;
-
         }
     }
 }

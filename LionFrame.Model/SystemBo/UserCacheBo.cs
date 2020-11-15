@@ -7,11 +7,16 @@ namespace LionFrame.Model.SystemBo
     public class UserCacheBo
     {
         public long UserId { get; set; }
-        public string UserName { get; set; }
+        public long TenantId { get; set; }
+        public string NickName { get; set; }
         public string PassWord { get; set; }
         public int Sex { get; set; }
         public string Email { get; set; }
         public string UserToken { get; set; }
+        /// <summary>
+        /// 为0的是管理员
+        /// </summary>
+        public long CreatedBy { get; set; }
         /// <summary>
         /// 会话ID
         /// </summary>

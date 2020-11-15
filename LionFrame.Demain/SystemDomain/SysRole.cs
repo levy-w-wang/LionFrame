@@ -10,6 +10,7 @@ namespace LionFrame.Domain.SystemDomain
     {
         [Key]
         public long RoleId { get; set; }
+        public long TenantId { get; set; }
 
         [MaxLength(25), Required]
         public string RoleName { get; set; }

@@ -45,7 +45,7 @@ namespace LionFrame.CoreCommon
                 {
                     http.Items["user"] = cache;
 #if DEBUG
-                    LogHelper.Logger.Debug("[LoginName]:{0}\n \n [UserId]:{1}\n [UserToken]:{2}", cache.UserName, cache.UserId, cache.UserToken);
+                    LogHelper.Logger.Debug("[LoginName]:{0}\n \n [UserId]:{1}\n [UserToken]:{2}", cache.NickName, cache.UserId, cache.UserToken);
 #endif
                     return cache;
                 }
@@ -75,7 +75,7 @@ namespace LionFrame.CoreCommon
             if (cache.SessionId == sessionId)
             {
 #if DEBUG
-                LogHelper.Logger.Debug("[LoginName]:{0}\n \n [UserId]:{1}\n [UserToken]:{2}", cache.UserName, cache.UserId, cache.UserToken);
+                LogHelper.Logger.Debug("[LoginName]:{0}\n \n [UserId]:{1}\n [UserToken]:{2}", cache.NickName, cache.UserId, cache.UserToken);
 #endif
                 return SysConstants.TokenValidType.Success;
             }

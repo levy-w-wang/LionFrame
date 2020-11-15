@@ -33,17 +33,19 @@ namespace LionFrame.Business
             var result = new ResponseModel<string>();
             var db = SysRoleDao.CurrentDbContext;
             SysRoleDao.CloseTracking();
-            if (await db.SysRoles.CountAsync(c => c.CreatedBy == currentUser.UserId && !c.Deleted) > 500)
+            if (await db.SysRoles.CountAsync(c => c.TenantId == currentUser.TenantId && !c.Deleted) > 500)
             {
-                return result.Fail("角色上限为500个");
+                return result.Fail("一个租户下角色上限为500个");
             }
-            if (await db.SysRoles.AnyAsync(c => c.CreatedBy == currentUser.UserId
-                && !c.Deleted && c.RoleName == incrementRoleParam.RoleName))
+
+            if (await db.SysRoles.AnyAsync(c => c.TenantId == currentUser.TenantId && !c.Deleted && c.RoleName == incrementRoleParam.RoleName))
             {
                 return result.Fail("角色名已存在");
             }
+
             var role = new SysRole()
             {
+                TenantId = currentUser.TenantId,
                 CreatedBy = currentUser.UserId,
                 CreatedTime = DateTime.Now,
                 Deleted = false,
@@ -66,7 +68,7 @@ namespace LionFrame.Business
         {
             var result = new ResponseModel<string>();
             var db = SysRoleDao.CurrentDbContext;
-            if (await db.SysRoles.AnyAsync(c => c.CreatedBy == currentUser.UserId && !c.Deleted && c.RoleName == incrementRoleParam.RoleName && c.RoleId != incrementRoleParam.RoleId))
+            if (await db.SysRoles.AnyAsync(c => c.TenantId == currentUser.TenantId && !c.Deleted && c.RoleName == incrementRoleParam.RoleName && c.RoleId != incrementRoleParam.RoleId))
             {
                 return result.Fail("角色名已存在");
             }
@@ -77,7 +79,7 @@ namespace LionFrame.Business
                 return result.Fail(checkResult);
             }
 
-            var role = await db.SysRoles.FirstOrDefaultAsync(c => !c.Deleted && c.RoleId == incrementRoleParam.RoleId);
+            var role = await db.SysRoles.FirstOrDefaultAsync(c => !c.Deleted && c.RoleId == incrementRoleParam.RoleId && c.TenantId == currentUser.TenantId);
 
             role.RoleName = incrementRoleParam.RoleName;
             role.RoleDesc = incrementRoleParam.RoleDesc ?? "";
@@ -99,6 +101,7 @@ namespace LionFrame.Business
             PageResponse<RoleListDto> roleList = await SysRoleDao.RoleListAsync(rolePageParam, currentUser);
             return roleList;
         }
+
         /// <summary>
         /// 用户管理界面获取可关联角色
         /// </summary>
@@ -110,6 +113,7 @@ namespace LionFrame.Business
             PageResponse<RoleListDto> roleList = await SysRoleDao.GetCanRelationRoleList(currentUser);
             return roleList;
         }
+
         /// <summary>
         /// 角色删除
         /// </summary>
@@ -145,20 +149,20 @@ namespace LionFrame.Business
         {
             SysRoleDao.CloseTracking();
             var db = SysRoleDao.CurrentDbContext;
-            var userRoleRelations = db.SysUserRoleRelations.Where(c => c.RoleId == roleId
-                && !c.Deleted && c.CreatedBy == currentUser.UserId);
+            var userRoleRelations = db.SysUserRoleRelations.Where(c => c.RoleId == roleId && !c.Deleted && c.TenantId == currentUser.TenantId);
 
-            var users = db.SysUsers.Where(c => c.ParentUid == currentUser.UserId);
+            // 排除当前管理员 和 自己
+            var users = db.SysUsers.Where(c => c.TenantId == currentUser.TenantId && c.CreatedBy > 0 && c.UserId != currentUser.UserId);
 
             var data = from user in users
-                       join userRole in userRoleRelations on user.UserId equals userRole.UserId into ur1
-                       from ur2 in ur1.DefaultIfEmpty()
-                       select new
-                       {
-                           roleId = ur2 == null ? -1 : ur2.RoleId,
-                           userId = user.UserId,
-                           userName = user.UserName
-                       };
+                join userRole in userRoleRelations on user.UserId equals userRole.UserId into ur1
+                from ur2 in ur1.DefaultIfEmpty()
+                select new
+                {
+                    roleId = ur2 == null ? -1 : ur2.RoleId,
+                    userId = user.UserId,
+                    NickName = user.NickName
+                };
             var result = await data.Distinct().ToListAsync();
             return new ResponseModel().Succeed(result);
         }
@@ -171,7 +175,7 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<BaseResponseModel> GetRoleMenuAsync(long roleId, UserCacheBo currentUser)
         {
-            var menus = await SysMenuDao.GetMenusAsync(roleId, currentUser.UserId);
+            var menus = await SysMenuDao.GetMenusAsync(roleId, currentUser.TenantId);
             var result = MenuBll.GetMenuList(menus);
             return new ResponseModel().Succeed(result);
         }
@@ -192,25 +196,28 @@ namespace LionFrame.Business
             {
                 return result.Fail(checkResult);
             }
+
             var currentUserMenus = await MenuBll.GetCurrentMenuAsync(currentUser);
             var currentMenuIds = currentUserMenus.Select(c => c.MenuId).ToList();
             //检查提交的按钮是否存在当前用户管理菜单数据中，只操作存在部分 即交集
             var crossMenuIds = roleMenuParam.MenuIds.Intersect(currentMenuIds).ToList();
 
             // 这里不是做的全量操作，而且新增部分做插入 数据库中的不在提交数据中的部分做删除  提交的和数据库相交叉的部分不做变动
-            var dbMenuIds = await SysMenuDao.LoadEntities<SysRoleMenuRelation>(c => c.RoleId == roleMenuParam.RoleId).Select(c => c.MenuId).ToListAsync();
-            var dIds = dbMenuIds.Except(crossMenuIds).ToList();//需要删除的权限
-            var iIds = crossMenuIds.Except(dbMenuIds).ToList();//需要插入的新权限
+            var dbMenuIds = await SysMenuDao.LoadEntities<SysRoleMenuRelation>(c => c.RoleId == roleMenuParam.RoleId && c.TenantId == currentUser.TenantId).Select(c => c.MenuId).ToListAsync();
+            var dIds = dbMenuIds.Except(crossMenuIds).ToList(); //需要删除的权限
+            var iIds = crossMenuIds.Except(dbMenuIds).ToList(); //需要插入的新权限
 
             var db = SysRoleDao.CurrentDbContext;
             if (dIds.Count > 0)
             {
                 await db.SysRoleMenuRelations.Where(c => dIds.Contains(c.MenuId) && c.RoleId == roleMenuParam.RoleId).DeleteAsync();
             }
+
             if (iIds.Count > 0)
             {
                 var roleMenuRelations = iIds.Select(iId => new SysRoleMenuRelation()
                 {
+                    TenantId = currentUser.TenantId,
                     CreatedBy = currentUser.UserId,
                     CreatedTime = DateTime.Now,
                     MenuId = iId,
@@ -219,10 +226,10 @@ namespace LionFrame.Business
                     RoleId = roleMenuParam.RoleId,
                     UpdatedBy = 0,
                     UpdatedTime = DateTime.Now,
-                })
-                    .ToList();
+                }).ToList();
                 await db.SysRoleMenuRelations.AddRangeAsync(roleMenuRelations);
             }
+
             await db.SaveChangesAsync();
             return result.Succeed("修改成功");
         }
@@ -235,20 +242,23 @@ namespace LionFrame.Business
         /// <returns></returns>
         private async Task<string> RoleIdCheckAsync(long roleId, UserCacheBo currentUser)
         {
-            if (roleId == 1 || roleId == 2)
+            var role = await SysRoleDao.FirstAsync<SysRole>(c => c.RoleId == roleId && c.TenantId == currentUser.TenantId && !c.Deleted);
+            
+            if (currentUser.RoleIdList.Contains(roleId))
             {
-                return "系统角色只读";
+                return "当前角色不可操作";
             }
-            var role = await SysRoleDao.FirstAsync<SysRole>(c => c.RoleId == roleId && !c.Deleted);
             if (role == null)
             {
                 return "角色不存在";
             }
-            if (role.CreatedBy == currentUser.UserId || currentUser.RoleIdList.Contains(1))
+
+            if (role.CreatedBy <= 0)
             {
-                return "";
+                return "系统角色只读";
             }
-            return "操作异常，请刷新重试";
+
+            return "";
         }
 
         /// <summary>
@@ -268,10 +278,10 @@ namespace LionFrame.Business
             }
 
             var db = SysRoleDao.CurrentDbContext;
-            var dbUserIds = await db.SysUsers.Where(c => c.ParentUid == currentUser.UserId).Select(c => c.UserId).ToListAsync();
-            var crossUserIds = param.UserIds.Intersect(dbUserIds).ToList();//检查修改的用户是否是自己管理的用户ID，谨防其它手段上传的数据
+            var dbUserIds = await db.SysUsers.Where(c => c.TenantId == currentUser.TenantId && c.CreatedBy > 0 && c.UserId != currentUser.UserId ).Select(c => c.UserId).ToListAsync();
+            var crossUserIds = param.UserIds.Intersect(dbUserIds).ToList(); //检查修改的用户是否是自己管理的用户ID，谨防其它手段上传的数据
             //直接全量修改 原有角色用户关系删除 直接新增现加的
-            await db.SysUserRoleRelations.Where(c => c.RoleId == param.RoleId && c.CreatedBy == currentUser.UserId).DeleteFromQueryAsync();
+            await db.SysUserRoleRelations.Where(c => c.RoleId == param.RoleId && c.TenantId == currentUser.TenantId).DeleteFromQueryAsync();
             if (crossUserIds.Count > 0)
             {
                 var userRoles = new List<SysUserRoleRelation>();
@@ -279,6 +289,7 @@ namespace LionFrame.Business
                 {
                     userRoles.Add(new SysUserRoleRelation()
                     {
+                        TenantId = currentUser.TenantId,
                         UserId = uid,
                         RoleId = param.RoleId,
                         State = 1,
@@ -289,8 +300,9 @@ namespace LionFrame.Business
                         UpdatedTime = DateTime.Now,
                     });
                 });
-                await db.SysUserRoleRelations.BulkInsertAsync<SysUserRoleRelation>(userRoles);
+                await db.SysUserRoleRelations.BulkInsertAsync(userRoles);
             }
+
             await db.SaveChangesAsync();
             return result.Succeed("修改成功");
         }

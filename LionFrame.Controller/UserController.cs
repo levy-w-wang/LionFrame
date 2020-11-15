@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using LionFrame.Basic.Extensions;
 
 namespace LionFrame.Controller
 {
@@ -64,23 +65,13 @@ namespace LionFrame.Controller
         /// <summary>
         /// 验证用户数据是否存在,在用户输入完数据后（blur），立即校验一次，提升用户体验
         /// </summary>
-        /// <param name="type">1：用户名  2：邮箱</param>
-        /// <param name="str">对应值 -- 未直接校验</param>
+        /// <param name="email">对应值 -- 未直接校验</param>
         /// <returns></returns>
         [Route("exist"), HttpGet, AllowAnonymous]
-        public async Task<ActionResult> ExistUser(int type, string str)
+        public async Task<ActionResult> ExistUser([RegularExpression(@"^[A-Za-z0-9\u4e00-\u9fa5_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", ErrorMessage = "邮箱格式错误")]string email)
         {
-            if (string.IsNullOrEmpty(str))
-            {
-                return Fail("不能为空");
-            }
-            var result = await UserBll.ExistUserAsync(type, str);
-            if (result)
-            {
-                var info = type == 1 ? "用户名" : "邮箱";
-                return Fail($"{info}已存在，请切换", $"{info}已存在，请切换");
-            }
-            return Succeed();
+            var result = await UserBll.ExistUserAsync(email);
+            return result ? Fail($"邮箱已存在，请切换", $"邮箱已存在，请切换") : Succeed();
         }
 
         /// <summary>
@@ -105,8 +96,8 @@ namespace LionFrame.Controller
         [Route("send-email-reset-pwd"), HttpPost, AllowAnonymous]
         public async Task<ActionResult> SendEmail()
         {
-            var dic = GetJsonParams<Dictionary<string, string>>();
-            var result = await UserBll.SendEmail(dic["email"]);
+            var dic = GetJsonParams<Dictionary<string, string>>() ?? new Dictionary<string, string>();
+            var result = await UserBll.SendEmail(dic.TryGetValueOrDefault("email"));
 
             return MyJson(result);
         }
@@ -134,17 +125,17 @@ namespace LionFrame.Controller
         }
 
         /// <summary>
-        /// 用户管理获取用户一览数据
+        /// 用户管理获取用户一览数据  分配这个页面则可以管理整个用户一览  逻辑可调整
         /// </summary>
         /// <param name="pageSize"></param>
         /// <param name="currentPage"></param>
         /// <param name="email"></param>
-        /// <param name="userName"></param>
+        /// <param name="nickName"></param>
         /// <returns></returns>
         [HttpGet, Route("page/{pageSize}/{currentPage}")]
-        public async Task<ActionResult> GetManagerUser([Range(1, 100, ErrorMessage = "页大小范围1-100")][FromRoute] int pageSize, [FromRoute] int currentPage, string email, string userName)
+        public async Task<ActionResult> GetManagerUser([Range(1, 100, ErrorMessage = "页大小范围1-100")][FromRoute] int pageSize, [FromRoute] int currentPage, string email, string nickName)
         {
-            var result = await UserBll.GetManagerUserAsync(pageSize, currentPage, email, userName, CurrentUser);
+            var result = await UserBll.GetManagerUserAsync(pageSize, currentPage, email, nickName, CurrentUser);
             return Succeed(result);
         }
 

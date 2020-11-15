@@ -13,8 +13,8 @@ namespace LionFrame.Domain.SystemDomain
         [Key]
         public long UserId { get; set; }
 
-        [MaxLength(128), Required]
-        public string UserName { get; set; }
+        [MaxLength(30), Required]
+        public string NickName { get; set; }
 
         [MaxLength(512), Required]
         public string PassWord { get; set; }
@@ -31,14 +31,19 @@ namespace LionFrame.Domain.SystemDomain
         /// <summary>
         /// 1为用户有效状态 -1为无效 其它尚未定义
         /// </summary>
-        public int Status { get; set; }
+        public int State { get; set; }
 
         public DateTime CreatedTime { get; set; }
+        public long CreatedBy { get; set; }
 
-        public long ParentUid { get; set; }
         public DateTime UpdatedTime { get; set; }
         public long UpdatedBy { get; set; }
 
+        /// <summary>
+        /// 租户ID
+        /// </summary>
+        public long TenantId { get; set; }
+        public TenantInfo TenantInfo { get; set; }
         public List<SysUserRoleRelation> SysUserRoleRelations { get; set; }
     }
 }

@@ -7,11 +7,9 @@ namespace LionFrame.Model.RequestParam.UserParams
     /// </summary>
     public class LoginParam
     {
-        /// <summary>
-        /// 账号
-        /// </summary>
-        [Required(ErrorMessage = "账号未输入")]
-        public string UserName { get; set; }
+        [RegularExpression(@"^[A-Za-z0-9\u4e00-\u9fa5_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$", ErrorMessage = "邮箱格式错误"),
+         Required(ErrorMessage = "请输入邮箱")]
+        public string Email { get; set; }
         /// <summary>
         /// 密码
         /// </summary>
