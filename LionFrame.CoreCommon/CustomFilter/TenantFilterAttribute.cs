@@ -12,30 +12,23 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace LionFrame.CoreCommon.CustomFilter
 {
     /// <summary>
-    /// 权限验证 -- 判断当前操作用户是否包含设定的角色id
+    /// 权限验证 -- 判断当前操作用户 租户是否有操作权限
     /// </summary>
-    public class PopedomFilterAttribute : Attribute, IActionFilter
+    public class TenantFilterAttribute : Attribute, IActionFilter
     {
-        public PopedomFilterAttribute()
+        public TenantFilterAttribute()
         {
         }
 
-        public List<long> Popedoms { get; set; } 
-
-        /// <summary>
-        /// 包含其中一个权限就通过
-        /// </summary>
-        public bool IsAny { get; set; }
+        public List<long> TenantIds { get; set; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="popedom">权限组  以英文字符分割</param>
-        /// <param name="isAny">是否包含一个就通过</param>
-        public PopedomFilterAttribute(bool isAny, params long[] popedom)
+        /// <param name="tenant">权限组  以英文字符分割</param>
+        public TenantFilterAttribute(params long[] tenant)
         {
-            Popedoms = popedom.ToList();
-            IsAny = isAny;
+            TenantIds = tenant.ToList();
         }
         /// <summary>
         /// Called after the action executes, before the action result.
@@ -69,26 +62,14 @@ namespace LionFrame.CoreCommon.CustomFilter
                 throw new CustomSystemException("请先对需权限验证的方法加上登录验证", ResponseCode.Unauthorized);
             }
 
-            if (Popedoms == null || Popedoms.Count == 0)
+            if (TenantIds == null || TenantIds.Count == 0)
                 return;
 
-            if (IsAny)
+            if (!TenantIds.Contains(user.TenantId))
             {
-                var popedomList = Popedoms.Intersect(user.RoleIdList).ToList();
-                if (popedomList.Any())
-                    return;
                 context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "未授权");
-            }
-            else
-            {
-                foreach (var item in Popedoms.Where(item => !user.RoleIdList.Contains(item)))
-                {
-                    context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "未授权");
-                }
-
                 return;
             }
-
             context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "未授权");
         }
     }

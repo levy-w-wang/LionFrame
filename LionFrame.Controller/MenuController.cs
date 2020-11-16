@@ -43,7 +43,7 @@ namespace LionFrame.Controller
         /// 新增菜单或修改
         /// </summary>
         /// <returns></returns>
-        [HttpPost, Route("menu"), PopedomFilter(true, 1)]
+        [HttpPost, Route("menu"), TenantFilter(1)]
         public async Task<ActionResult> AddMenu(IncrementMenuParam incrementMenu)
         {
             var result = incrementMenu.IsUpdate
@@ -57,7 +57,7 @@ namespace LionFrame.Controller
         /// </summary>
         /// <param name="menuId"></param>
         /// <returns></returns>
-        [HttpDelete, Route("menu/{menuId}"), PopedomFilter(true, 1)]
+        [HttpDelete, Route("menu/{menuId}"), TenantFilter(1)]
         public async Task<ActionResult> DeleteMenu([FromRoute] string menuId)
         {
             var result = await MenuBll.DeleteMenuAsync(menuId);
@@ -67,7 +67,7 @@ namespace LionFrame.Controller
         /// 获取系统的菜单管理
         /// </summary>
         /// <returns></returns>
-        [HttpGet, Route("manage"), PopedomFilter(true, 1)]
+        [HttpGet, Route("manage"), TenantFilter(1)]
         public async Task<ActionResult> MenuManage()
         {
             var result = await Task.FromResult(MenuBll.GetMenuManage());
@@ -79,7 +79,7 @@ namespace LionFrame.Controller
         /// </summary>
         /// <param name="assignMenuParam"></param>
         /// <returns></returns>
-        [HttpPost, Route("assign"), PopedomFilter(true, 1)]
+        [HttpPost, Route("assign"), TenantFilter(1)]
         public async Task<ActionResult> AssignMenu(AssignMenuParam assignMenuParam)
         {
             var result = assignMenuParam.Type ? await MenuBll.AssignMenuAsync(assignMenuParam.MenuIdList, CurrentUser.UserId) : await MenuBll.CancelAssignMenuAsync(assignMenuParam.MenuIdList, CurrentUser.UserId);

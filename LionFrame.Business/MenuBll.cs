@@ -162,7 +162,7 @@ namespace LionFrame.Business
                 {
                     MenuId = sysMenu.MenuId,
                     RoleId = 2,
-                    Deleted = true, //默认不分配给系统管理员看  需单独分配 
+                    Deleted = true, //默认不分配给超级管理员看  需单独分配 
                     CreatedTime = DateTime.Now,
                     CreatedBy = currentUser.UserId,
                     State = 1,
@@ -208,8 +208,9 @@ namespace LionFrame.Business
         {
             var count = await SysRoleMenuRelationDao.CurrentDbContext.SysRoleMenuRelations.Where(c => menuIds.Contains(c.MenuId) && c.RoleId != 1).UpdateFromQueryAsync(c => new SysRoleMenuRelation()
             {
-                Deleted = false,
+                Deleted = false, //分配给超级管理员看  需单独分配 
                 UpdatedBy = uid,
+                UpdatedTime = DateTime.Now,
             });
             var result = new ResponseModel<bool>();
             return count > 0 ? result.Succeed(true) : result.Fail("分配菜单失败");

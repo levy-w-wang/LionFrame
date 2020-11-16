@@ -35,6 +35,9 @@ namespace LionFrame.Data.BasicData
             //}
             #endregion
 
+            modelBuilder.Entity<SysUser>().HasOne(c => c.TenantInfo)
+                .WithMany(c => c.SysUser)
+                .HasForeignKey(c => c.TenantId);
             modelBuilder.Entity<SysUser>().HasIndex(c => new {c.TenantId,c.UserId});
             modelBuilder.Entity<SysUser>().HasIndex(c => c.Email).IsUnique();
 

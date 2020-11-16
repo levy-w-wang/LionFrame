@@ -7,7 +7,7 @@ using LionFrame.Domain.BaseDomain;
 
 namespace LionFrame.Domain.SystemDomain
 {
-    [Table("tenant_info")]
+    [Table("Tenant_Info")]
     public class TenantInfo : BaseModel
     {
         //[Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
