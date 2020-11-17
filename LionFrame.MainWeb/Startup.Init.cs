@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HealthChecks.UI.Client;
 using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon;
@@ -13,6 +14,7 @@ using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -37,7 +39,7 @@ namespace LionFrame.MainWeb
         /// Db配置
         /// </summary>
         /// <param name="services"></param>
-        public void ConfigureServices_Db(IServiceCollection services)
+        private void ConfigureServices_Db(IServiceCollection services)
         {
             services.AddDbContext<LionDbContext>(options =>
             {
@@ -65,7 +67,7 @@ namespace LionFrame.MainWeb
         /// Swagger配置
         /// </summary>
         /// <param name="services"></param>
-        public void ConfigureServices_Swagger(IServiceCollection services)
+        private void ConfigureServices_Swagger(IServiceCollection services)
         {
             #region Swagger
 
@@ -146,10 +148,51 @@ namespace LionFrame.MainWeb
         }
 
         /// <summary>
+        /// 健康检查
+        /// </summary>
+        /// <param name="services"></param>
+        private void ConfigureServices_HealthChecks(IServiceCollection services)
+        {
+            var healthChecks = services.AddHealthChecks().AddRedis(Configuration["Redis:RedisConnectionString"]);
+            var db = Configuration.GetSection("DB").Value;
+            switch (db)
+            {
+                case "MsSql":
+                    healthChecks.AddSqlServer(Configuration.GetConnectionString("MsSqlConnection"));
+                    break;
+                case "MySql":
+                    healthChecks.AddMySql(Configuration.GetConnectionString("MySqlConnection"));
+                    break;
+                default:
+                    healthChecks.AddSqlServer(Configuration.GetConnectionString("MsSqlConnection"));
+                    break;
+            }
+            //配置监控存储地方
+            var healthChecksUi = services.AddHealthChecksUI();
+            var healthStorageType = Configuration["HealthChecks-UI:HealthStorageType"];
+            switch (healthStorageType)
+            {
+                case "MsSql":
+                    healthChecksUi.AddSqlServerStorage(Configuration["HealthChecks-UI:HealthStorageConnectionString"]);
+                    break;
+                case "MySql":
+                    healthChecksUi.AddMySqlStorage(Configuration["HealthChecks-UI:HealthStorageConnectionString"]);
+                    break;
+                case "Memory":
+                    healthChecksUi.AddInMemoryStorage();
+                    break;
+                default:
+                    healthChecksUi.AddInMemoryStorage();
+                    break;
+            }
+        }
+
+
+        /// <summary>
         /// 配置Swagger
         /// </summary>
         /// <param name="app"></param>
-        public void Config_Swagger(IApplicationBuilder app)
+        private void Config_Swagger(IApplicationBuilder app)
         {
             #region Swagger
 
@@ -168,9 +211,28 @@ namespace LionFrame.MainWeb
         }
 
         /// <summary>
+        /// 健康检查
+        /// </summary>
+        /// <param name="app"></param>
+        private void Config_HealthChecks(IApplicationBuilder app)
+        {
+            app.UseHealthChecks("/health", new HealthCheckOptions()
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+
+            }); //要进行该站点检测应添加此代码
+
+            app.UseHealthChecksUI(config =>
+            {
+                config.UIPath = "/health_ui"; //切换ui地址
+            }); //添加UI界面支持
+        }
+
+        /// <summary>
         /// 数据库操作语句显示
         /// </summary>
-        public readonly ILoggerFactory DbConsoleLoggerFactory = LoggerFactory.Create(builder =>
+        private readonly ILoggerFactory DbConsoleLoggerFactory = LoggerFactory.Create(builder =>
         {
             builder.AddFilter((category, level) => category == DbLoggerCategory.Database.Command.Name && level == LogLevel.Information).AddConsole();
         });
@@ -227,6 +289,5 @@ namespace LionFrame.MainWeb
         }
 
         #endregion
-
     }
 }

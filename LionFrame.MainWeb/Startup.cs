@@ -78,13 +78,15 @@ namespace LionFrame.MainWeb
                 })
                 .AddNewtonsoftJson()
                 .AddControllersAsServices();
-
             //资源路径小写
             services.AddRouting(options =>
             {
                 options.LowercaseUrls = true;
             });
 
+#if !DEBUG
+              ConfigureServices_HealthChecks(services); //测试情况下不开启健康检查
+#endif
             ConfigureServices_Swagger(services);
         }
 
@@ -196,7 +198,9 @@ namespace LionFrame.MainWeb
 
             // app.UseSession();
             // app.UseResponseCaching();
-
+#if !DEBUG  
+            Config_HealthChecks(app);   //测试情况下不开启健康检查
+#endif
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");

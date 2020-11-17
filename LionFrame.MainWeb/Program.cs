@@ -21,7 +21,9 @@ namespace LionFrame.MainWeb
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory()) //替换原生DI 使用autofac
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls("http://*:5000");
+#if !DEBUG
+                    webBuilder.UseUrls("http://*:5000"); 
+#endif
                     webBuilder.UseStartup<Startup>();
                 })
                 .ConfigureLogging(logging =>

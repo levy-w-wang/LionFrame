@@ -12,6 +12,6 @@
         public int KeepAlive { get; set; } = 20;
         public int SyncTimeout { get; set; } = 30000;
         public bool Ssl { get; set; } = false;
-
+        public string RedisConnectionString { get; set; }
     }
 }
