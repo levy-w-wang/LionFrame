@@ -148,27 +148,48 @@ namespace LionFrame.Business
             sysMenu.CreatedBy = currentUser.UserId;
             sysMenu.UpdatedBy = currentUser.UserId;
 
-            var relations = new List<SysRoleMenuRelation>()
+
+            var relations = new List<SysRoleMenuRelation>();
+            // 循环取出租户主体信息角色 增加新权限关系 默认为删除状态 点击分配给使用
+            var db = SysMenuDao.CurrentDbContext;
+            var roleIdsQueryable = db.SysUserRoleRelations.Where(c => !c.Deleted && c.State == 1 && c.TenantId > 1 && c.CreatedBy == 0).Select(c => new RoleCacheBo {RoleId = c.RoleId,TenantId = c.TenantId});
+            for (int i = 1; i < 100000; i++)
             {
-                new SysRoleMenuRelation()
+                var roleIds = SysMenuDao.LoadPageEntities(roleIdsQueryable, i, 100, true, roleId => roleId.RoleId);
+                if (roleIds.Data.Count > 0)
                 {
-                    MenuId = sysMenu.MenuId,
-                    RoleId = 1,
-                    CreatedTime = DateTime.Now,
-                    CreatedBy = currentUser.UserId,
-                    State = 1,
-                },
-                new SysRoleMenuRelation()
-                {
-                    MenuId = sysMenu.MenuId,
-                    RoleId = 2,
-                    Deleted = true, //默认不分配给超级管理员看  需单独分配 
-                    CreatedTime = DateTime.Now,
-                    CreatedBy = currentUser.UserId,
-                    State = 1,
+                    roleIds.Data.ForEach(roleInfo =>
+                    {
+                        relations.Add(new SysRoleMenuRelation()
+                        {
+                            TenantId = roleInfo.TenantId,
+                            MenuId = sysMenu.MenuId,
+                            RoleId = roleInfo.RoleId,
+                            Deleted = true, //默认不分配给超级管理员看  需单独分配 
+                            CreatedTime = DateTime.Now,
+                            CreatedBy = 0,//系统创建的都设置为0
+                            State = 1,
+                        });
+                    });
                 }
-            };
-            await SysMenuDao.CurrentDbContext.BulkInsertAsync(relations);
+                else
+                {
+                    break;
+                }
+            }
+
+            relations.Add(new SysRoleMenuRelation()
+            {
+                TenantId = 1, //系统租户ID
+                MenuId = sysMenu.MenuId,
+                RoleId = 1, //系统角色ID
+                Deleted = false, //系统管理员使用
+                CreatedTime = DateTime.Now,
+                CreatedBy = 0, //系统创建的都设置为0
+                State = 1,
+            });
+
+            await db.BulkInsertAsync(relations);
             await SysMenuDao.AddAsync(sysMenu);
             var count = await SysMenuDao.SaveChangesAsync();
             return count > 0 ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "保存失败");
@@ -228,6 +249,7 @@ namespace LionFrame.Business
             {
                 Deleted = true,
                 UpdatedBy = uid,
+                UpdatedTime = DateTime.Now,
             });
             var result = new ResponseModel<bool>();
             return count > 0 ? result.Succeed(true) : result.Fail("分配菜单失败");
