@@ -24,7 +24,7 @@ namespace LionFrame.Controller
         [HttpPost, Route("login"), AllowAnonymous]
         public async Task<ActionResult> Login(LoginParam loginParam)
         {
-            var result = await Task.FromResult(UserBll.Login(loginParam));
+            var result = await UserBll.Login(loginParam);
             return MyJson(result);
         }
 

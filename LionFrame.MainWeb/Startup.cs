@@ -48,7 +48,7 @@ namespace LionFrame.MainWeb
 
             services.AddMemoryCache();//使用MemoryCache
 
-            // 添加 automapper 映射关系
+            // 添加 AutoMapper 映射关系
             services.AddAutoMapper(c => c.AddProfile<MappingProfile>());
 
             // If using Kestrel:
@@ -162,7 +162,9 @@ namespace LionFrame.MainWeb
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
+                Config_HealthChecks(app); //测试情况下不开启健康检查
             }
+
             // Z.EntityFramework.Extensions 扩展包需要  --无法显示日志
             EntityFrameworkManager.ContextFactory = context => app.ApplicationServices.GetRequiredService<LionDbContext>();
 
@@ -198,9 +200,7 @@ namespace LionFrame.MainWeb
 
             // app.UseSession();
             // app.UseResponseCaching();
-#if !DEBUG  
-            Config_HealthChecks(app);   //测试情况下不开启健康检查
-#endif
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");

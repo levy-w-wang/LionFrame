@@ -26,47 +26,49 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="loginParam"></param>
         /// <returns></returns>
-        public ResponseModel<UserCacheBo> Login(LoginParam loginParam)
+        public async Task<ResponseModel<UserCacheBo>> Login(LoginParam loginParam)
         {
             CloseTracking();
             var response = new ResponseModel<UserCacheBo>();
-            var user = First<SysUser>(c => c.Email == loginParam.Email && c.State == 1);
+            var user = await FirstAsync<SysUser>(c => c.Email == loginParam.Email && c.State == 1);
             if (user == null)
             {
                 return response.Fail(ResponseCode.LoginFail, "账号不存在", null);
             }
-            if (user.PassWord == loginParam.Password.Md5Encrypt())
+
+            if (user.PassWord != loginParam.Password.Md5Encrypt())
             {
-                var dbData = from sysUser in CurrentDbContext.SysUsers
-                             where sysUser.UserId == user.UserId && sysUser.State == 1
-                             select new UserCacheBo
-                             {
-                                 UserId = sysUser.UserId,
-                                 TenantId = sysUser.TenantId,
-                                 NickName = sysUser.NickName,
-                                 PassWord = sysUser.PassWord,
-                                 Email = sysUser.Email,
-                                 Sex = sysUser.Sex,
-                                 CreatedBy = sysUser.CreatedBy,
-                                 RoleCacheBos = from userRoleRelation in CurrentDbContext.SysUserRoleRelations
-                                                join sysRole in CurrentDbContext.SysRoles on userRoleRelation.RoleId equals sysRole.RoleId
-                                                where userRoleRelation.UserId == sysUser.UserId && !userRoleRelation.Deleted && !sysRole.Deleted
-                                                && userRoleRelation.State == 1
-                                                select new RoleCacheBo()
-                                                {
-                                                    RoleId = sysRole.RoleId,
-                                                    TenantId = sysRole.TenantId,
-                                                    RoleDesc = sysRole.RoleDesc,
-                                                    RoleName = sysRole.RoleName,
-                                                }
-                             };
-                // 使用include 无法使用条件判断
-                //var dbData1 = CurrentDbContext.SysUsers.Where(c => c.UserId == user.UserId && c.Status == 1).Include(c => c.SysUserRoleRelations).ThenInclude(c => c.SysRole).FirstOrDefault();
-                //var userCacheBo = dbData1.MapTo<UserCacheBo>();
-                response.Succeed(dbData.FirstOrDefault());
-                return response;
+                return response.Fail(ResponseCode.LoginFail, "账号或密码错误", null);
             }
-            return response.Fail(ResponseCode.LoginFail, "账号或密码错误", null);
+
+            var dbData = from sysUser in CurrentDbContext.SysUsers
+                where sysUser.UserId == user.UserId && sysUser.State == 1
+                select new UserCacheBo
+                {
+                    UserId = sysUser.UserId,
+                    TenantId = sysUser.TenantId,
+                    NickName = sysUser.NickName,
+                    PassWord = sysUser.PassWord,
+                    Email = sysUser.Email,
+                    Sex = sysUser.Sex,
+                    CreatedBy = sysUser.CreatedBy,
+                    RoleCacheBos = from userRoleRelation in CurrentDbContext.SysUserRoleRelations
+                        join sysRole in CurrentDbContext.SysRoles on userRoleRelation.RoleId equals sysRole.RoleId
+                        where userRoleRelation.UserId == sysUser.UserId && !userRoleRelation.Deleted && !sysRole.Deleted
+                            && userRoleRelation.State == 1
+                        select new RoleCacheBo()
+                        {
+                            RoleId = sysRole.RoleId,
+                            TenantId = sysRole.TenantId,
+                            RoleDesc = sysRole.RoleDesc,
+                            RoleName = sysRole.RoleName,
+                        }
+                };
+            // 使用include 无法使用条件判断
+            //var dbData1 = CurrentDbContext.SysUsers.Where(c => c.UserId == user.UserId && c.Status == 1).Include(c => c.SysUserRoleRelations).ThenInclude(c => c.SysRole).FirstOrDefault();
+            //var userCacheBo = dbData1.MapTo<UserCacheBo>();
+            response.Succeed(await dbData.FirstOrDefaultAsync());
+            return response;
         }
 
         /// <summary>

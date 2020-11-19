@@ -41,17 +41,17 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="loginParam"></param>
         /// <returns></returns>
-        public ResponseModel<UserDto> Login(LoginParam loginParam)
+        public async Task<ResponseModel<UserDto>> Login(LoginParam loginParam)
         {
             var result = new ResponseModel<UserDto>();
-            var verificationResult = SystemBll.VerificationLogin(loginParam).Result;
+            var verificationResult = await SystemBll.VerificationLogin(loginParam);
             if (verificationResult != "验证通过")
             {
                 result.Fail(ResponseCode.LoginFail, verificationResult, null);
                 return result;
             }
 
-            var responseResult = SysUserDao.Login(loginParam);
+            var responseResult = await SysUserDao.Login(loginParam);
             if (responseResult.Success)
             {
                 var userCache = responseResult.Data;

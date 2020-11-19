@@ -1,4 +1,5 @@
-﻿using LionFrame.Business;
+﻿using System.Threading.Tasks;
+using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,9 +15,9 @@ namespace LionFrame.Controller
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("captcha")]
-        public ActionResult GetCaptcha()
+        public async Task<ActionResult> GetCaptcha()
         {
-            var result = SystemBll.GetCaptchaResult();
+            var result = await SystemBll.GetCaptchaResult();
             return Succeed(result);
         }
     }
