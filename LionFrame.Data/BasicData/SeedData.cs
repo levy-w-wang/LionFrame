@@ -20,7 +20,7 @@ namespace LionFrame.Data.BasicData
         {
             #region 租户
 
-            modelBuilder.Entity<TenantInfo>().HasData(InitTenants);
+            modelBuilder.Entity<SysTenant>().HasData(InitTenants);
 
             #endregion
 

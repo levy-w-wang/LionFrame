@@ -43,7 +43,7 @@ namespace LionFrame.Domain.SystemDomain
         /// 租户ID
         /// </summary>
         public long TenantId { get; set; }
-        public TenantInfo TenantInfo { get; set; }
+        public SysTenant TenantInfo { get; set; }
         public List<SysUserRoleRelation> SysUserRoleRelations { get; set; }
     }
 }

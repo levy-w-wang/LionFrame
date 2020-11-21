@@ -65,12 +65,13 @@ namespace LionFrame.CoreCommon.CustomFilter
             if (TenantIds == null || TenantIds.Count == 0)
                 return;
 
-            if (!TenantIds.Contains(user.TenantId))
+            if (TenantIds.Contains(user.TenantId))
             {
-                context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "未授权");
                 return;
             }
+
             context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "未授权");
+            return;
         }
     }
 }

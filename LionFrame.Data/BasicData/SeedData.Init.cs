@@ -12,9 +12,9 @@ namespace LionFrame.Data.BasicData
         /// <summary>
         /// 初始租户信息
         /// </summary>
-        public static List<TenantInfo> InitTenants => new List<TenantInfo>()
+        public static List<SysTenant> InitTenants => new List<SysTenant>()
         {
-            new TenantInfo()
+            new SysTenant()
             {
                 TenantId = 1,
                 TenantName = "系统管理员",
@@ -22,7 +22,7 @@ namespace LionFrame.Data.BasicData
                 State = 1,
                 CreatedTime = DateTime.Now,
             },
-            new TenantInfo()
+            new SysTenant()
             {
                 TenantId = 2,
                 TenantName = "管理员",

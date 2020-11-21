@@ -212,7 +212,7 @@ namespace LionFrame.Business
         /// <returns></returns>
         private async Task<int> SaveRegisterUserAsync(RegisterUserParam registerUserParam)
         {
-            var tenantUser = new TenantInfo()
+            var tenantUser = new SysTenant()
             {
                 //TenantId = IdWorker.NextId(),
                 CreatedTime = DateTime.Now,

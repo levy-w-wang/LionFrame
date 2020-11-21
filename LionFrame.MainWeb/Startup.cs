@@ -162,6 +162,7 @@ namespace LionFrame.MainWeb
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
+                app.UseHttpsRedirection();// 从 http 跳转到 https
                 Config_HealthChecks(app); //测试情况下不开启健康检查
             }
 
@@ -179,8 +180,6 @@ namespace LionFrame.MainWeb
 
             LionWeb.MemoryCache = memoryCache;
 
-            // 从 http 跳转到 https
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             //app.UseCookiePolicy();
 
