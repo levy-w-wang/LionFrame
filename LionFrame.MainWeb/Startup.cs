@@ -166,17 +166,17 @@ namespace LionFrame.MainWeb
                 Config_HealthChecks(app); //测试情况下不开启健康检查
             }
 
-            // Z.EntityFramework.Extensions 扩展包需要  --无法显示日志
-            EntityFrameworkManager.ContextFactory = context => app.ApplicationServices.GetRequiredService<LionDbContext>();
-
             // 2.使用自定义异常处理中间件  处理该中间件以后未捕捉的异常
             //app.UseMiddleware<CustomExceptionMiddleware>();
 
             //autofac 新增 
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();
 
+            // Z.EntityFramework.Extensions 扩展包需要  --无法显示日志
+            EntityFrameworkManager.ContextFactory = context => LionWeb.AutofacContainer.Resolve<LionDbContext>();
+
             LionWeb.Environment = env;
-            LionWeb.Configure(app.ApplicationServices.GetRequiredService<IHttpContextAccessor>());
+            LionWeb.Configure(LionWeb.AutofacContainer.Resolve<IHttpContextAccessor>());
 
             LionWeb.MemoryCache = memoryCache;
 
