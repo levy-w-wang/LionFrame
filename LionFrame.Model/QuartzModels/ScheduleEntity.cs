@@ -56,15 +56,15 @@ namespace LionFrame.Model.QuartzModels
         public TriggerTypeEnum TriggerType { get; set; }
 
         /// <summary>
-        /// 请求url 或 dll路径 namespace
+        /// 请求url 或 仅项目完整名称(不包含文件夹路径)
         /// </summary>
         [Required]
         public string RequestPath { get; set; }
 
         /// <summary>
-        /// 请求类型
+        /// 请求类型 RequestTypeEnum   或  文件夹名.类名
         /// </summary>
-        public RequestTypeEnum RequestType { get; set; } = RequestTypeEnum.Post;
+        public string RequestMethod{ get; set; }
 
         /// <summary>
         /// 请求参数（Post，Put请求用） 调用方法参数

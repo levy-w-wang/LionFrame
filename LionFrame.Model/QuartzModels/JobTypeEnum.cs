@@ -11,6 +11,6 @@ namespace LionFrame.Model.QuartzModels
     {
         None = 0,
         Http = 1,
-        Dll = 2
+        Assembly = 2
     }
 }

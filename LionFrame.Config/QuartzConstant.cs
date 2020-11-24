@@ -22,14 +22,14 @@ namespace LionFrame.Config
         /// </summary>
         public static readonly string HEADERS = "Headers";
         /// <summary>
-        /// 是否发送邮件
-        /// </summary>
-        public static readonly string MAILMESSAGE = "MailMessage";
-        /// <summary>
         /// 请求类型 RequestType
         /// </summary>
         public static readonly string REQUESTTYPE = "RequestType";
 
+        /// <summary>
+        /// 是否发送邮件
+        /// </summary>
+        public static readonly string MAILMESSAGE = "MailMessage";
         /// <summary>
         /// 通知邮箱
         /// </summary>
@@ -37,7 +37,7 @@ namespace LionFrame.Config
         public static readonly string NOTIFYEMAIL = "NotifyEmail";
 
         /// <summary>
-        /// 任务类型  http dll 两种
+        /// 任务类型  http Assembly 两种
         /// </summary>
         public static readonly string JOBTYPE = "jobType";
     }

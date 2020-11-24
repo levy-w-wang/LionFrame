@@ -51,6 +51,7 @@ namespace LionFrame.MainWeb
             // Ìí¼Ó AutoMapper Ó³Éä¹ØÏµ
             services.AddAutoMapper(c => c.AddProfile<MappingProfile>());
 
+            services.AddHttpClient<IHttpClientBuilder>();
             // If using Kestrel:
             services.Configure<KestrelServerOptions>(options =>
             {
