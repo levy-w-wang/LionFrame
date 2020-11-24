@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using LionFrame.Basic;
@@ -13,16 +10,7 @@ using LionFrame.Model;
 using LionFrame.Model.QuartzModels;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Quartz.Jobs;
-using LionFrame.Quartz.Listeners;
-using Newtonsoft.Json.Linq;
 using Quartz;
-using Quartz.Impl;
-using Quartz.Impl.AdoJobStore;
-using Quartz.Impl.AdoJobStore.Common;
-using Quartz.Impl.Matchers;
-using Quartz.Impl.Triggers;
-using Quartz.Simpl;
-using Quartz.Util;
 
 namespace LionFrame.Quartz
 {

@@ -22,7 +22,7 @@ namespace LionFrame.Quartz
         {
             LogProvider.SetCurrentLogProvider(new QuartzLogProvider());
             IScheduler _scheduler;
-            var driverDelegateType = string.Empty;
+            string driverDelegateType;
             var db = LionWeb.Configuration.GetSection("DB").Value;
             switch (db)
             {

@@ -25,7 +25,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.MainWeb", "LionFr
 		{3E14598F-9D1E-4D28-9CD6-9C328D0E3DA1} = {3E14598F-9D1E-4D28-9CD6-9C328D0E3DA1}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LionFrame.Quartz", "LionFrame.Quartz\LionFrame.Quartz.csproj", "{E2408A51-8451-4D19-8260-7E176232B555}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LionFrame.Quartz", "LionFrame.Quartz\LionFrame.Quartz.csproj", "{E2408A51-8451-4D19-8260-7E176232B555}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{192AFB6B-C2D3-48BE-B796-4E50E94559FC}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Log_Db.txt = docs\Log_Db.txt
+		docs\quartz_tables_mysql_innodb.sql = docs\quartz_tables_mysql_innodb.sql
+		docs\quartz_tables_sqlServer.sql = docs\quartz_tables_sqlServer.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -111,11 +111,9 @@ namespace LionFrame.Basic
         /// </summary>
         public static Color GetRandomColor()
         {
-            Random randomNumFirst = new Random((int)DateTime.Now.Ticks);
-            System.Threading.Thread.Sleep(randomNumFirst.Next(50));
-            Random randomNumSecond = new Random((int)DateTime.Now.Ticks);
-            int intRed = randomNumFirst.Next(180);
-            int intGreen = randomNumSecond.Next(180);
+            var randomNum = new Random(Guid.NewGuid().GetHashCode());
+            int intRed = randomNum.Next(180);
+            int intGreen = randomNum.Next(180);
             int intBlue = (intRed + intGreen > 300) ? 0 : 400 - intRed - intGreen;
             intBlue = (intBlue > 255) ? 255 : intBlue;
             return Color.FromArgb(intRed, intGreen, intBlue);
