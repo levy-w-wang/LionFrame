@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using LionFrame.Basic;
@@ -13,16 +10,7 @@ using LionFrame.Model;
 using LionFrame.Model.QuartzModels;
 using LionFrame.Model.ResponseDto.ResultModel;
 using LionFrame.Quartz.Jobs;
-using LionFrame.Quartz.Listeners;
-using Newtonsoft.Json.Linq;
 using Quartz;
-using Quartz.Impl;
-using Quartz.Impl.AdoJobStore;
-using Quartz.Impl.AdoJobStore.Common;
-using Quartz.Impl.Matchers;
-using Quartz.Impl.Triggers;
-using Quartz.Simpl;
-using Quartz.Util;
 
 namespace LionFrame.Quartz
 {
@@ -58,6 +46,7 @@ namespace LionFrame.Quartz
                     return result;
                 }
             }
+
             try
             {
                 //检查任务是否已存在
@@ -67,27 +56,28 @@ namespace LionFrame.Quartz
                     result.Fail("调度任务已存在", "");
                     return result;
                 }
+
                 //http请求配置
                 var httpDir = new Dictionary<string, string>()
                 {
-                    { QuartzConstant.REQUESTURL,entity.RequestUrl},
-                    { QuartzConstant.REQUESTPARAMETERS,entity.RequestParameters},
-                    { QuartzConstant.REQUESTTYPE, ((int)entity.RequestType).ToString()},
-                    { QuartzConstant.HEADERS, entity.Headers},
-                    { QuartzConstant.MAILMESSAGE, ((int)entity.MailMessage).ToString()},
+                    { QuartzConstant.REQUESTURL, entity.RequestPath },
+                    { QuartzConstant.REQUESTPARAMETERS, entity.RequestParameters },
+                    { QuartzConstant.REQUESTTYPE, ((int) entity.RequestType).ToString() },
+                    { QuartzConstant.HEADERS, entity.Headers },
+                    { QuartzConstant.MAILMESSAGE, ((int) entity.MailMessage).ToString() },
                 };
                 // 定义这个工作，并将其绑定到我们的IJob实现类                
                 IJobDetail job = JobBuilder.Create<TestJob>()
                     .SetJobData(new JobDataMap(httpDir))
                     .WithDescription(entity.Description)
                     .WithIdentity(entity.JobName, entity.JobGroup)
-                    //.StoreDurably(true)//孤立存储，指即使该JobDetail没有关联的Trigger，也会进行存储 也就是执行完成后，不删除
-                    //.RequestRecovery(true) //请求恢复，指应用崩溃后再次启动，会重新执行该作业
+                    .StoreDurably() //孤立存储，指即使该JobDetail没有关联的Trigger，也会进行存储 也就是执行完成后，不删除
+                    .RequestRecovery() //请求恢复，指应用崩溃后再次启动，会重新执行该作业
                     .Build();
                 // 创建触发器
                 ITrigger trigger;
                 //校验是否正确的执行周期表达式
-                if (entity.TriggerType == TriggerTypeEnum.Cron)//CronExpression.IsValidExpression(entity.Cron))
+                if (entity.TriggerType == TriggerTypeEnum.Cron) //CronExpression.IsValidExpression(entity.Cron))
                 {
                     trigger = CreateCronTrigger(entity);
                 }
@@ -105,6 +95,7 @@ namespace LionFrame.Quartz
                 LogHelper.Logger.Fatal(ex, "添加任务失败", "");
                 result.Fail(ResponseCode.UnknownEx, ex.Message, "");
             }
+
             return result;
         }
 
@@ -130,12 +121,12 @@ namespace LionFrame.Quartz
                 {
                     result.Succeed("停止任务计划成功");
                 }
-
             }
             catch (Exception ex)
             {
                 result.Fail(ResponseCode.UnknownEx, "停止计划任务失败！--" + ex.Message, "");
             }
+
             return result;
         }
 
@@ -168,6 +159,7 @@ namespace LionFrame.Quartz
                 result.Fail(ResponseCode.UnknownEx, "恢复任务计划失败！--" + ex.Message, "");
                 LogHelper.Logger.Error($"恢复任务失败！{ex}");
             }
+
             return result;
         }
 
@@ -194,6 +186,7 @@ namespace LionFrame.Quartz
                 await Scheduler.Start();
                 LogHelper.Logger.Info("任务调度启动！");
             }
+
             return !Scheduler.InStandbyMode;
         }
 
@@ -209,6 +202,7 @@ namespace LionFrame.Quartz
                 await Scheduler.Standby(); //TODO  注意：Shutdown后Start会报错，所以这里使用暂停。
                 LogHelper.Logger.Info("任务调度暂停！");
             }
+
             return Scheduler.InStandbyMode;
         }
 
@@ -223,30 +217,27 @@ namespace LionFrame.Quartz
             if (entity.RunTimes.HasValue && entity.RunTimes > 0)
             {
                 return TriggerBuilder.Create()
-               .WithIdentity(entity.JobName, entity.JobGroup)
-               .StartAt(entity.BeginTime)//开始时间
-               .EndAt(entity.EndTime)//结束数据
-                                     //.WithPriority(5) // 优先级 默认为5 相同执行时间越高越先执行
-               .WithSimpleSchedule(x => x
-                   .WithIntervalInSeconds(entity.IntervalSecond ?? 1)//执行时间间隔，单位秒
-                   .WithRepeatCount(entity.RunTimes.Value))//执行次数、默认从0开始
-                   .ForJob(entity.JobName, entity.JobGroup)//作业名称
-               .Build();
+                    .WithIdentity(entity.JobName, entity.JobGroup)
+                    .StartAt(entity.BeginTime) //开始时间
+                    .EndAt(entity.EndTime) //结束数据
+                    .WithPriority(5) // 优先级 默认为5 相同执行时间越高越先执行
+                    .WithSimpleSchedule(x => 
+                        x.WithIntervalInSeconds(entity.IntervalSecond ?? 1) //执行时间间隔，单位秒
+                        .WithRepeatCount(entity.RunTimes.Value)) //执行次数、默认从0开始
+                    .ForJob(entity.JobName, entity.JobGroup) //作业名称
+                    .Build();
             }
             else
             {
-                return TriggerBuilder.Create()
-               .WithIdentity(entity.JobName, entity.JobGroup)
-               .StartAt(entity.BeginTime)//开始时间
-                                         //.WithPriority(5) // 优先级 默认为5 相同执行时间越高越先执行
-               .EndAt(entity.EndTime)//结束数据
-               .WithSimpleSchedule(x => x
-                   .WithIntervalInSeconds(entity.IntervalSecond ?? 1)//执行时间间隔，单位秒
-                   .RepeatForever())//无限循环
-                   .ForJob(entity.JobName, entity.JobGroup)//作业名称
-               .Build();
+                return TriggerBuilder.Create().WithIdentity(entity.JobName, entity.JobGroup).StartAt(entity.BeginTime) //开始时间
+                    .WithPriority(5) // 优先级 默认为5 相同执行时间越高越先执行
+                    .EndAt(entity.EndTime) //结束数据
+                    .WithSimpleSchedule(x => 
+                        x.WithIntervalInSeconds(entity.IntervalSecond ?? 1) //执行时间间隔，单位秒
+                        .RepeatForever()) //无限循环
+                    .ForJob(entity.JobName, entity.JobGroup) //作业名称
+                    .Build();
             }
-
         }
 
         /// <summary>
@@ -257,15 +248,12 @@ namespace LionFrame.Quartz
         private ITrigger CreateCronTrigger(ScheduleEntity entity)
         {
             // 作业触发器
-            return TriggerBuilder.Create()
-                   .WithIdentity(entity.JobName, entity.JobGroup)
-                   //.WithPriority(5) // 优先级 默认为5 相同执行时间越高越先执行
-                   .StartAt(entity.BeginTime)//开始时间
-                   .EndAt(entity.EndTime)//结束时间
-                   .WithCronSchedule(entity.Cron)//指定cron表达式
-                   .ForJob(entity.JobName, entity.JobGroup)//作业名称
-                   .Build();
+            return TriggerBuilder.Create().WithIdentity(entity.JobName, entity.JobGroup).WithPriority(5) // 优先级 默认为5 相同执行时间越高越先执行
+                .StartAt(entity.BeginTime) //开始时间
+                .EndAt(entity.EndTime) //结束时间
+                .WithCronSchedule(entity.Cron) //指定cron表达式
+                .ForJob(entity.JobName, entity.JobGroup) //作业名称
+                .Build();
         }
-
     }
 }

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace LionFrame.Config
 {
+    /// <summary>
+    /// Quartz JobDataMap存储key
+    /// </summary>
     public class QuartzConstant
     {
         /// <summary>
@@ -26,5 +29,16 @@ namespace LionFrame.Config
         /// 请求类型 RequestType
         /// </summary>
         public static readonly string REQUESTTYPE = "RequestType";
+
+        /// <summary>
+        /// 通知邮箱
+        /// </summary>
+
+        public static readonly string NOTIFYEMAIL = "NotifyEmail";
+
+        /// <summary>
+        /// 任务类型  http dll 两种
+        /// </summary>
+        public static readonly string JOBTYPE = "jobType";
     }
 }

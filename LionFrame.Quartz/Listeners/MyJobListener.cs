@@ -9,6 +9,7 @@ namespace LionFrame.Quartz.Listeners
     {
         public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
         {
+            context.Result = "123";
             //Job即将执行
             return Task.Factory.StartNew(() =>
             {
@@ -26,6 +27,7 @@ namespace LionFrame.Quartz.Listeners
 
         public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new CancellationToken())
         {
+            Console.WriteLine(context.Result);
             //Job执行完成
             return Task.Factory.StartNew(() =>
             {

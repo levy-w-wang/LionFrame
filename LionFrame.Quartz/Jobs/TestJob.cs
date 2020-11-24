@@ -12,6 +12,7 @@ namespace LionFrame.Quartz.Jobs
     {
         public Task Execute(IJobExecutionContext context)
         {
+            context.Result = "asdadasd" +context.Result;
             return Task.CompletedTask;
         }
     }
