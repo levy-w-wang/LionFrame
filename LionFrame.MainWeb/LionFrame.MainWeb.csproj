@@ -46,6 +46,7 @@
     <ProjectReference Include="..\LionFrame.Controller\LionFrame.Controller.csproj" />
     <ProjectReference Include="..\LionFrame.CoreCommon\LionFrame.CoreCommon.csproj" />
     <ProjectReference Include="..\LionFrame.Data\LionFrame.Data.csproj" />
+    <ProjectReference Include="..\LionFrame.Quartz\LionFrame.Quartz.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="https://docs.renovatebot.com/renovate-schema.json" appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

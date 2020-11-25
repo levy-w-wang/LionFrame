@@ -13,7 +13,7 @@ namespace LionFrame.Quartz
         {
             return (level, func, exception, parameters) =>
        {
-           if (level >= LogLevel.Info && func != null)
+           if (level > LogLevel.Info && func != null)
            {
                LogHelper.Logger.Warn(exception, name + "[" + level + "] " + func(), parameters);
            }

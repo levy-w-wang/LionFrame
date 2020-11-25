@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
 using LionFrame.Basic;
+using LionFrame.Basic.AutofacDependency;
 using LionFrame.Basic.Extensions;
 using LionFrame.Config;
 using LionFrame.CoreCommon;
@@ -19,13 +20,13 @@ namespace LionFrame.Quartz
     /// 调度中心  参考网址：https://cloud.tencent.com/developer/article/1500752
     /// 数据库语句：https://github.com/quartznet/quartznet/tree/master/database/tables
     /// </summary>
-    public class SchedulerCenter
+    public class SchedulerCenter : IScopedDependency
     {
         /// <summary>
         /// 返回任务计划（调度器）
         /// </summary>
         /// <returns></returns>
-        private IScheduler Scheduler => LionWeb.AutofacContainer.Resolve<IScheduler>();
+        public IScheduler Scheduler { get; set; }
 
         /// <summary>
         /// 添加一个工作调度
@@ -35,18 +36,6 @@ namespace LionFrame.Quartz
         public async Task<BaseResponseModel> AddScheduleJobAsync(ScheduleEntity entity)
         {
             var result = new ResponseModel<string>();
-            if (!entity.Headers.IsNullOrEmpty())
-            {
-                try
-                {
-                    entity.Headers.ToObject<Dictionary<string, string>>();
-                }
-                catch
-                {
-                    result.Fail(ResponseCode.DataFormatError, "请求头参数格式错误，json字典格式", "");
-                    return result;
-                }
-            }
 
             try
             {
@@ -76,6 +65,18 @@ namespace LionFrame.Quartz
                 switch (entity.JobType)
                 {
                     case JobTypeEnum.Http:
+                        if (!entity.Headers.IsNullOrEmpty())
+                        {
+                            try
+                            {
+                                entity.Headers.ToObject<Dictionary<string, string>>();
+                            }
+                            catch
+                            {
+                                result.Fail(ResponseCode.DataFormatError, "请求头参数格式错误，json字典格式", "");
+                                return result;
+                            }
+                        }
                         job = AddHttpJob(entity, jobDataMap);
                         break;
                     case JobTypeEnum.Assembly:
@@ -86,10 +87,10 @@ namespace LionFrame.Quartz
                         return result.Fail("未选择任务类型");
                         break;
                 }
-                          //校验是否正确的执行周期表达式
-            var trigger = entity.TriggerType == TriggerTypeEnum.Cron ? CreateCronTrigger(entity) : CreateSimpleTrigger(entity);
+                //校验是否正确的执行周期表达式
+                var trigger = entity.TriggerType == TriggerTypeEnum.Cron ? CreateCronTrigger(entity) : CreateSimpleTrigger(entity);
 
-            await Scheduler.ScheduleJob(job, trigger);
+                await Scheduler.ScheduleJob(job, trigger);
                 result.Succeed("添加任务成功");
             }
             catch (Exception ex)
@@ -121,7 +122,7 @@ namespace LionFrame.Quartz
                 .SetJobData(new JobDataMap(jobDataMap))
                 .WithDescription(entity.Description)
                 .WithIdentity(entity.JobName, entity.JobGroup)
-                .StoreDurably() //孤立存储，指即使该JobDetail没有关联的Trigger，也会进行存储 也就是执行完成后，不删除
+                //.StoreDurably() //孤立存储，指即使该JobDetail没有关联的Trigger，也会进行存储 也就是执行完成后，不删除
                 .RequestRecovery() //请求恢复，指应用崩溃后再次启动，会重新执行该作业
                 .Build();
             // 创建触发器
@@ -146,7 +147,7 @@ namespace LionFrame.Quartz
                 .SetJobData(new JobDataMap(jobDataMap))
                 .WithDescription(entity.Description)
                 .WithIdentity(entity.JobName, entity.JobGroup)
-                .StoreDurably() //孤立存储，指即使该JobDetail没有关联的Trigger，也会进行存储 也就是执行完成后，不删除
+                //.StoreDurably() //孤立存储，指即使该JobDetail没有关联的Trigger，也会进行存储 也就是执行完成后，不删除
                 .RequestRecovery() //请求恢复，指应用崩溃后再次启动，会重新执行该作业
                 .Build();
             // 创建触发器
@@ -156,19 +157,18 @@ namespace LionFrame.Quartz
         /// <summary>
         /// 暂停/删除 指定的计划
         /// </summary>
-        /// <param name="jobGroup">任务分组</param>
-        /// <param name="jobName">任务名称</param>
+        /// <param name="jobKey"></param>
         /// <param name="isDelete">停止并删除任务</param>
         /// <returns></returns>
-        public async Task<BaseResponseModel> StopOrDelScheduleJobAsync(string jobGroup, string jobName, bool isDelete = false)
+        public async Task<BaseResponseModel> StopOrDelScheduleJobAsync(JobKey jobKey, bool isDelete = false)
         {
             var result = new ResponseModel<string>();
             try
             {
-                await Scheduler.PauseJob(new JobKey(jobName, jobGroup));
+                await Scheduler.PauseJob(jobKey);
                 if (isDelete)
                 {
-                    await Scheduler.DeleteJob(new JobKey(jobName, jobGroup));
+                    await Scheduler.DeleteJob(jobKey);
                     result.Succeed("删除任务计划成功");
                 }
                 else
@@ -187,15 +187,13 @@ namespace LionFrame.Quartz
         /// <summary>
         /// 恢复运行暂停的任务
         /// </summary>
-        /// <param name="jobName">任务名称</param>
-        /// <param name="jobGroup">任务分组</param>
-        public async Task<BaseResponseModel> ResumeJobAsync(string jobGroup, string jobName)
+        /// <param name="jobKey">任务</param>
+        public async Task<BaseResponseModel> ResumeJobAsync(JobKey jobKey)
         {
             var result = new ResponseModel<string>();
             try
             {
                 //检查任务是否存在
-                var jobKey = new JobKey(jobName, jobGroup);
                 if (await Scheduler.CheckExists(jobKey))
                 {
                     //任务已经存在则暂停任务

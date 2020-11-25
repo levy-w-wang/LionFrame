@@ -6,8 +6,8 @@ using Quartz;
 
 namespace LionFrame.Quartz.Jobs
 {
-    [DisallowConcurrentExecution]
-    [PersistJobDataAfterExecution]
+    //[DisallowConcurrentExecution]
+    //[PersistJobDataAfterExecution]
     public class TestJob : IJob
     {
         public Task Execute(IJobExecutionContext context)

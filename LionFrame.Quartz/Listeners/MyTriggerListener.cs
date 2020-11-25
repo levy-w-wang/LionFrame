@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using LionFrame.Basic.Extensions;
 using Quartz;
 
 namespace LionFrame.Quartz.Listeners
@@ -15,6 +17,8 @@ namespace LionFrame.Quartz.Listeners
         /// <returns></returns>
         public Task TriggerFired(ITrigger trigger, IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
         {
+            var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
+            Console.WriteLine("TriggerFired" + a.ToString());
             return Task.CompletedTask;
         }
 
@@ -27,6 +31,8 @@ namespace LionFrame.Quartz.Listeners
         /// <returns></returns>
         public Task<bool> VetoJobExecution(ITrigger trigger, IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
         {
+            var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
+            Console.WriteLine("VetoJobExecution" + a.ToString());
             return Task.FromResult(false); //返回true表示否决Job继续执行
         }
 
@@ -51,6 +57,9 @@ namespace LionFrame.Quartz.Listeners
         /// <returns></returns>
         public Task TriggerComplete(ITrigger trigger, IJobExecutionContext context, SchedulerInstruction triggerInstructionCode, CancellationToken cancellationToken = new CancellationToken())
         {
+            Console.WriteLine("TriggerComplete" + context.Result.ToJson());
+            var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
+            Console.WriteLine(a.ToString());
             return Task.CompletedTask;
         }
 

@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LionFrame.Business\LionFrame.Business.csproj" />
     <ProjectReference Include="..\LionFrame.CoreCommon\LionFrame.CoreCommon.csproj" />
+    <ProjectReference Include="..\LionFrame.Quartz\LionFrame.Quartz.csproj" />
   </ItemGroup>
 
 </Project>

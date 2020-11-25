@@ -19,7 +19,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
+using Quartz;
 using Z.EntityFramework.Extensions;
+using LionFrame.Quartz;
 
 namespace LionFrame.MainWeb
 {
@@ -101,6 +103,8 @@ namespace LionFrame.MainWeb
             // 注册redis实例
             builder.RegisterInstance(new RedisClient(Configuration)).SingleInstance().PropertiesAutowired();
             builder.RegisterInstance(new LionMemoryCache("Cache")).SingleInstance().PropertiesAutowired();
+            var scheduler = new SchedulerFactory(Configuration).GetScheduler().Result;
+            builder.RegisterInstance(scheduler).As<IScheduler>().PropertiesAutowired().SingleInstance();
 
             #region 注册dbcontext上下文 使用属性注入 -- 但是使用上面的方式直接add好像也可以
 

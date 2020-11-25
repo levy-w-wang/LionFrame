@@ -38,6 +38,6 @@ namespace LionFrame.Quartz.Listeners
         /// <summary>
         /// Get the name of the <see cref="T:Quartz.IJobListener" />.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; } = nameof(MyJobListener);
     }
 }

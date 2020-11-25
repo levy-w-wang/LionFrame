@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Quartz;
 using Module = Autofac.Module;
 
 namespace LionFrame.CoreCommon
@@ -96,7 +97,7 @@ namespace LionFrame.CoreCommon
             #endregion
 
             var idWorker = LionWeb.Configuration.GetSection("IdWorker").Get<long>();
-            builder.RegisterInstance(new IdWorker(idWorker));
+            builder.RegisterInstance(new IdWorker(idWorker)).SingleInstance().PropertiesAutowired();
         }
     }
 }

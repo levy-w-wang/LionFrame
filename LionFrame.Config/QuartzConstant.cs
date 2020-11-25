@@ -39,6 +39,6 @@ namespace LionFrame.Config
         /// <summary>
         /// 任务类型  http Assembly 两种
         /// </summary>
-        public static readonly string JOBTYPE = "jobType";
+        public static readonly string JOBTYPE = "JobType";
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using LionFrame.CoreCommon;
 using LionFrame.Quartz.Listeners;
+using Microsoft.Extensions.Configuration;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.AdoJobStore;
@@ -18,24 +19,29 @@ namespace LionFrame.Quartz
     /// </summary>
     public class SchedulerFactory
     {
+         private IConfiguration Configuration { get; set; }
+        public SchedulerFactory(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
         public async Task<IScheduler> GetScheduler()
         {
             LogProvider.SetCurrentLogProvider(new QuartzLogProvider());
             IScheduler _scheduler;
             string driverDelegateType;
-            var db = LionWeb.Configuration.GetSection("DB").Value;
+            var db = Configuration.GetSection("DB").Value;
             switch (db)
             {
                 case "MsSql":
-                    DBConnectionManager.Instance.AddConnectionProvider("default", new DbProvider("SqlServer", LionWeb.Configuration["ConnectionStrings:MsSqlConnection"]));
+                    DBConnectionManager.Instance.AddConnectionProvider("default", new DbProvider("SqlServer", Configuration["ConnectionStrings:MsSqlConnection"]));
                     driverDelegateType = typeof(SqlServerDelegate).AssemblyQualifiedName;
                     break;
                 case "MySql":
-                    DBConnectionManager.Instance.AddConnectionProvider("default", new DbProvider("MySql", LionWeb.Configuration["ConnectionStrings:MySqlConnection"]));
+                    DBConnectionManager.Instance.AddConnectionProvider("default", new DbProvider("MySql", Configuration["ConnectionStrings:MySqlConnection"]));
                     driverDelegateType = typeof(MySQLDelegate).AssemblyQualifiedName;
                     break;
                 default:
-                    DBConnectionManager.Instance.AddConnectionProvider("default", new DbProvider("SqlServer", LionWeb.Configuration["ConnectionStrings:MsSqlConnection"]));
+                    DBConnectionManager.Instance.AddConnectionProvider("default", new DbProvider("SqlServer", Configuration["ConnectionStrings:MsSqlConnection"]));
                     driverDelegateType = typeof(SqlServerDelegate).AssemblyQualifiedName;
                     break;
             }
