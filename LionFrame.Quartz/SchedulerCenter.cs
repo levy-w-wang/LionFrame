@@ -215,7 +215,7 @@ namespace LionFrame.Quartz
         }
 
         /// <summary>
-        /// 立即执行
+        /// 立即执行 单独触发一次job
         /// </summary>
         /// <param name="jobKey"></param>
         /// <returns></returns>
@@ -256,34 +256,44 @@ namespace LionFrame.Quartz
         }
 
         /// <summary>
+        /// 创建TriggerBuilder
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        private TriggerBuilder GetTriggerBuilder(ScheduleEntity entity)
+        {
+            return TriggerBuilder.Create() //创建
+                .WithIdentity(entity.JobName, entity.JobGroup) // 标识
+                .StartAt(entity.BeginTime) //开始时间
+                .EndAt(entity.EndTime) //结束数据
+                .WithPriority(entity.Priority) // 优先级 默认为5 相同执行时间越高越先执行
+                .WithDescription(entity.Description ?? "") //描述
+                .ForJob(entity.JobName, entity.JobGroup); //作业名称
+        }
+
+        /// <summary>
         /// 创建类型Simple的触发器
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
         private ITrigger CreateSimpleTrigger(ScheduleEntity entity)
         {
+            var triggerBuilder = GetTriggerBuilder(entity);
             //作业触发器
             if (entity.RunTimes.HasValue && entity.RunTimes > 0)
             {
-                return TriggerBuilder.Create()
-                    .WithIdentity(entity.JobName, entity.JobGroup)
-                    .StartAt(entity.BeginTime) //开始时间
-                    .EndAt(entity.EndTime) //结束数据
-                    .WithPriority(entity.Priority) // 优先级 默认为5 相同执行时间越高越先执行
+                return triggerBuilder
                     .WithSimpleSchedule(x =>
                         x.WithIntervalInSeconds(entity.IntervalSecond ?? 1) //执行时间间隔，单位秒
                         .WithRepeatCount(entity.RunTimes.Value)) //执行次数、默认从0开始
-                    .ForJob(entity.JobName, entity.JobGroup) //作业名称
                     .Build();
             }
 
-            return TriggerBuilder.Create().WithIdentity(entity.JobName, entity.JobGroup).StartAt(entity.BeginTime) //开始时间
-                .WithPriority(entity.Priority) // 优先级 默认为5 相同执行时间越高越先执行
-                .EndAt(entity.EndTime) //结束数据
+            return triggerBuilder
                 .WithSimpleSchedule(x =>
                     x.WithIntervalInSeconds(entity.IntervalSecond ?? 1) //执行时间间隔，单位秒
                         .RepeatForever()) //无限循环
-                .ForJob(entity.JobName, entity.JobGroup) //作业名称
+
                 .Build();
         }
 
@@ -294,14 +304,10 @@ namespace LionFrame.Quartz
         /// <returns></returns>
         private ITrigger CreateCronTrigger(ScheduleEntity entity)
         {
+            var triggerBuilder = GetTriggerBuilder(entity);
             // 作业触发器
-            return TriggerBuilder.Create()
-                .WithIdentity(entity.JobName, entity.JobGroup)
-                .WithPriority(entity.Priority) // 优先级 默认为5 相同执行时间越高越先执行
-                .StartAt(entity.BeginTime) //开始时间
-                .EndAt(entity.EndTime) //结束时间
+            return triggerBuilder
                 .WithCronSchedule(entity.Cron) //指定cron表达式
-                .ForJob(entity.JobName, entity.JobGroup) //作业名称
                 .Build();
         }
     }

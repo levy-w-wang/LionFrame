@@ -57,9 +57,8 @@ namespace LionFrame.Quartz.Listeners
         /// <returns></returns>
         public Task TriggerComplete(ITrigger trigger, IJobExecutionContext context, SchedulerInstruction triggerInstructionCode, CancellationToken cancellationToken = new CancellationToken())
         {
-            Console.WriteLine("TriggerComplete" + context.Result.ToJson());
             var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
-            Console.WriteLine(a.ToString());
+            Console.WriteLine($"TriggerComplete   state:{a.ToString()}" + context.Result.ToJson());
             return Task.CompletedTask;
         }
 

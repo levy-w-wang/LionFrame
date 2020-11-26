@@ -10,10 +10,11 @@ namespace LionFrame.Quartz.Listeners
         public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
         {
             context.Result = "123";
+            var state = context.Scheduler.GetTriggerState(context.Trigger.Key,cancellationToken).Result;
             //Job即将执行
             return Task.Factory.StartNew(() =>
             {
-                Console.WriteLine($"Job: {context.JobDetail.Key} 即将执行");
+                Console.WriteLine($"Job: {context.JobDetail.Key} state:{state} 即将执行");
             }, cancellationToken);
         }
 
@@ -27,11 +28,11 @@ namespace LionFrame.Quartz.Listeners
 
         public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = new CancellationToken())
         {
-            Console.WriteLine(context.Result);
+            var state = context.Scheduler.GetTriggerState(context.Trigger.Key,cancellationToken).Result;
             //Job执行完成
             return Task.Factory.StartNew(() =>
             {
-                Console.WriteLine($"Job: {context.JobDetail.Key} 执行完成");
+                Console.WriteLine($"Job: {context.JobDetail.Key}   context.Result:{context.Result}    state:{state}   执行完成");
             }, cancellationToken);
         }
 

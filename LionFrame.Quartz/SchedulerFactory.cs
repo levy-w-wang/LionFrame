@@ -66,7 +66,7 @@ namespace LionFrame.Quartz
             DirectSchedulerFactory.Instance.CreateScheduler("Scheduler", "AUTO", threadPool, jobStore);
             _scheduler = await SchedulerRepository.Instance.Lookup("Scheduler");
             _scheduler.ListenerManager.AddJobListener(new MyJobListener(), GroupMatcher<JobKey>.AnyGroup());
-            _scheduler.ListenerManager.AddTriggerListener(new MyTriggerListener(), GroupMatcher<TriggerKey>.AnyGroup());
+            //_scheduler.ListenerManager.AddTriggerListener(new MyTriggerListener(), GroupMatcher<TriggerKey>.AnyGroup());
             _scheduler.ListenerManager.AddSchedulerListener(new MySchedulerListener());
 
             await _scheduler.Start();//默认开始调度器

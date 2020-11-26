@@ -1,42 +1,58 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
+using LionFrame.CoreCommon;
 using Quartz;
 
 namespace LionFrame.Quartz.Listeners
 {
     public class MySchedulerListener : ISchedulerListener
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="trigger"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public Task JobScheduled(ITrigger trigger, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
+            var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
+            return Task.Factory.StartNew(async () =>
             {
-                Console.WriteLine($"{trigger.Key.Name}  JobScheduled");
+                var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
+                Console.WriteLine($"{trigger.Key.Name} state:{state} JobScheduled");
             }, cancellationToken);
         }
 
         public Task JobUnscheduled(TriggerKey triggerKey, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
+            var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
+            return Task.Factory.StartNew(async () =>
             {
-                Console.WriteLine($"{triggerKey.Name}  JobUnscheduled");
+                var state = await schedule.GetTriggerState(triggerKey, cancellationToken);
+                Console.WriteLine($"{triggerKey.Name} state:{state} JobUnscheduled");
             }, cancellationToken);
         }
 
         public Task TriggerFinalized(ITrigger trigger, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
+            var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
+            return Task.Factory.StartNew(async () =>
             {
-                Console.WriteLine($"{trigger.Key.Name}  TriggerFinalized");
+                var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
+                Console.WriteLine($"{trigger.Key.Name} state:{state}  TriggerFinalized");
             }, cancellationToken);
         }
 
 
         public Task TriggerPaused(TriggerKey triggerKey, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
+            var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
+            return Task.Factory.StartNew(async () =>
             {
-                Console.WriteLine($"{triggerKey.Name}  TriggerPaused");
+                var state = await schedule.GetTriggerState(triggerKey, cancellationToken);
+                Console.WriteLine($"{triggerKey.Name} state:{state}  TriggerPaused");
             }, cancellationToken);
         }
 
@@ -51,9 +67,11 @@ namespace LionFrame.Quartz.Listeners
 
         public Task TriggerResumed(TriggerKey triggerKey, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
+            var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
+            return Task.Factory.StartNew(async () =>
             {
-                Console.WriteLine($"{triggerKey.Name}  TriggerResumed");
+                var state = await schedule.GetTriggerState(triggerKey, cancellationToken);
+                Console.WriteLine($"{triggerKey.Name} state:{state}  TriggerResumed");
             }, cancellationToken);
         }
 
@@ -127,7 +145,7 @@ namespace LionFrame.Quartz.Listeners
         {
             return Task.Factory.StartNew(() =>
             {
-                Console.WriteLine($"SchedulerError");
+                Console.WriteLine($"SchedulerError msg:{msg} cause:{cause.Message}");
             }, cancellationToken);
         }
 

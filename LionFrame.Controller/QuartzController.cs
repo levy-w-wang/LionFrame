@@ -73,17 +73,17 @@ namespace LionFrame.Controller
             return Succeed("修改计划任务成功！");
         }
 
-        /// <summary>
-        /// 立即执行
-        /// </summary>
-        /// <param name="jobKey"></param>
-        /// <returns></returns>
-        [HttpPost, Route("triggerjob")]
-        public async Task<ActionResult> TriggerJob([FromBody]JobKey jobKey)
-        {
-            await SchedulerCenter.TriggerJobAsync(jobKey);
-            return Succeed();
-        }
+        ///// <summary>
+        ///// 立即执行 不使用
+        ///// </summary>
+        ///// <param name="jobKey"></param>
+        ///// <returns></returns>
+        //[HttpPost, Route("triggerjob")]
+        //public async Task<ActionResult> TriggerJob([FromBody]JobKey jobKey)
+        //{
+        //    await SchedulerCenter.TriggerJobAsync(jobKey);
+        //    return Succeed();
+        //}
 
         /// <summary>
         /// 启动调度
