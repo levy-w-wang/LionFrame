@@ -69,7 +69,6 @@ namespace LionFrame.Quartz
             //_scheduler.ListenerManager.AddTriggerListener(new MyTriggerListener(), GroupMatcher<TriggerKey>.AnyGroup());
             _scheduler.ListenerManager.AddSchedulerListener(new MySchedulerListener());
 
-            await _scheduler.Start();//默认开始调度器
             return _scheduler;
         }
     }

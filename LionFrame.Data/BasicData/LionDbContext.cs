@@ -17,6 +17,11 @@ namespace LionFrame.Data.BasicData
         public DbSet<SysUserRoleRelation> SysUserRoleRelations { get; set; }
         public DbSet<SysMenu> SysMenus { get; set; }
         public DbSet<SysRoleMenuRelation> SysRoleMenuRelations { get; set; }
+        public DbSet<SysTenant> SysTenants { get; set; }
+        public DbSet<SysQuartz> SysQuartzs { get; set; }
+        public DbSet<SysQuartzLog> SysQuartzLogs { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region 使用这种方式 就不需要上面的dbset 但是在实体类中也不能加导航属性
@@ -38,13 +43,13 @@ namespace LionFrame.Data.BasicData
             modelBuilder.Entity<SysUser>().HasOne(c => c.TenantInfo)
                 .WithMany(c => c.SysUser)
                 .HasForeignKey(c => c.TenantId);
-            modelBuilder.Entity<SysUser>().HasIndex(c => new {c.TenantId,c.UserId});
+            modelBuilder.Entity<SysUser>().HasIndex(c => new { c.TenantId, c.UserId });
             modelBuilder.Entity<SysUser>().HasIndex(c => c.Email).IsUnique();
 
-            modelBuilder.Entity<SysRole>().HasIndex(c => new {c.TenantId,c.RoleId});
+            modelBuilder.Entity<SysRole>().HasIndex(c => new { c.TenantId, c.RoleId });
 
             modelBuilder.Entity<SysUserRoleRelation>()
-                .HasKey(t => new { t.RoleId, t.UserId,t.TenantId });
+                .HasKey(t => new { t.RoleId, t.UserId, t.TenantId });
             modelBuilder.Entity<SysUserRoleRelation>()
                 .HasOne(ur => ur.SysUser)
                 .WithMany(r => r.SysUserRoleRelations)
@@ -55,7 +60,7 @@ namespace LionFrame.Data.BasicData
                 .HasForeignKey(c => c.RoleId);
 
             modelBuilder.Entity<SysRoleMenuRelation>()
-                .HasKey(t => new { t.RoleId, t.MenuId,t.TenantId });
+                .HasKey(t => new { t.RoleId, t.MenuId, t.TenantId });
             modelBuilder.Entity<SysRoleMenuRelation>()
                 .HasOne(rm => rm.SysRole)
                 .WithMany(r => r.SysRoleMenuRelations)
@@ -64,6 +69,10 @@ namespace LionFrame.Data.BasicData
                 .HasOne(rm => rm.SysMenu)
                 .WithMany(r => r.SysRoleMenuRelations)
                 .HasForeignKey(c => c.MenuId);
+
+            modelBuilder.Entity<SysQuartz>().HasKey(sq => new { sq.JobGroup, sq.JobName });
+            modelBuilder.Entity<SysQuartz>().HasIndex(sq => sq.CreatedTime);
+            modelBuilder.Entity<SysQuartzLog>().HasIndex(sq => new { sq.JobGroup, sq.JobName });
 
             // 初始数据
             modelBuilder.InitData();

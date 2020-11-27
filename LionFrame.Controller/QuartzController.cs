@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.CoreCommon.CustomFilter;
 using LionFrame.Model.QuartzModels;
@@ -15,6 +16,7 @@ namespace LionFrame.Controller
     public class QuartzController : BaseUserController
     {
         public SchedulerCenter SchedulerCenter { get; set; }
+        public SysQuartzBll SysQuartzBll { get; set; }
 
         /// <summary>
         /// 添加任务
@@ -22,9 +24,13 @@ namespace LionFrame.Controller
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPost, Route("addtask")]
-        public async Task<ActionResult> AddTask(ScheduleEntity entity)
+        public async Task<ActionResult> AddTask(ScheduleEntityParam entity)
         {
             var result = await SchedulerCenter.AddScheduleJobAsync(entity);
+            if (result.Success)
+            {
+                await SysQuartzBll.AddTask(entity);
+            }
             return MyJson(result);
         }
 
@@ -66,7 +72,7 @@ namespace LionFrame.Controller
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPost, Route("modifyjob")]
-        public async Task<ActionResult> ModifyJob([FromBody]ScheduleEntity entity)
+        public async Task<ActionResult> ModifyJob([FromBody]ScheduleEntityParam entity)
         {
             await SchedulerCenter.StopOrDelScheduleJobAsync(new JobKey(entity.JobName, entity.JobGroup), true);
             await SchedulerCenter.AddScheduleJobAsync(entity);

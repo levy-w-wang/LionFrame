@@ -214,6 +214,9 @@ namespace LionFrame.MainWeb
                     await context.Response.WriteAsync("<div style='text-align: center;margin-top: 15%;'><h3>项目<b style='color: green;'>启动成功</b>,测试请使用接口测试工具，或与前端联调！</h3> <h4>项目<a href='/apidoc' style='color: cornflowerblue;'>接口文档</a>,点击查看</h4></div>");
                 });
             });
+
+            // 初始化
+            Init();
         }
     }
 }

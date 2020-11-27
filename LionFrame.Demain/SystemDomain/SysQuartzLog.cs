@@ -66,5 +66,10 @@ namespace LionFrame.Domain.SystemDomain
         /// 请求结果
         /// </summary>
         public string Result { get; set; }
+
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreatedTime { get; set; }
     }
 }

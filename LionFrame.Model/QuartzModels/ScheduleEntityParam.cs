@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LionFrame.Model.QuartzModels
 {
-    public class ScheduleEntity
+    public class ScheduleEntityParam
     {
         [Required]
         public JobTypeEnum JobType { get; set; }
@@ -26,18 +26,18 @@ namespace LionFrame.Model.QuartzModels
         /// 开始时间
         /// </summary>
         [Required]
-        public DateTimeOffset BeginTime { get; set; } = DateTime.Now;
+        public DateTime BeginTime { get; set; } = DateTime.Now;
 
         /// <summary>
         /// 结束时间
         /// </summary>
         [Required]
-        public DateTimeOffset? EndTime { get; set; }
+        public DateTime EndTime { get; set; }
 
         /// <summary>
         /// Cron表达式
         /// </summary>
-        public string Cron { get; set; }
+        public string Cron { get; set; } = "";
 
         /// <summary>
         /// 执行次数（默认无限循环）
@@ -64,18 +64,19 @@ namespace LionFrame.Model.QuartzModels
         /// <summary>
         /// 请求类型 RequestTypeEnum   或  文件夹名.类名
         /// </summary>
+        [Required]
         public string RequestMethod{ get; set; }
 
         /// <summary>
         /// 请求参数（Post，Put请求用） 调用方法参数
         /// </summary>
-        public string RequestParameters { get; set; }
+        public string RequestParameters { get; set; } = "{}";
 
         /// <summary>
         /// Headers(可以包含如：Authorization授权认证) http请求用
         /// 格式：{"Authorization":"userpassword.."}
         /// </summary>
-        public string Headers { get; set; }
+        public string Headers { get; set; } = "{}";
 
         /// <summary>
         /// 执行优先级  默认等级5 等级越高 执行时间相同时就先执行谁
@@ -86,12 +87,12 @@ namespace LionFrame.Model.QuartzModels
         /// <summary>
         /// 任务描述
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
         /// <summary>
         /// 通知邮箱
         /// </summary>
-        public string NotifyEmail { get; set; }
+        public string NotifyEmail { get; set; } = "";
 
         /// <summary>
         /// 邮件通知类型

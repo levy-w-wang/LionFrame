@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using HealthChecks.UI.Client;
 using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
@@ -22,6 +23,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Quartz;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace LionFrame.MainWeb
@@ -31,8 +33,10 @@ namespace LionFrame.MainWeb
         /// <summary>
         /// 初始化
         /// </summary>
-        public void Init()
+        public async void Init()
         {
+            // 开启调度
+            await LionWeb.AutofacContainer.Resolve<IScheduler>().Start();
         }
 
         /// <summary>

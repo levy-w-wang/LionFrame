@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LionFrame.Domain.SystemDomain;
+using LionFrame.Model.QuartzModels;
 using LionFrame.Model.RequestParam.SystemParams;
 using LionFrame.Model.ResponseDto.SystemDto;
 using LionFrame.Model.ResponseDto.UserDtos;
@@ -29,6 +30,12 @@ namespace LionFrame.CoreCommon.AutoMapperCfg
             CreateMap<MenuCacheBo, MenuPermsDto>();
             CreateMap<IncrementMenuParam, SysMenu>();
             CreateMap<SysMenu, MenuManageDto>();
+
+            #endregion
+
+            #region Quartz
+
+            CreateMap<ScheduleEntityParam, SysQuartz>();
 
             #endregion
         }

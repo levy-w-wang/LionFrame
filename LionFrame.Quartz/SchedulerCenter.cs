@@ -33,7 +33,7 @@ namespace LionFrame.Quartz
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public async Task<BaseResponseModel> AddScheduleJobAsync(ScheduleEntity entity)
+        public async Task<BaseResponseModel> AddScheduleJobAsync(ScheduleEntityParam entity)
         {
             var result = new ResponseModel<string>();
 
@@ -108,7 +108,7 @@ namespace LionFrame.Quartz
         /// <param name="entity"></param>
         /// <param name="jobDataMap"></param>
         /// <returns></returns>
-        private IJobDetail AddAssemblyJob(ScheduleEntity entity, Dictionary<string, string> jobDataMap)
+        private IJobDetail AddAssemblyJob(ScheduleEntityParam entity, Dictionary<string, string> jobDataMap)
         {
             // 格式 LionFrame.Quartz.Jobs.TestJob,LionFrame.Quartz
             var typeName = $"{entity.RequestPath}.{entity.RequestMethod},{entity.RequestPath}";
@@ -135,7 +135,7 @@ namespace LionFrame.Quartz
         /// <param name="entity"></param>
         /// <param name="jobDataMap"></param>
         /// <returns></returns>
-        private IJobDetail AddHttpJob(ScheduleEntity entity, Dictionary<string, string> jobDataMap)
+        private IJobDetail AddHttpJob(ScheduleEntityParam entity, Dictionary<string, string> jobDataMap)
         {
             //http请求配置
             jobDataMap.Add(QuartzConstant.REQUESTTYPE, entity.RequestMethod);
@@ -249,7 +249,7 @@ namespace LionFrame.Quartz
             if (!Scheduler.InStandbyMode)
             {
                 //等待任务运行完成
-                await Scheduler.Standby(); //TODO  注意：Shutdown后Start会报错，所以这里使用暂停。
+                await Scheduler.Standby(); //TODO  注意：Shutdown后Start会报错，所以这里使用暂停。必须重新实例化才可start
             }
 
             return Scheduler.InStandbyMode;
@@ -260,7 +260,7 @@ namespace LionFrame.Quartz
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        private TriggerBuilder GetTriggerBuilder(ScheduleEntity entity)
+        private TriggerBuilder GetTriggerBuilder(ScheduleEntityParam entity)
         {
             return TriggerBuilder.Create() //创建
                 .WithIdentity(entity.JobName, entity.JobGroup) // 标识
@@ -276,7 +276,7 @@ namespace LionFrame.Quartz
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        private ITrigger CreateSimpleTrigger(ScheduleEntity entity)
+        private ITrigger CreateSimpleTrigger(ScheduleEntityParam entity)
         {
             var triggerBuilder = GetTriggerBuilder(entity);
             //作业触发器
@@ -302,7 +302,7 @@ namespace LionFrame.Quartz
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        private ITrigger CreateCronTrigger(ScheduleEntity entity)
+        private ITrigger CreateCronTrigger(ScheduleEntityParam entity)
         {
             var triggerBuilder = GetTriggerBuilder(entity);
             // 作业触发器

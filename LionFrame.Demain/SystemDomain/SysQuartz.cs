@@ -12,9 +12,6 @@ namespace LionFrame.Domain.SystemDomain
     [Table("Sys_Quartz")]
     public class SysQuartz : BaseModel
     {
-        [Required]
-        public JobTypeEnum JobType { get; set; }
-
         /// <summary>
         /// 任务分组
         /// </summary>
@@ -25,6 +22,9 @@ namespace LionFrame.Domain.SystemDomain
         /// </summary>
         [Required, MaxLength(200)]
         public string JobName { get; set; }
+
+        [Required]
+        public JobTypeEnum JobType { get; set; }
 
         /// <summary>
         /// 开始时间
@@ -112,11 +112,16 @@ namespace LionFrame.Domain.SystemDomain
         /// <summary>
         /// 任务状态
         /// </summary>
-        public TriggerState TriggerState { get; set; }
+        public MyTriggerState TriggerState { get; set; }
 
         /// <summary>
         /// 最后执行时间
         /// </summary>
         public DateTime? LastFireTime { get; set; }
+
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreatedTime { get; set; }
     }
 }

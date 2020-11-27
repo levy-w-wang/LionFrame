@@ -70,7 +70,7 @@ namespace LionFrame.CoreCommon.CustomFilter
                 return;
             }
 
-            context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "未授权");
+            context.Result = new CustomHttpStatusCodeResult(200, ResponseCode.Unauthorized1, "无权限操作");
             return;
         }
     }
