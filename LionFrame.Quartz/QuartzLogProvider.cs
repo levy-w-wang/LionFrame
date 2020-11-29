@@ -12,13 +12,30 @@ namespace LionFrame.Quartz
         public Logger GetLogger(string name)
         {
             return (level, func, exception, parameters) =>
-       {
-           if (level > LogLevel.Info && func != null)
-           {
-               LogHelper.Logger.Warn(exception, name + "[" + level + "] " + func(), parameters);
-           }
-           return true;
-       };
+            {
+                if (level < LogLevel.Info || func == null)
+                {
+                    return true;
+                }
+
+                switch (level)
+                {
+                    case LogLevel.Info:
+                        LogHelper.Logger.Info(exception, name + func(), parameters);
+                        break;
+                    case LogLevel.Warn:
+                        LogHelper.Logger.Warn(exception, name + func(), parameters);
+                        break;
+                    case LogLevel.Error:
+                        LogHelper.Logger.Error(exception, name + func(), parameters);
+                        break;
+                    case LogLevel.Fatal:
+                        LogHelper.Logger.Fatal(exception, name + func(), parameters);
+                        break;
+                }
+
+                return true;
+            };
         }
 
         /// <summary>

@@ -173,7 +173,7 @@ namespace LionFrame.Quartz
                 }
                 else
                 {
-                    result.Succeed("停止任务计划成功");
+                    result.Succeed("暂停任务计划成功");
                 }
             }
             catch (Exception ex)

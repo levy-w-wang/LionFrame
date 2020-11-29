@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LionFrame.Business\LionFrame.Business.csproj" />
     <ProjectReference Include="..\LionFrame.CoreCommon\LionFrame.CoreCommon.csproj" />
   </ItemGroup>
 

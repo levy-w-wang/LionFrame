@@ -26,36 +26,24 @@ namespace LionFrame.Domain.SystemDomain
         public string JobName { get; set; }
 
         /// <summary>
-        /// 请求url 或 仅项目完整名称(不包含文件夹路径)
+        /// 请求Job类完整路径
         /// </summary>
         [Required, MaxLength(56)]
         public string RequestPath { get; set; }
 
         /// <summary>
-        /// 请求类型 RequestTypeEnum   或  文件夹名.类名
-        /// </summary>
-        [Required, MaxLength(40)]
-        public string RequestMethod { get; set; }
-        /// <summary>
         /// 下次执行时间
         /// </summary>
-        public DateTime NextFireTime { get; set; }
+        public DateTime? NextFireTime { get; set; }
 
         /// <summary>
         /// 上次执行时间
         /// </summary>
-        public DateTime PreviousFireTime { get; set; }
+        public DateTime? PreviousFireTime { get; set; }
         /// <summary>
         /// 请求参数
         /// </summary>
-        public string Parameters { get; set; }
-
-        /// <summary>
-        /// Headers(可以包含如：Authorization授权认证) http请求用
-        /// 格式：{"Authorization":"userpassword.."}
-        /// </summary>
-        [Required, MaxLength(256)]
-        public string Headers { get; set; }
+        public string JobDataMap { get; set; }
 
         /// <summary>
         /// 任务描述

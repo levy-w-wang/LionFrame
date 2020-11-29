@@ -26,12 +26,20 @@ namespace LionFrame.Controller
         [HttpPost, Route("addtask")]
         public async Task<ActionResult> AddTask(ScheduleEntityParam entity)
         {
-            var result = await SchedulerCenter.AddScheduleJobAsync(entity);
-            if (result.Success)
+            // 判断存在
+            if (await SysQuartzBll.ExistTask(entity))
             {
-                await SysQuartzBll.AddTask(entity);
+                return Fail("任务名称已存在");
             }
-            return MyJson(result);
+
+            var result = await SchedulerCenter.AddScheduleJobAsync(entity);
+            if (!result.Success)
+            {
+                return MyJson(result);
+            }
+
+            var addResult = await SysQuartzBll.AddTask(entity);
+            return addResult ? Succeed() : Fail("添加失败");
         }
 
         /// <summary>
@@ -41,7 +49,15 @@ namespace LionFrame.Controller
         [HttpPost, Route("stopjob")]
         public async Task<ActionResult> StopJob(JobKey jobKey)
         {
-            return MyJson((await SchedulerCenter.StopOrDelScheduleJobAsync(jobKey)));
+            var result = await SchedulerCenter.StopOrDelScheduleJobAsync(jobKey);
+            return MyJson(result);
+            //if (!result.Success)
+            //{
+            //    return MyJson(result);
+            //}
+
+            //var updateResult = await SysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, MyTriggerState.Paused);
+            //return updateResult ? Succeed() : Fail("暂停失败");
         }
 
         /// <summary>
@@ -54,6 +70,13 @@ namespace LionFrame.Controller
         {
             var result = await SchedulerCenter.StopOrDelScheduleJobAsync(jobKey, true);
             return MyJson(result);
+            //if (!result.Success)
+            //{
+            //    return MyJson(result);
+            //}
+
+            //var updateResult = await SysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, MyTriggerState.Delete);
+            //return updateResult ? Succeed() : Fail("删除失败");
         }
 
         /// <summary>
@@ -63,7 +86,15 @@ namespace LionFrame.Controller
         [HttpPost, Route("resumejob")]
         public async Task<ActionResult> ResumeJob(JobKey jobKey)
         {
-            return MyJson((await SchedulerCenter.ResumeJobAsync(jobKey)));
+            var result = await SchedulerCenter.ResumeJobAsync(jobKey);
+            return MyJson(result);
+            //if (!result.Success)
+            //{
+            //    return MyJson(result);
+            //}
+
+            //var updateResult = await SysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, MyTriggerState.Normal);
+            //return updateResult ? Succeed() : Fail("恢复运行失败");
         }
 
         /// <summary>
@@ -72,11 +103,21 @@ namespace LionFrame.Controller
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPost, Route("modifyjob")]
-        public async Task<ActionResult> ModifyJob([FromBody]ScheduleEntityParam entity)
+        public async Task<ActionResult> ModifyJob([FromBody] ScheduleEntityParam entity)
         {
-            await SchedulerCenter.StopOrDelScheduleJobAsync(new JobKey(entity.JobName, entity.JobGroup), true);
-            await SchedulerCenter.AddScheduleJobAsync(entity);
-            return Succeed("修改计划任务成功！");
+            var result = await SchedulerCenter.StopOrDelScheduleJobAsync(new JobKey(entity.JobName, entity.JobGroup), true);
+            if (!result.Success)
+            {
+                return MyJson(result);
+            }
+
+            result = await SchedulerCenter.AddScheduleJobAsync(entity);
+            if (result.Success)
+            {
+                result = await SysQuartzBll.ModifyTask(entity);
+            }
+
+            return MyJson(result);
         }
 
         ///// <summary>
