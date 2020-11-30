@@ -166,6 +166,18 @@ namespace LionFrame.Data.BasicData
             },
             new SysMenu()
             {
+                MenuId = "M5",
+                MenuName = "任务调度",
+                ParentMenuId = string.Empty,
+                Url = string.Empty,
+                Level = 1,
+                Type = SysConstants.MenuType.Menu,
+                Icon = "lion-icon-renwutiaodu",
+                OrderIndex = 1,
+                CreatedTime = DateTime.Now,
+            },
+            new SysMenu()
+            {
                 MenuId = "M101",
                 MenuName = "用户管理",
                 ParentMenuId = "M1",
@@ -368,6 +380,30 @@ namespace LionFrame.Data.BasicData
                 Icon = "el-icon-potato-strips",
                 OrderIndex = 2,
                 CreatedTime = DateTime.Now,
+            },
+            new SysMenu()
+            {
+                MenuId = "M501",
+                MenuName = "任务管理",
+                ParentMenuId = "M5",
+                Level = 2,
+                Url = "quartz/task",
+                Type = SysConstants.MenuType.Menu,
+                Icon = "lion-icon-renwu",
+                OrderIndex = 1,
+                CreatedTime = DateTime.Now,
+            },
+            new SysMenu()
+            {
+                MenuId = "M502",
+                MenuName = "任务日志",
+                ParentMenuId = "M5",
+                Level = 2,
+                Url = "quartz/tasklog",
+                Type = SysConstants.MenuType.Menu,
+                Icon = "lion-icon-rizhi",
+                OrderIndex = 2,
+                CreatedTime = DateTime.Now,
             }
         };
 
@@ -375,7 +411,7 @@ namespace LionFrame.Data.BasicData
         //非系统管理员不能管理菜单 
         public static List<string> InitNoPerms = new List<string>()
         {
-            "M102",
+            "M102","M5","M501","M502"
         };
 
         /// <summary>
@@ -415,6 +451,7 @@ namespace LionFrame.Data.BasicData
                         tempNormalRoleMenuRelation.State = -1;
                         tempNormalRoleMenuRelation.Deleted = true;
                     }
+
                     roleMenus.Add(tempRoleMenuRelation);
                     roleMenus.Add(tempNormalRoleMenuRelation);
                     InitNormalRoleMenuRelations.Add(tempNormalRoleMenuRelation);

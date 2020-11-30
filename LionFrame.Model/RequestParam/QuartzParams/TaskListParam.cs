@@ -1,4 +1,5 @@
 ﻿using LionFrame.Model.QuartzModels;
+using Quartz;
 
 namespace LionFrame.Model.RequestParam.QuartzParams
 {
@@ -22,6 +23,6 @@ namespace LionFrame.Model.RequestParam.QuartzParams
         /// <summary>
         /// 任务状态
         /// </summary>
-        public MyTriggerState? TriggerState { get; set; }
+        public TriggerState? TriggerState { get; set; }
     }
 }

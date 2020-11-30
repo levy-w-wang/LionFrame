@@ -23,7 +23,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
-            await sysQuartzBll.ModifyTaskState(trigger.JobKey.Group, trigger.JobKey.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(trigger.JobKey.Group, trigger.JobKey.Name, state);
             Console.WriteLine($"{trigger.Key.Name} state:{state} JobScheduled");
         }
 
@@ -33,7 +33,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(triggerKey, cancellationToken);
-            await sysQuartzBll.ModifyTaskState(triggerKey.Group, triggerKey.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(triggerKey.Group, triggerKey.Name, state);
             Console.WriteLine($"{triggerKey.Name} state:{state} JobUnscheduled");
         }
 
@@ -43,7 +43,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
-            await sysQuartzBll.ModifyTaskState(trigger.Key.Group, trigger.Key.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(trigger.Key.Group, trigger.Key.Name, state);
             Console.WriteLine($"{trigger.Key.Name} state:{state}  TriggerFinalized");
         }
 
@@ -70,7 +70,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state);
             Console.WriteLine($"{jobKey.Name} state:{state}  JobDeleted");
         }
 
@@ -81,7 +81,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state);
             Console.WriteLine($"{jobKey.Name}  JobPaused");
         }
 
@@ -91,7 +91,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state);
             Console.WriteLine($"{jobKey.Name}  JobInterrupted");
         }
 
@@ -102,7 +102,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
             var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state);
             Console.WriteLine($"{jobKey.Name}  JobResumed");
         }
 

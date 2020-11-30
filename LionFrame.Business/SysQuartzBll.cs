@@ -11,6 +11,7 @@ using LionFrame.Model.QuartzModels;
 using LionFrame.Model.RequestParam.QuartzParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.EntityFrameworkCore;
+using Quartz;
 
 namespace LionFrame.Business
 {
@@ -41,7 +42,7 @@ namespace LionFrame.Business
         /// <param name="jobName"></param>
         /// <param name="triggerState"></param>
         /// <returns></returns>
-        public async Task<bool> ModifyTaskState(string jobGroup, string jobName, MyTriggerState triggerState)
+        public async Task<bool> ModifyTaskState(string jobGroup, string jobName, TriggerState triggerState)
         {
             var result = await SysQuartzDao.CurrentDbContext.SysQuartzs.Where(c => c.JobGroup == jobGroup && c.JobName == jobName).UpdateFromQueryAsync(c => new SysQuartz()
             {
@@ -91,7 +92,7 @@ namespace LionFrame.Business
                 Description = entity.Description,
                 NotifyEmail = entity.NotifyEmail ?? "",
                 MailMessage = entity.MailMessage,
-                TriggerState = MyTriggerState.Normal,
+                TriggerState = TriggerState.Normal,
             });
             return result > 0 ? responseResult.Succeed() : responseResult.Fail("最终修改失败");
         }

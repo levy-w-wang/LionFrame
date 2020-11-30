@@ -34,6 +34,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzLogBll = LionWeb.AutofacContainer.Resolve<SysQuartzLogBll>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
             var jobDetail = context.JobDetail;
+            
             SysQuartzLog sysQuartzLog = new SysQuartzLog()
             {
                 JobGroup = jobDetail.Key.Group,
@@ -45,6 +46,7 @@ namespace LionFrame.Quartz.Listeners
                 Description = jobDetail.Description ?? "",
                 Result = (context.Result ?? "").ToJson(true),
                 Exception = jobException?.Message ?? "",
+                RunTimeTotalMilliseconds = context.JobRunTime.TotalMilliseconds,
                 CreatedTime = DateTime.Now
             };
             await sysQuartzLogBll.AddTaskLog(sysQuartzLog);

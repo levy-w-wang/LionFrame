@@ -23,4 +23,8 @@
     <Folder Include="ResponseDto\MenuDtos\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Quartz" Version="3.2.3" />
+  </ItemGroup>
+
 </Project>

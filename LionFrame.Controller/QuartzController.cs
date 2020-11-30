@@ -44,7 +44,7 @@ namespace LionFrame.Controller
             // 判断存在
             if (await SysQuartzBll.ExistTask(entity))
             {
-                return Fail("任务名称已存在");
+                return Fail("任务名称已存在,请进行修改原任务，或使用新名称");
             }
 
             var result = await SchedulerCenter.AddScheduleJobAsync(entity);
@@ -61,7 +61,7 @@ namespace LionFrame.Controller
         /// 暂停任务
         /// </summary>
         /// <returns></returns>
-        [HttpPost, Route("stopjob")]
+        [HttpPut, Route("stopjob")]
         public async Task<ActionResult> StopJob(JobKey jobKey)
         {
             var result = await SchedulerCenter.StopOrDelScheduleJobAsync(jobKey);
@@ -80,8 +80,8 @@ namespace LionFrame.Controller
         /// </summary>
         /// <param name="jobKey"></param>
         /// <returns></returns>
-        [HttpDelete, Route("removetask")]
-        public async Task<ActionResult> DeleteTask(JobKey jobKey)
+        [HttpDelete, Route("removejob")]
+        public async Task<ActionResult> DeleteJob(JobKey jobKey)
         {
             var result = await SchedulerCenter.StopOrDelScheduleJobAsync(jobKey, true);
             return MyJson(result);
@@ -98,7 +98,7 @@ namespace LionFrame.Controller
         /// 恢复运行暂停的任务
         /// </summary> 
         /// <returns></returns>
-        [HttpPost, Route("resumejob")]
+        [HttpPut, Route("resumejob")]
         public async Task<ActionResult> ResumeJob(JobKey jobKey)
         {
             var result = await SchedulerCenter.ResumeJobAsync(jobKey);
@@ -117,7 +117,7 @@ namespace LionFrame.Controller
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        [HttpPost, Route("modifyjob")]
+        [HttpPut, Route("modifyjob")]
         public async Task<ActionResult> ModifyJob(ScheduleEntityParam entity)
         {
             var result = await SchedulerCenter.StopOrDelScheduleJobAsync(new JobKey(entity.JobName, entity.JobGroup), true);
@@ -151,7 +151,7 @@ namespace LionFrame.Controller
         /// 启动调度
         /// </summary>
         /// <returns></returns>
-        [HttpGet, Route("startschedule")]
+        [HttpPut, Route("startschedule")]
         public async Task<ActionResult> StartSchedule()
         {
             return Succeed(await SchedulerCenter.StartScheduleAsync());
@@ -161,7 +161,7 @@ namespace LionFrame.Controller
         /// 停止调度
         /// </summary>
         /// <returns></returns>
-        [HttpGet, Route("stopschedule")]
+        [HttpPut, Route("stopschedule")]
         public async Task<ActionResult> StopSchedule()
         {
             return Succeed(await SchedulerCenter.StopScheduleAsync());

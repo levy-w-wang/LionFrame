@@ -32,14 +32,14 @@ namespace LionFrame.Domain.SystemDomain
         public string RequestPath { get; set; }
 
         /// <summary>
-        /// 下次执行时间
-        /// </summary>
-        public DateTime? NextFireTime { get; set; }
-
-        /// <summary>
         /// 上次执行时间
         /// </summary>
         public DateTime? PreviousFireTime { get; set; }
+
+        /// <summary>
+        /// 下次执行时间
+        /// </summary>
+        public DateTime? NextFireTime { get; set; }
         /// <summary>
         /// 请求参数
         /// </summary>
@@ -56,6 +56,12 @@ namespace LionFrame.Domain.SystemDomain
         public string Result { get; set; }
 
         public string Exception { get; set; }
+
+        /// <summary>
+        /// 运行时长
+        /// </summary>
+        public double RunTimeTotalMilliseconds { get; set; }
+
         /// <summary>
         /// 创建时间
         /// </summary>
