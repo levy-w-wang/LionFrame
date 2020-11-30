@@ -17,43 +17,34 @@ namespace LionFrame.Quartz.Listeners
         /// <param name="trigger"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task JobScheduled(ITrigger trigger, CancellationToken cancellationToken = new CancellationToken())
+        public async Task JobScheduled(ITrigger trigger, CancellationToken cancellationToken = new CancellationToken())
         {
             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
-                await sysQuartzBll.ModifyTaskState(trigger.JobKey.Group, trigger.JobKey.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{trigger.Key.Name} state:{state} JobScheduled");
-            }, cancellationToken);
+            var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
+            await sysQuartzBll.ModifyTaskState(trigger.JobKey.Group, trigger.JobKey.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{trigger.Key.Name} state:{state} JobScheduled");
         }
 
-        public Task JobUnscheduled(TriggerKey triggerKey, CancellationToken cancellationToken = new CancellationToken())
+        public async Task JobUnscheduled(TriggerKey triggerKey, CancellationToken cancellationToken = new CancellationToken())
         {
             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(triggerKey, cancellationToken);
-                await sysQuartzBll.ModifyTaskState(triggerKey.Group, triggerKey.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{triggerKey.Name} state:{state} JobUnscheduled");
-            }, cancellationToken);
+            var state = await schedule.GetTriggerState(triggerKey, cancellationToken);
+            await sysQuartzBll.ModifyTaskState(triggerKey.Group, triggerKey.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{triggerKey.Name} state:{state} JobUnscheduled");
         }
 
-        public Task TriggerFinalized(ITrigger trigger, CancellationToken cancellationToken = new CancellationToken())
+        public async Task TriggerFinalized(ITrigger trigger, CancellationToken cancellationToken = new CancellationToken())
         {
             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
-                await sysQuartzBll.ModifyTaskState(trigger.Key.Group, trigger.Key.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{trigger.Key.Name} state:{state}  TriggerFinalized");
-            }, cancellationToken);
+            var state = await schedule.GetTriggerState(trigger.Key, cancellationToken);
+            await sysQuartzBll.ModifyTaskState(trigger.Key.Group, trigger.Key.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{trigger.Key.Name} state:{state}  TriggerFinalized");
         }
 
         public Task TriggerPaused(TriggerKey triggerKey, CancellationToken cancellationToken = new CancellationToken())
@@ -68,154 +59,118 @@ namespace LionFrame.Quartz.Listeners
 
         public Task JobAdded(IJobDetail jobDetail, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"{jobDetail.Key.Name}  JobAdded");
-            }, cancellationToken);
+            Console.WriteLine($"{jobDetail.Key.Name}  JobAdded");
+            return Task.CompletedTask;
         }
 
 
-        public Task JobDeleted(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
+        public async Task JobDeleted(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
         {
             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-                await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{jobKey.Name} state:{state}  JobDeleted");
-            }, cancellationToken);
+            var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{jobKey.Name} state:{state}  JobDeleted");
         }
 
 
-        public Task JobPaused(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
-        {
-             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
-            var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
-
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-                await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{jobKey.Name}  JobPaused");
-            }, cancellationToken);
-        }
-
-        public Task JobInterrupted(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
+        public async Task JobPaused(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
         {
             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-                await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{jobKey.Name}  JobInterrupted");
-            }, cancellationToken);
+            var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{jobKey.Name}  JobPaused");
         }
 
-
-        public Task JobResumed(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
+        public async Task JobInterrupted(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
         {
             var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
 
-            return Task.Factory.StartNew(async () =>
-            {
-                var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
-                await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
-                Console.WriteLine($"{jobKey.Name}  JobResumed");
-            }, cancellationToken);
+            var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{jobKey.Name}  JobInterrupted");
+        }
+
+
+        public async Task JobResumed(JobKey jobKey, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var schedule = LionWeb.AutofacContainer.Resolve<IScheduler>();
+            var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
+
+            var state = await schedule.GetTriggerState(jobKey.ConvertKey(), cancellationToken);
+            await sysQuartzBll.ModifyTaskState(jobKey.Group, jobKey.Name, state.ConvertTriggerState());
+            Console.WriteLine($"{jobKey.Name}  JobResumed");
         }
 
         public Task TriggersResumed(string triggerGroup, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"{triggerGroup}  TriggersResumed");
-            }, cancellationToken);
+            Console.WriteLine($"{triggerGroup}  TriggersResumed");
+            return Task.CompletedTask;
         }
 
         public Task JobsPaused(string jobGroup, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"{jobGroup}  JobsPaused");
-            }, cancellationToken);
+            Console.WriteLine($"{jobGroup}  JobsPaused");
+            return Task.CompletedTask;
         }
 
         public Task JobsResumed(string jobGroup, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"{jobGroup}  JobsResumed");
-            }, cancellationToken);
+            Console.WriteLine($"{jobGroup}  JobsResumed");
+            return Task.CompletedTask;
         }
 
         public Task TriggersPaused(string triggerGroup, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"{triggerGroup}  TriggersPaused");
-            }, cancellationToken);
+            Console.WriteLine($"{triggerGroup}  TriggersPaused");
+            return Task.CompletedTask;
         }
 
         public Task SchedulerError(string msg, SchedulerException cause, CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                LogHelper.Logger.Fatal(cause, msg);
-                Console.WriteLine($"SchedulerError msg:{msg} cause:{cause.Message}");
-            }, cancellationToken);
+            LogHelper.Logger.Fatal(cause, msg);
+            Console.WriteLine($"SchedulerError msg:{msg} cause:{cause.Message}");
+            return Task.CompletedTask;
         }
 
         public Task SchedulerInStandbyMode(CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"SchedulerInStandbyMode");
-            }, cancellationToken);
+            Console.WriteLine($"SchedulerInStandbyMode");
+            return Task.CompletedTask;
         }
 
         public Task SchedulerStarted(CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"SchedulerStarted");
-            }, cancellationToken);
+            Console.WriteLine($"SchedulerStarted");
+            return Task.CompletedTask;
         }
 
         public Task SchedulerStarting(CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"SchedulerStarting");
-            }, cancellationToken);
+            Console.WriteLine($"SchedulerStarting");
+            return Task.CompletedTask;
         }
 
         public Task SchedulerShutdown(CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"SchedulerShutdown");
-            }, cancellationToken);
+            Console.WriteLine($"SchedulerShutdown");
+            return Task.CompletedTask;
         }
 
         public Task SchedulerShuttingdown(CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"SchedulerShuttingdown");
-            }, cancellationToken);
+            Console.WriteLine($"SchedulerShuttingdown");
+            return Task.CompletedTask;
         }
 
         public Task SchedulingDataCleared(CancellationToken cancellationToken = new CancellationToken())
         {
-            return Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine($"SchedulingDataCleared");
-            }, cancellationToken);
+            Console.WriteLine($"SchedulingDataCleared");
+            return Task.CompletedTask;
         }
     }
 }

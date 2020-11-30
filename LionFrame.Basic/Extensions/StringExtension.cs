@@ -20,6 +20,15 @@ namespace LionFrame.Basic.Extensions
         }
 
         /// <summary>
+        /// 字符串 不为Null、空字符串组成。
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsNotNullOrEmpty(this string str)
+        {
+            return !string.IsNullOrEmpty(str);
+        }
+        /// <summary>
         /// 字符串是否为Null、空字符串或仅由空白字符组成。
         /// </summary>
         /// <param name="str"></param>

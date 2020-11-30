@@ -8,6 +8,7 @@ using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.Data.SystemDao;
 using LionFrame.Domain.SystemDomain;
 using LionFrame.Model.QuartzModels;
+using LionFrame.Model.RequestParam.QuartzParams;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +27,8 @@ namespace LionFrame.Business
         {
             var sysQuartz = entity.MapTo<SysQuartz>();
             sysQuartz.CreatedTime = DateTime.Now;
-            sysQuartz.LastFireTime = null;
+            sysQuartz.NextFireTime = null;
+            sysQuartz.PreviousFireTime = null;
             await SysQuartzDao.AddAsync(sysQuartz);
             var result = await SysQuartzDao.SaveChangesAsync();
             return result > 0;
@@ -53,13 +55,15 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="jobGroup"></param>
         /// <param name="jobName"></param>
-        /// <param name="dateTime"></param>
+        /// <param name="previousFireTime"></param>
+        /// <param name="nextFireTime"></param>
         /// <returns></returns>
-        public async Task<bool> ModifyTaskLastFireTime(string jobGroup, string jobName, DateTime dateTime)
+        public async Task<bool> ModifyTaskLastFireTime(string jobGroup, string jobName, DateTime? previousFireTime, DateTime? nextFireTime)
         {
             var result = await SysQuartzDao.CurrentDbContext.SysQuartzs.Where(c => c.JobGroup == jobGroup && c.JobName == jobName).UpdateFromQueryAsync(c => new SysQuartz()
             {
-                LastFireTime = dateTime,
+                PreviousFireTime = previousFireTime,
+                NextFireTime = nextFireTime
             });
             return result > 0;
         }
@@ -101,6 +105,16 @@ namespace LionFrame.Business
         {
             var result = await SysQuartzDao.CurrentDbContext.SysQuartzs.AnyAsync(c => c.JobGroup == entity.JobGroup && c.JobName == entity.JobName);
             return result;
+        }
+
+        /// <summary>
+        /// 获取任务分页数据
+        /// </summary>
+        /// <param name="taskListParam"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<SysQuartz>> GetTaskPageList(TaskListParam taskListParam)
+        {
+            return await SysQuartzDao.GetTaskPageList(taskListParam);
         }
     }
 }

@@ -115,9 +115,14 @@ namespace LionFrame.Domain.SystemDomain
         public MyTriggerState TriggerState { get; set; }
 
         /// <summary>
-        /// 最后执行时间
+        /// 上次执行时间
         /// </summary>
-        public DateTime? LastFireTime { get; set; }
+        public DateTime? PreviousFireTime { get; set; }
+
+        /// <summary>
+        /// 下次执行时间
+        /// </summary>
+        public DateTime? NextFireTime { get; set; }
 
         /// <summary>
         /// 创建时间

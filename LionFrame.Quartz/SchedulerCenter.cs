@@ -69,6 +69,7 @@ namespace LionFrame.Quartz
                         {
                             try
                             {
+                                // 判断是否能转成字典格式 数据是否正确
                                 entity.Headers.ToObject<Dictionary<string, string>>();
                             }
                             catch
@@ -143,7 +144,7 @@ namespace LionFrame.Quartz
             jobDataMap.Add(QuartzConstant.HEADERS, entity.Headers);
 
             // 定义这个工作，并将其绑定到我们的IJob实现类                
-            IJobDetail job = JobBuilder.Create<TestJob>()
+            IJobDetail job = JobBuilder.Create<HttpJob>()
                 .SetJobData(new JobDataMap(jobDataMap))
                 .WithDescription(entity.Description)
                 .WithIdentity(entity.JobName, entity.JobGroup)
@@ -240,6 +241,14 @@ namespace LionFrame.Quartz
             return !Scheduler.InStandbyMode;
         }
 
+        /// <summary>
+        /// 获取任务状态是否已暂停
+        /// </summary>
+        /// <returns></returns>
+        public bool ScheduleAState()
+        {
+            return !Scheduler.InStandbyMode;
+        }
         /// <summary>
         /// 停止任务调度
         /// </summary>

@@ -55,6 +55,7 @@ namespace LionFrame.Domain.SystemDomain
         /// </summary>
         public string Result { get; set; }
 
+        public string Exception { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>

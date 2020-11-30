@@ -15,11 +15,10 @@ namespace LionFrame.Quartz.Listeners
         /// <param name="context"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task TriggerFired(ITrigger trigger, IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
+        public async Task TriggerFired(ITrigger trigger, IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
         {
-            var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
+            var a = await context.Scheduler.GetTriggerState(trigger.Key, cancellationToken);
             Console.WriteLine("TriggerFired" + a.ToString());
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -29,11 +28,11 @@ namespace LionFrame.Quartz.Listeners
         /// <param name="context"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<bool> VetoJobExecution(ITrigger trigger, IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> VetoJobExecution(ITrigger trigger, IJobExecutionContext context, CancellationToken cancellationToken = new CancellationToken())
         {
-            var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
+            var a = await context.Scheduler.GetTriggerState(trigger.Key, cancellationToken);
             Console.WriteLine("VetoJobExecution" + a.ToString());
-            return Task.FromResult(false); //返回true表示否决Job继续执行
+            return false; //返回true表示否决Job继续执行
         }
 
         /// <summary>
@@ -55,11 +54,10 @@ namespace LionFrame.Quartz.Listeners
         /// <param name="triggerInstructionCode"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task TriggerComplete(ITrigger trigger, IJobExecutionContext context, SchedulerInstruction triggerInstructionCode, CancellationToken cancellationToken = new CancellationToken())
+        public async Task TriggerComplete(ITrigger trigger, IJobExecutionContext context, SchedulerInstruction triggerInstructionCode, CancellationToken cancellationToken = new CancellationToken())
         {
-            var a = context.Scheduler.GetTriggerState(trigger.Key, cancellationToken).Result;
+            var a = await context.Scheduler.GetTriggerState(trigger.Key, cancellationToken);
             Console.WriteLine($"TriggerComplete   state:{a.ToString()}" + context.Result.ToJson());
-            return Task.CompletedTask;
         }
 
         /// <summary>

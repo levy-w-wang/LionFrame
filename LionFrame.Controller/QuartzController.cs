@@ -6,17 +6,32 @@ using LionFrame.Business;
 using LionFrame.CoreCommon.Controllers;
 using LionFrame.CoreCommon.CustomFilter;
 using LionFrame.Model.QuartzModels;
+using LionFrame.Model.RequestParam.QuartzParams;
 using LionFrame.Quartz;
 using Microsoft.AspNetCore.Mvc;
 using Quartz;
 
 namespace LionFrame.Controller
 {
+    /// <summary>
+    /// 任务控制器  租户限制为系统账号租户ID
+    /// </summary>
     [Route("api/[controller]"), TenantFilter(1)]
     public class QuartzController : BaseUserController
     {
         public SchedulerCenter SchedulerCenter { get; set; }
         public SysQuartzBll SysQuartzBll { get; set; }
+
+        /// <summary>
+        /// 分页数据
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost, Route("list")]
+        public async Task<ActionResult> TaskPageList(TaskListParam taskListParam)
+        {
+            var result = await SysQuartzBll.GetTaskPageList(taskListParam);
+            return Succeed(result);
+        }
 
         /// <summary>
         /// 添加任务
@@ -103,7 +118,7 @@ namespace LionFrame.Controller
         /// <param name="entity"></param>
         /// <returns></returns>
         [HttpPost, Route("modifyjob")]
-        public async Task<ActionResult> ModifyJob([FromBody] ScheduleEntityParam entity)
+        public async Task<ActionResult> ModifyJob(ScheduleEntityParam entity)
         {
             var result = await SchedulerCenter.StopOrDelScheduleJobAsync(new JobKey(entity.JobName, entity.JobGroup), true);
             if (!result.Success)
@@ -150,6 +165,16 @@ namespace LionFrame.Controller
         public async Task<ActionResult> StopSchedule()
         {
             return Succeed(await SchedulerCenter.StopScheduleAsync());
+        }
+
+        /// <summary>
+        /// 获取调度器当前状态
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("schedulestate")]
+        public ActionResult ScheduleState()
+        {
+            return Succeed(SchedulerCenter.ScheduleAState());
         }
     }
 }

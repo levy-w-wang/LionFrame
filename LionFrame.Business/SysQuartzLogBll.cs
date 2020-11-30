@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using LionFrame.Basic.AutofacDependency;
 using LionFrame.Data.SystemDao;
 using LionFrame.Domain.SystemDomain;
+using LionFrame.Model.RequestParam.QuartzParams;
+using LionFrame.Model.ResponseDto.ResultModel;
 
 namespace LionFrame.Business
 {
@@ -17,6 +19,16 @@ namespace LionFrame.Business
             await SysQuartzLogDao.AddAsync(sysQuartzLog);
             var result = await SysQuartzLogDao.SaveChangesAsync();
             return result > 0;
+        }
+
+        /// <summary>
+        /// 获取任务执行日志分页数据
+        /// </summary>
+        /// <param name="taskLogListParam"></param>
+        /// <returns></returns>
+        public async Task<PageResponse<SysQuartzLog>> GetTaskLogPageList(TaskLogListParam taskLogListParam)
+        {
+            return await SysQuartzLogDao.GetTaskLogPageList(taskLogListParam);
         }
     }
 }
