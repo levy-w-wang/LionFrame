@@ -261,7 +261,7 @@ namespace LionFrame.Quartz
                 await Scheduler.Standby(); //TODO  注意：Shutdown后Start会报错，所以这里使用暂停。必须重新实例化才可start
             }
 
-            return Scheduler.InStandbyMode;
+            return !Scheduler.InStandbyMode;
         }
 
         /// <summary>
