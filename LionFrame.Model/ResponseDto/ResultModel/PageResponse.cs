@@ -40,16 +40,16 @@ namespace LionFrame.Model.ResponseDto.ResultModel
             }
         }
 
-        public List<T> Data { get; set; }
+        public List<T> PageData { get; set; }
 
         public PageResponse()
         {
-            Data = new List<T>();
+            PageData = new List<T>();
         }
 
         public PageResponse(List<T> data, int currentPage, int pageTotal)
         {
-            Data = data;
+            PageData = data;
             CurrentPage = currentPage;
             PageTotal = pageTotal;
         }

@@ -156,9 +156,9 @@ namespace LionFrame.Business
             for (int i = 1; i < 100000; i++)
             {
                 var roleIds = SysMenuDao.LoadPageEntities(roleIdsQueryable, i, 100, true, roleId => roleId.RoleId);
-                if (roleIds.Data.Count > 0)
+                if (roleIds.PageData.Count > 0)
                 {
-                    roleIds.Data.ForEach(roleInfo =>
+                    roleIds.PageData.ForEach(roleInfo =>
                     {
                         relations.Add(new SysRoleMenuRelation()
                         {

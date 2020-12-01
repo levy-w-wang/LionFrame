@@ -192,12 +192,12 @@ namespace LionFrame.Data.BasicData
             rest.RecordTotal = temp.Count();//记录总条数时，自动设置了总页数
             if (isAsc)
             {
-                rest.Data = temp.OrderBy(orderBy)
+                rest.PageData = temp.OrderBy(orderBy)
                      .Skip(pageSize * (currentPage - 1))
                      .Take(pageSize).Select(t => new T()).ToList(); //去掉.AsQueryable()，添加.select(t=>new Dto()).ToList()
             }
 
-            rest.Data = temp.OrderByDescending(orderBy)
+            rest.PageData = temp.OrderByDescending(orderBy)
                 .Skip(pageSize * (currentPage - 1))
                 .Take(pageSize).Select(t => new T()).ToList(); //.select(t=>new Dto()).ToList()
 
@@ -261,13 +261,13 @@ namespace LionFrame.Data.BasicData
             rest.RecordTotal = temp.Count();
             if (isAsc)
             {
-                rest.Data = temp.OrderBy(orderBy)
+                rest.PageData = temp.OrderBy(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ToList();
             }
             else
             {
-                rest.Data = temp.OrderByDescending(orderBy)
+                rest.PageData = temp.OrderByDescending(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ToList();
             }
@@ -407,12 +407,12 @@ namespace LionFrame.Data.BasicData
             rest.RecordTotal = await temp.CountAsync();//记录总条数时，自动设置了总页数
             if (isAsc)
             {
-                rest.Data = await temp.OrderBy(orderBy)
+                rest.PageData = await temp.OrderBy(orderBy)
                      .Skip(pageSize * (currentPage - 1))
                      .Take(pageSize).Select(t => new T()).ToListAsync(); //去掉.AsQueryable()，添加.select(t=>new Dto()).ToList()
             }
 
-            rest.Data = await temp.OrderByDescending(orderBy)
+            rest.PageData = await temp.OrderByDescending(orderBy)
                 .Skip(pageSize * (currentPage - 1))
                 .Take(pageSize).Select(t => new T()).ToListAsync(); //.select(t=>new Dto()).ToList()
 
@@ -442,13 +442,13 @@ namespace LionFrame.Data.BasicData
             rest.RecordTotal = await temp.CountAsync();
             if (isAsc)
             {
-                rest.Data = await temp.OrderBy(orderBy)
+                rest.PageData = await temp.OrderBy(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ToListAsync();
             }
             else
             {
-                rest.Data = await temp.OrderByDescending(orderBy)
+                rest.PageData = await temp.OrderByDescending(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ToListAsync();
             }
@@ -478,13 +478,13 @@ namespace LionFrame.Data.BasicData
             rest.RecordTotal = await temp.CountAsync();
             if (isAsc)
             {
-                rest.Data = await temp.OrderBy(orderBy)
+                rest.PageData = await temp.OrderBy(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ProjectTo<TResult>(MapperProvider).ToListAsync();
             }
             else
             {
-                rest.Data = await temp.OrderByDescending(orderBy)
+                rest.PageData = await temp.OrderByDescending(orderBy)
                     .Skip(pageSize * (currentPage - 1))
                     .Take(pageSize).ProjectTo<TResult>(MapperProvider).ToListAsync();
             }

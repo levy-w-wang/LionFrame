@@ -136,7 +136,7 @@ namespace LionFrame.Data.SystemDao
             }
             var result = await LoadPageEntitiesProjectToAsync<SysUser, long, UserManagerDto>(sysUserQueryable, currentPage, pageSize, false, u => u.UserId);
 
-            var uids = result.Data.Select(c => long.Parse(c.UserId));
+            var uids = result.PageData.Select(c => long.Parse(c.UserId));
             var rolesQueryable = from userRoleRelation in CurrentDbContext.SysUserRoleRelations
                                  join sysRole in CurrentDbContext.SysRoles on userRoleRelation.RoleId equals sysRole.RoleId
                                  where !userRoleRelation.Deleted && userRoleRelation.State == 1 && !sysRole.Deleted && sysRole.TenantId == currentUser.TenantId  && userRoleRelation.TenantId == currentUser.TenantId
@@ -149,7 +149,7 @@ namespace LionFrame.Data.SystemDao
                                      sysRole.RoleDesc,
                                  };
             var roles = await rolesQueryable.Distinct().ToListAsync();
-            result.Data.ForEach(u =>
+            result.PageData.ForEach(u =>
             {
                 var r = roles.Where(c => c.UserId.ToString() == u.UserId).ToList();
                 u.RoleIds = r.Select(c => c.RoleId.ToString()).ToList();

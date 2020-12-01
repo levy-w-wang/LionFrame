@@ -60,7 +60,7 @@ namespace LionFrame.CoreCommon
             var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0]?.Trim();
             if (string.IsNullOrEmpty(ip))
             {
-                ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+                ip = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
             }
 
             return ip;
