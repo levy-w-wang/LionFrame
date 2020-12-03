@@ -108,13 +108,21 @@ namespace LionFrame.CoreCommon
                 {
                     return validResult;
                 }
-
                 //当token过期时间小于8小时，更新token并重新返回新的token
                 if (date.AddHours(-8) > DateTime.Now) return validResult;
-                var nToken = TokenManager.GenerateToken(str);
+                #region 滑动刷新Token
+
+                var newSessionId = Guid.NewGuid().ToString("N");
+                userDic["sessionId"] = newSessionId;
+                var nToken = TokenManager.GenerateToken(userDic.ToJson());
+                CurrentUser.SessionId = newSessionId;
+                CurrentUser.UserToken = nToken;
+                LionUserCache.CreateUserCache(CurrentUser);
                 LionWeb.HttpContext.Response.Headers["token"] = nToken;
                 LionWeb.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "token";
                 return validResult;
+
+                #endregion
             }
 
             return SysConstants.TokenValidType.LogonInvalid;

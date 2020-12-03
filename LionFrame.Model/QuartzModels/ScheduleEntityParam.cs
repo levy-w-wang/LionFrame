@@ -13,13 +13,13 @@ namespace LionFrame.Model.QuartzModels
         /// <summary>
         /// 任务名称
         /// </summary>
-        [Required]
+        [Required, MaxLength(50)]
         public string JobName { get; set; }
 
         /// <summary>
         /// 任务分组
         /// </summary>
-        [Required]
+        [Required, MaxLength(50)]
         public string JobGroup { get; set; }
 
         /// <summary>
@@ -87,6 +87,7 @@ namespace LionFrame.Model.QuartzModels
         /// <summary>
         /// 任务描述
         /// </summary>
+        [MaxLength(120)]
         public string Description { get; set; } = "";
 
         /// <summary>

@@ -85,7 +85,7 @@ namespace LionFrame.CoreCommon
             userCache.LoginIp = LionWeb.GetClientIp();
             userCache.LoginTime = DateTime.Now;
 
-            UserCacheBo oldCache = Get(sid);
+            UserCacheBo oldCache = Get(sid,false);
             UserCacheBo cache = oldCache;
 
             //如果是同一用户,仅更新时间 单点登录
@@ -99,8 +99,8 @@ namespace LionFrame.CoreCommon
                 cache = userCache;
                 var redisClient = LionWeb.AutofacContainer.Resolve<RedisClient>();
                 redisClient.Set(key, cache, RedisTimeout);
+                AddToMemoryCache(key, cache);
             }
-            AddToMemoryCache(key, cache);
         }
 
         /// <summary>
@@ -121,24 +121,28 @@ namespace LionFrame.CoreCommon
         /// 获取当前用户缓存
         /// </summary>
         /// <param name="uid"></param>
+        /// <param name="getFromLocal">从item和memorycache 中取出来的是一样的，可能是因为引用类型 指向同一地址</param>
         /// <returns></returns>
-        public static UserCacheBo Get(string uid = "")
+        public static UserCacheBo Get(string uid = "",bool getFromLocal = true)
         {
             var http = LionWeb.HttpContext;
             if (http == null)
                 throw new CustomSystemException("未授权，请重新登录", ResponseCode.Unauthorized);
-            if (http.Items["user"] is UserCacheBo user)
+            if (http.Items["user"] is UserCacheBo user && getFromLocal)
                 return user;
             uid = uid.IsNullOrEmpty() ? GetUidFromClient() : uid;
             if (uid.IsNullOrEmpty())
                 return null;
-
             var key = FormatPrefixKey(uid);
-            //从本地缓存中读取cache
-            var cacheCache = Cache.Get<UserCacheBo>(key);
-            if (cacheCache != null)
+
+            if (getFromLocal)
             {
-                return cacheCache;
+                //从本地缓存中读取cache
+                var cacheCache = Cache.Get<UserCacheBo>(key);
+                if (cacheCache != null)
+                {
+                    return cacheCache;
+                }
             }
 
             // 本地缓存中不存在，则从redis中获取，然后存回本地缓存
