@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Net.Http;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using LionFrame.Basic.Extensions;
 using LionFrame.Config;
 using LionFrame.CoreCommon.HttpHelper;
 using LionFrame.Model.QuartzModels;
-using LionFrame.Model.ResponseDto.ResultModel;
 using Quartz;
 
 namespace LionFrame.Quartz.Jobs
@@ -21,81 +15,57 @@ namespace LionFrame.Quartz.Jobs
     {
         public async Task Execute(IJobExecutionContext context)
         {
-            var maxLogCount = 20; //最多保存日志数量
-            var warnTime = 20; //接口请求超过多少秒记录警告日志   
+            //获取相关参数
+            var requestUrl = context.JobDetail.JobDataMap.GetString(QuartzConstant.REQUESTURL);
+            requestUrl = requestUrl?.IndexOf("http") == 0 ? requestUrl : "http://" + requestUrl;
+            var requestParameters = context.JobDetail.JobDataMap.GetString(QuartzConstant.REQUESTPARAMETERS);
+            var headersString = context.JobDetail.JobDataMap.GetString(QuartzConstant.HEADERS);
+            var headers = (headersString?.Trim())?.ToObject<Dictionary<string, string>>();
+            var requestType = int.Parse(context.JobDetail.JobDataMap.GetString(QuartzConstant.REQUESTTYPE) ?? "0").ToEnum<RequestTypeEnum>();
 
-            var mailMessage = MailMessageEnum.None;
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Restart(); //  开始监视代码运行时间
-            try
+            HttpResponseMessage response;
+
+            var http = HttpHelper.Instance;
+            switch (requestType)
             {
-                //获取相关参数
-                var requestUrl = context.JobDetail.JobDataMap.GetString(QuartzConstant.REQUESTURL);
-                requestUrl = requestUrl?.IndexOf("http") == 0 ? requestUrl : "http://" + requestUrl;
-                var requestParameters = context.JobDetail.JobDataMap.GetString(QuartzConstant.REQUESTPARAMETERS);
-                var headersString = context.JobDetail.JobDataMap.GetString(QuartzConstant.HEADERS);
-                mailMessage = (MailMessageEnum) int.Parse(context.JobDetail.JobDataMap.GetString(QuartzConstant.MAILMESSAGE) ?? "0");
-                var headers = (headersString?.Trim())?.ToObject<Dictionary<string, string>>();
-                RequestTypeEnum requestType = (RequestTypeEnum) int.Parse(context.JobDetail.JobDataMap.GetString(QuartzConstant.REQUESTTYPE) ?? string.Empty);
-
-                HttpResponseMessage response = new HttpResponseMessage();
-
-
-                var http = HttpHelper.Instance;
-                switch (requestType)
-                {
-                    case RequestTypeEnum.Get:
-                        response = await http.GetAsync(requestUrl, headers);
-                        break;
-                    case RequestTypeEnum.Post:
-                        response = await http.PostAsync(requestUrl, requestParameters, headers);
-                        break;
-                    case RequestTypeEnum.Put:
-                        response = await http.PutAsync(requestUrl, requestParameters, headers);
-                        break;
-                    case RequestTypeEnum.Delete:
+                case RequestTypeEnum.Get:
+                    response = await http.GetAsync(requestUrl, headers);
+                    break;
+                case RequestTypeEnum.Post:
+                    response = await http.PostAsync(requestUrl, requestParameters, headers);
+                    break;
+                case RequestTypeEnum.Put:
+                    response = await http.PutAsync(requestUrl, requestParameters, headers);
+                    break;
+                case RequestTypeEnum.Delete:
+                    if (requestParameters.IsNullOrEmpty())
+                    {
                         response = await http.DeleteAsync(requestUrl, headers);
-                        break;
-                    default:
-                        response = await http.PostAsync(requestUrl, requestParameters, headers);
-                        break;
-                }
-
-                var result = HttpUtility.HtmlEncode(await response.Content.ReadAsStringAsync());
-
-                stopwatch.Stop(); //  停止监视            
-                double seconds = stopwatch.Elapsed.TotalSeconds; //总秒数                                
-
-                if (!response.IsSuccessStatusCode)
-                {
-                }
-                else
-                {
-                    try
-                    {
-                        var httpResult = HttpUtility.HtmlDecode(result).ToObject<ResponseModel>();
-                        if (!httpResult.Success)
-                        {
-                        }
-                        else
-                        {
-
-                        }
                     }
-                    catch (Exception)
+                    else
                     {
+                        response = await http.DeleteAsync(requestUrl, requestParameters, headers);
                     }
-                }
+                    break;
+                case RequestTypeEnum.None:
+                default:
+                    response = await http.PostAsync(requestUrl, requestParameters, headers);
+                    break;
             }
-            catch (Exception ex)
-            {
-                stopwatch.Stop(); //  停止监视            
-                double seconds = stopwatch.Elapsed.TotalSeconds; //总秒数
-            }
-            finally
-            {
-                double seconds = stopwatch.Elapsed.TotalSeconds; //总秒数
-            }
+            var result = await response.Content.ReadAsStringAsync();
+
+            //var result = "{}";
+            //if (!response.IsSuccessStatusCode)
+            //{
+               
+            //}
+            //else
+            //{
+            //    result = await response.Content.ReadAsStringAsync();
+            //}
+
+            //设置响应结果
+            context.Result = result;
         }
     }
 }

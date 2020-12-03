@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using LionFrame.Basic;
@@ -36,24 +38,13 @@ namespace LionFrame.Quartz
         public async Task<BaseResponseModel> AddScheduleJobAsync(ScheduleEntityParam entity)
         {
             var result = new ResponseModel<string>();
-
             try
             {
-                //检查任务是否已存在
-                var jobKey = new JobKey(entity.JobName, entity.JobGroup);
-                if (await Scheduler.CheckExists(jobKey))
+                if (!await CheckScheduleEntityParam(entity, result))
                 {
-                    result.Fail("调度任务已存在", "");
                     return result;
                 }
 
-                if (entity.TriggerType == TriggerTypeEnum.Cron)
-                {
-                    if (!CronExpression.IsValidExpression(entity.Cron))
-                    {
-                        return result.Fail("Cron表达式不正确");
-                    }
-                }
                 var jobDataMap = new Dictionary<string, string>()
                 {
                     { QuartzConstant.NOTIFYEMAIL, entity.NotifyEmail },
@@ -65,19 +56,6 @@ namespace LionFrame.Quartz
                 switch (entity.JobType)
                 {
                     case JobTypeEnum.Http:
-                        if (!entity.Headers.IsNullOrEmpty())
-                        {
-                            try
-                            {
-                                // 判断是否能转成字典格式 数据是否正确
-                                entity.Headers.ToObject<Dictionary<string, string>>();
-                            }
-                            catch
-                            {
-                                result.Fail(ResponseCode.DataFormatError, "请求头参数格式错误，json字典格式", "");
-                                return result;
-                            }
-                        }
                         job = AddHttpJob(entity, jobDataMap);
                         break;
                     case JobTypeEnum.Assembly:
@@ -88,6 +66,7 @@ namespace LionFrame.Quartz
                         return result.Fail("未选择任务类型");
                         break;
                 }
+
                 //校验是否正确的执行周期表达式
                 var trigger = entity.TriggerType == TriggerTypeEnum.Cron ? CreateCronTrigger(entity) : CreateSimpleTrigger(entity);
 
@@ -101,6 +80,75 @@ namespace LionFrame.Quartz
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 检查参数是否符合要求
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task<bool> CheckScheduleEntityParam(ScheduleEntityParam entity, ResponseModel<string> result)
+        {
+            //检查任务是否已存在
+            var jobKey = new JobKey(entity.JobName, entity.JobGroup);
+            if (await Scheduler.CheckExists(jobKey))
+            {
+                result.Fail("调度任务已存在", "");
+                return false;
+            }
+
+            // 检查Cron表达式
+            if (entity.TriggerType == TriggerTypeEnum.Cron)
+            {
+                if (!CronExpression.IsValidExpression(entity.Cron))
+                {
+                    result.Fail("Cron表达式不正确");
+                    return false;
+                }
+            }
+
+            // 检查请求头格式是否正确
+            if (entity.JobType == JobTypeEnum.Http && entity.Headers.IsNotNullOrEmpty())
+            {
+                try
+                {
+                    // 判断是否能转成字典格式 数据是否正确
+                    entity.Headers.ToObject<Dictionary<string, string>>();
+                }
+                catch
+                {
+                    result.Fail(ResponseCode.DataFormatError, "请求头参数格式错误，json字典格式", "");
+                    return false;
+                }
+            }
+
+            // 检查通知接收邮箱是否正确
+            if (entity.MailMessage != MailMessageEnum.None)
+            {
+                if (entity.NotifyEmail.IsNullOrEmpty())
+                {
+                    result.Fail(ResponseCode.DataFormatError, "通知邮箱不能为空", "");
+                    return false;
+                }
+
+                var notifyEmails = entity.NotifyEmail.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                var sb = new List<string>();
+                notifyEmails.ForEach(notifyEmail =>
+                {
+                    if (!notifyEmail.IsEmail())
+                    {
+                        sb.Add($"邮箱[{notifyEmail}]格式不正确");
+                    }
+                });
+                if (sb.Count > 0)
+                {
+                    result.Fail(ResponseCode.DataFormatError, string.Join(@"\n", sb), "");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

@@ -12,7 +12,6 @@ namespace LionFrame.Quartz.Jobs
     {
         public Task Execute(IJobExecutionContext context)
         {
-            //throw new Exception("ttttces");
             context.Result = "asdadasd" +context.Result;
             return Task.CompletedTask;
         }
