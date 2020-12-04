@@ -15,11 +15,14 @@ namespace LionFrame.CoreCommon.HttpHelper
     /// </summary>
     public class HttpHelper
     {
-        public static readonly HttpHelper Instance;
+        /// <summary>
+        /// 超时时间设置 默认10秒
+        /// </summary>
+        private readonly int _timeOutSeconds;
 
-        static HttpHelper()
+        public HttpHelper(int timeOutSeconds = 10)
         {
-            Instance = new HttpHelper();
+            this._timeOutSeconds = timeOutSeconds;
         }
 
         /// <summary>
@@ -28,14 +31,14 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url">url地址</param>
         /// <param name="jsonString">请求参数（Json字符串）</param>
         /// <param name="headers">webapi做用户认证</param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> PostAsync(string url, string jsonString, Dictionary<string, string> headers = null)
+        public async Task<HttpResponseMessage> PostAsync(string url, string jsonString, Dictionary<string, string> headers = null, string contentType = "application/json")
         {
             if (string.IsNullOrWhiteSpace(jsonString))
                 jsonString = "{}";
-            StringContent content = new StringContent(jsonString);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var http = HttpClientHelper.Instance();
+            StringContent content = new StringContent(jsonString, Encoding.UTF8, contentType);
+            var http = HttpClientHelper.Instance(_timeOutSeconds);
             if (headers != null && headers.Any())
             {
                 foreach (var item in headers)
@@ -55,10 +58,11 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url">url地址</param>
         /// <param name="content">请求参数</param>
         /// <param name="headers">webapi做用户认证</param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> PostAsync<T>(string url, T content, Dictionary<string, string> headers = null) where T : class
+        public async Task<HttpResponseMessage> PostAsync<T>(string url, T content, Dictionary<string, string> headers = null, string contentType = "application/json") where T : class
         {
-            return await PostAsync(url, content.ToJson(), headers);
+            return await PostAsync(url, content.ToJson(), headers, contentType);
         }
 
         /// <summary>
@@ -69,7 +73,7 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> headers = null)
         {
-            var http = HttpClientHelper.Instance();
+            var http = HttpClientHelper.Instance(_timeOutSeconds);
             if (headers != null && headers.Any())
             {
                 //如果有headers认证等信息，则每个请求实例一个HttpClient
@@ -89,14 +93,14 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url">url地址</param>
         /// <param name="jsonString">请求参数（Json字符串）</param>
         /// <param name="headers">webapi做用户认证</param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> PutAsync(string url, string jsonString, Dictionary<string, string> headers = null)
+        public async Task<HttpResponseMessage> PutAsync(string url, string jsonString, Dictionary<string, string> headers = null, string contentType = "application/json")
         {
-            var http = HttpClientHelper.Instance();
+            var http = HttpClientHelper.Instance(_timeOutSeconds);
             if (string.IsNullOrWhiteSpace(jsonString))
                 jsonString = "{}";
-            StringContent content = new StringContent(jsonString);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            StringContent content = new StringContent(jsonString, Encoding.UTF8, contentType);
             if (headers != null && headers.Any())
             {
                 //如果有headers认证等信息，则每个请求实例一个HttpClient
@@ -119,10 +123,11 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url">url地址</param>
         /// <param name="content">请求参数</param>
         /// <param name="headers">webapi做用户认证</param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> PutAsync<T>(string url, T content, Dictionary<string, string> headers = null)
+        public async Task<HttpResponseMessage> PutAsync<T>(string url, T content, Dictionary<string, string> headers = null, string contentType = "application/json")
         {
-            return await PutAsync(url, content.ToJson(), headers);
+            return await PutAsync(url, content.ToJson(), headers, contentType);
         }
 
         /// <summary>
@@ -131,13 +136,14 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url">url地址</param>
         /// <param name="content"></param>
         /// <param name="headers"></param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> DeleteAsync<T>(string url, T content, Dictionary<string, string> headers = null)
+        public async Task<HttpResponseMessage> DeleteAsync<T>(string url, T content, Dictionary<string, string> headers = null, string contentType = "application/json")
         {
-            var http = HttpClientHelper.Instance();
+            var http = HttpClientHelper.Instance(_timeOutSeconds);
             var request = new HttpRequestMessage
             {
-                Content = new StringContent(content.ToJson(), Encoding.UTF8, "application/json"),
+                Content = new StringContent(content.ToJson(), Encoding.UTF8, contentType),
                 Method = HttpMethod.Delete,
                 RequestUri = new Uri(url),
             };
@@ -160,13 +166,14 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url"></param>
         /// <param name="content"></param>
         /// <param name="headers"></param>
+        /// <param name="contentType"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> DeleteAsync(string url, string content, Dictionary<string, string> headers = null)
+        public async Task<HttpResponseMessage> DeleteAsync(string url, string content, Dictionary<string, string> headers = null, string contentType = "application/json")
         {
-            var http = HttpClientHelper.Instance();
+            var http = HttpClientHelper.Instance(_timeOutSeconds);
             var request = new HttpRequestMessage
             {
-                Content = new StringContent(content, Encoding.UTF8, "application/json"),
+                Content = new StringContent(content, Encoding.UTF8, contentType),
                 Method = HttpMethod.Delete,
                 RequestUri = new Uri(url),
             };
@@ -191,7 +198,7 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <returns></returns>
         public async Task<HttpResponseMessage> DeleteAsync(string url, Dictionary<string, string> headers = null)
         {
-            var http = HttpClientHelper.Instance();
+            var http = HttpClientHelper.Instance(_timeOutSeconds);
             if (headers != null && headers.Any())
             {
                 //如果有headers认证等信息，则每个请求实例一个HttpClient
@@ -212,15 +219,15 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <param name="url">请求地址</param>
         /// <param name="content">请求Body参数</param>
         /// <param name="headers">请求头</param>
-        /// <param name="mediaType">请求格式</param>
+        /// <param name="contentType">请求格式</param>
         /// <param name="timeOutSeconds">超时时间</param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> SendAsync(HttpMethod httpMethod, string url, string content, Dictionary<string, string> headers = null, string mediaType = "application/json", int timeOutSeconds = 100)
+        public async Task<HttpResponseMessage> SendAsync(HttpMethod httpMethod, string url, string content, Dictionary<string, string> headers = null, string contentType = "application/json", int timeOutSeconds = 100)
         {
             var http = HttpClientHelper.Instance(timeOutSeconds);
             var request = new HttpRequestMessage
             {
-                Content = new StringContent(content, Encoding.UTF8, mediaType),
+                Content = new StringContent(content, Encoding.UTF8, contentType),
                 Method = httpMethod,
                 RequestUri = new Uri(url),
             };

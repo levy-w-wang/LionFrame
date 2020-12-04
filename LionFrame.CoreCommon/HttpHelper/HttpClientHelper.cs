@@ -15,9 +15,9 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <summary>
         /// 主要是为了设置请求超时时间
         /// </summary>
-        /// <param name="timeOutSeconds"> 默认5秒 timeout</param>
+        /// <param name="timeOutSeconds"> 默认10秒 timeout</param>
         /// <returns></returns>
-        public static HttpClient Instance(int timeOutSeconds = 100)
+        public static HttpClient Instance(int timeOutSeconds = 10)
         {
             var httpClientFactory = LionWeb.AutofacContainer.Resolve<IHttpClientFactory>();
             var clientInstance = httpClientFactory.CreateClient();

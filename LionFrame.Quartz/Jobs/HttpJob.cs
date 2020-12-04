@@ -25,7 +25,7 @@ namespace LionFrame.Quartz.Jobs
 
             HttpResponseMessage response;
 
-            var http = HttpHelper.Instance;
+            var http = new HttpHelper();
             switch (requestType)
             {
                 case RequestTypeEnum.Get:
