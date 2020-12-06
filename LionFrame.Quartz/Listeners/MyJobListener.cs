@@ -56,7 +56,6 @@ namespace LionFrame.Quartz.Listeners
                     {
                         await SendNotifyEmail(context, jobException);
                     }
-
                     break;
                 case MailMessageEnum.All:
                     await SendNotifyEmail(context, jobException);
@@ -79,7 +78,7 @@ namespace LionFrame.Quartz.Listeners
 
             var notifyEmail = jobDetail.JobDataMap.GetString(QuartzConstant.NOTIFYEMAIL) ?? "";
             var systemBll = LionWeb.AutofacContainer.Resolve<SystemBll>();
-
+            var result = ConvertResult(context);
             var emailContent = new StringBuilder();
             emailContent.Append($@"<p>任务执行结果:{resultState}</p>");
             emailContent.Append($@"<p>组名：{jobDetail.Key.Group}</p>");
@@ -89,7 +88,7 @@ namespace LionFrame.Quartz.Listeners
             emailContent.Append($@"<p>JobDataMap：{jobDetail.JobDataMap.ToJson()}</p>");
             if (context.Result != null)
             {
-                emailContent.Append($@"<p>执行结果：{context.Result.ToJson()}</p>");
+                emailContent.Append($@"<p>执行结果：{result}</p>");
             }
 
             if (jobException != null)
@@ -98,7 +97,7 @@ namespace LionFrame.Quartz.Listeners
                 emailContent.Append($@"<p>异常堆栈：{jobException.StackTrace}</p>");
             }
 
-            emailContent.Append($@"<p>执行毫秒：{context.JobRunTime.TotalMilliseconds}</p>");
+            emailContent.Append($@"<p>执行耗时：{context.JobRunTime.TotalMilliseconds}毫秒</p>");
             await systemBll.SendSystemMailAsync($"{jobDetail.Key.Name}-{resultState}-Quartz通知", emailContent.ToString(), notifyEmail, "");
         }
 
@@ -113,6 +112,7 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzLogBll = LionWeb.AutofacContainer.Resolve<SysQuartzLogBll>();
             var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
             var jobDetail = context.JobDetail;
+            var result = ConvertResult(context);
 
             var sysQuartzLog = new SysQuartzLog()
             {
@@ -123,13 +123,28 @@ namespace LionFrame.Quartz.Listeners
                 PreviousFireTime = context.PreviousFireTimeUtc?.LocalDateTime,
                 JobDataMap = jobDetail.JobDataMap.ToJson(true),
                 Description = jobDetail.Description ?? "",
-                Result = (context.Result ?? "").ToJson(true),
+                Result = result,
                 Exception = jobException?.Message ?? "",
                 RunTimeTotalMilliseconds = context.JobRunTime.TotalMilliseconds,
                 CreatedTime = DateTime.Now
             };
             await sysQuartzLogBll.AddTaskLog(sysQuartzLog);
             await sysQuartzBll.ModifyTaskLastFireTime(jobDetail.Key.Group, jobDetail.Key.Name, context.PreviousFireTimeUtc?.LocalDateTime, context.NextFireTimeUtc?.LocalDateTime);
+        }
+
+        private static string ConvertResult(IJobExecutionContext context)
+        {
+            var result = "";
+            if (context.Result is string || context.Result is int || context.Result is bool || context.Result is long || context.Result is Enum || context.Result is double || context.Result is float || context.Result is char || context.Result is byte || context.Result is short)
+            {
+                result = context.Result as string;
+            }
+            else if (context.Result != null)
+            {
+                result = context.Result.ToJson();
+            }
+
+            return result;
         }
 
         /// <summary>

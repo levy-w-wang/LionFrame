@@ -71,7 +71,7 @@ namespace LionFrame.Data.BasicData
                 .HasForeignKey(c => c.MenuId);
 
             modelBuilder.Entity<SysQuartz>().HasKey(sq => new { sq.JobGroup, sq.JobName });
-            modelBuilder.Entity<SysQuartz>().HasIndex(sq => sq.CreatedTime);
+            modelBuilder.Entity<SysQuartz>().HasIndex(sq => sq.TriggerState);
             modelBuilder.Entity<SysQuartzLog>().HasIndex(sq => new { sq.JobGroup, sq.JobName });
 
             // 初始数据

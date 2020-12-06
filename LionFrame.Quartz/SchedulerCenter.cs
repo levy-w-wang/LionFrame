@@ -337,7 +337,7 @@ namespace LionFrame.Quartz
         {
             var triggerBuilder = GetTriggerBuilder(entity);
             //作业触发器
-            if (entity.RunTimes.HasValue && entity.RunTimes > 0)
+            if (entity.RunTimes.HasValue && entity.RunTimes >= 0)
             {
                 return triggerBuilder
                     .WithSimpleSchedule(x =>

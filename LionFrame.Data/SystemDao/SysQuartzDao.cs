@@ -42,7 +42,7 @@ namespace LionFrame.Data.SystemDao
             }
 
             var data = CurrentDbContext.SysQuartzs.Where(quartzExpression);
-            var resultEntities = await LoadPageEntitiesAsync(data, taskListParam.CurrentPage, taskListParam.PageSize, false, c => c.CreatedTime);
+            var resultEntities = await LoadPageEntitiesAsync(data, taskListParam.CurrentPage, taskListParam.PageSize, true, c => c.TriggerState);
             return resultEntities;
         }
     }
