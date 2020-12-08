@@ -19,7 +19,11 @@ namespace LionFrame.CoreCommon.HttpHelper
         /// <returns></returns>
         public static HttpClient Instance(int timeOutSeconds = 10)
         {
-            var httpClientFactory = LionWeb.AutofacContainer.Resolve<IHttpClientFactory>();
+            IHttpClientFactory httpClientFactory;
+            using (var container = LionWeb.AutofacContainer.BeginLifetimeScope())
+            {
+                httpClientFactory = container.Resolve<IHttpClientFactory>();
+            }
             var clientInstance = httpClientFactory.CreateClient();
             clientInstance.Timeout = TimeSpan.FromSeconds(timeOutSeconds);
             return clientInstance;

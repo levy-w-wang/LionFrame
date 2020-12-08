@@ -36,7 +36,8 @@ namespace LionFrame.MainWeb
         public async void Init()
         {
             // 开启调度
-            await LionWeb.AutofacContainer.Resolve<IScheduler>().Start();
+            using var container = LionWeb.AutofacContainer.BeginLifetimeScope();
+            await container.Resolve<IScheduler>().Start();
         }
 
         /// <summary>

@@ -178,10 +178,13 @@ namespace LionFrame.MainWeb
             LionWeb.AutofacContainer = app.ApplicationServices.CreateScope().ServiceProvider.GetAutofacRoot();
 
             // Z.EntityFramework.Extensions 扩展包需要  --无法显示日志
-            EntityFrameworkManager.ContextFactory = context => LionWeb.AutofacContainer.Resolve<LionDbContext>();
+            using (var container = LionWeb.AutofacContainer.BeginLifetimeScope())
+            {
+                EntityFrameworkManager.ContextFactory = context => container.Resolve<LionDbContext>();
+                LionWeb.Configure(container.Resolve<IHttpContextAccessor>());
+            }
 
             LionWeb.Environment = env;
-            LionWeb.Configure(LionWeb.AutofacContainer.Resolve<IHttpContextAccessor>());
 
             LionWeb.MemoryCache = memoryCache;
 

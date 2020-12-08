@@ -75,9 +75,8 @@ namespace LionFrame.Quartz.Listeners
         {
             var resultState = (jobException == null ? "正常" : "异常");
             var jobDetail = context.JobDetail;
-
             var notifyEmail = jobDetail.JobDataMap.GetString(QuartzConstant.NOTIFYEMAIL) ?? "";
-            var systemBll = LionWeb.AutofacContainer.Resolve<SystemBll>();
+ 
             var result = ConvertResult(context);
             var emailContent = new StringBuilder();
             emailContent.Append($@"<p>任务执行结果:{resultState}</p>");
@@ -98,6 +97,8 @@ namespace LionFrame.Quartz.Listeners
             }
 
             emailContent.Append($@"<p>执行耗时：{context.JobRunTime.TotalMilliseconds}毫秒</p>");
+            using var container = LionWeb.AutofacContainer.BeginLifetimeScope();
+            SystemBll systemBll = container.Resolve<SystemBll>();
             await systemBll.SendSystemMailAsync($"{jobDetail.Key.Name}-{resultState}-Quartz通知", emailContent.ToString(), notifyEmail, "");
         }
 
@@ -109,8 +110,6 @@ namespace LionFrame.Quartz.Listeners
         /// <returns></returns>
         private static async Task SaveExecutedResult(IJobExecutionContext context, JobExecutionException jobException)
         {
-            var sysQuartzLogBll = LionWeb.AutofacContainer.Resolve<SysQuartzLogBll>();
-            var sysQuartzBll = LionWeb.AutofacContainer.Resolve<SysQuartzBll>();
             var jobDetail = context.JobDetail;
             var result = ConvertResult(context);
 
@@ -128,6 +127,10 @@ namespace LionFrame.Quartz.Listeners
                 RunTimeTotalMilliseconds = context.JobRunTime.TotalMilliseconds,
                 CreatedTime = DateTime.Now
             };
+            using var container = LionWeb.AutofacContainer.BeginLifetimeScope();
+            var sysQuartzLogBll = container.Resolve<SysQuartzLogBll>();
+            var sysQuartzBll = container.Resolve<SysQuartzBll>();
+
             await sysQuartzLogBll.AddTaskLog(sysQuartzLog);
             await sysQuartzBll.ModifyTaskLastFireTime(jobDetail.Key.Group, jobDetail.Key.Name, context.PreviousFireTimeUtc?.LocalDateTime, context.NextFireTimeUtc?.LocalDateTime);
         }
