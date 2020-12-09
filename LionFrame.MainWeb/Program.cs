@@ -28,10 +28,15 @@ namespace LionFrame.MainWeb
                 })
                 .ConfigureLogging(logging =>
                 {
-                    //logging.ClearProviders();
+                    logging.ClearProviders();
                     logging.SetMinimumLevel(LogLevel.Trace);
                     logging.AddConsole();
-                    logging.AddNLog("NLog.config");
+                    logging.AddNLog("NLog.config")
+#if !DEBUG
+                        .AddFilter("Microsoft.*", LogLevel.Warning)
+                        .AddFilter("System", LogLevel.Warning)
+#endif
+                       ;
                 })
                 .UseNLog();
     }
