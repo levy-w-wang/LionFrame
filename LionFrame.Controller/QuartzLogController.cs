@@ -18,7 +18,7 @@ namespace LionFrame.Controller
         [HttpPost, Route("list")]
         public async Task<ActionResult> TaskLogPageList(TaskLogListParam taskLogListParam)
         {
-            var result = await SysQuartzLogBll.GetTaskLogPageList(taskLogListParam);
+            var result = await SysQuartzLogBll.GetTaskLogPageListAsync(taskLogListParam);
             return Succeed(result);
         }
     }

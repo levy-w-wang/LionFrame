@@ -14,7 +14,7 @@ namespace LionFrame.Data.SystemDao
 {
     public class SysQuartzLogDao : BaseData
     {
-        public async Task<PageResponse<SysQuartzLog>> GetTaskLogPageList(TaskLogListParam taskLogListParam)
+        public async Task<PageResponse<SysQuartzLog>> GetTaskLogPageListAsync(TaskLogListParam taskLogListParam)
         {
             CloseTracking();
             Expression<Func<SysQuartzLog, bool>> quartzExpression = quartzLog => true;

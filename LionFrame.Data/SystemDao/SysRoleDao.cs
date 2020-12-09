@@ -56,7 +56,7 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public async Task<PageResponse<RoleListDto>> GetCanRelationRoleList(UserCacheBo currentUser)
+        public async Task<PageResponse<RoleListDto>> GetCanRelationRoleListAsync(UserCacheBo currentUser)
         {
             CloseTracking();
             Expression<Func<SysRole, bool>> roleExpression = s => !s.Deleted && s.TenantId == currentUser.TenantId && s.CreatedBy > 0;

@@ -47,8 +47,8 @@ namespace LionFrame.Controller
         public async Task<ActionResult> AddMenu(IncrementMenuParam incrementMenu)
         {
             var result = incrementMenu.IsUpdate
-                ? await MenuBll.UpdateMenu(CurrentUser, incrementMenu)
-                : await MenuBll.AddMenu(CurrentUser, incrementMenu);
+                ? await MenuBll.UpdateMenuAsync(CurrentUser, incrementMenu)
+                : await MenuBll.AddMenuAsync(CurrentUser, incrementMenu);
             return MyJson(result);
         }
 
@@ -70,7 +70,7 @@ namespace LionFrame.Controller
         [HttpGet, Route("manage"), TenantFilter(1)]
         public async Task<ActionResult> MenuManage()
         {
-            var result = await Task.FromResult(MenuBll.GetMenuManage());
+            var result = await MenuBll.GetMenuManageAsync();
             return Succeed(result);
         }
 

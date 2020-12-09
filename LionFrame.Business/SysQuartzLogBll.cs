@@ -14,7 +14,7 @@ namespace LionFrame.Business
     {
         public SysQuartzLogDao SysQuartzLogDao { get; set; }
 
-        public async Task<bool> AddTaskLog(SysQuartzLog sysQuartzLog)
+        public async Task<bool> AddTaskLogAsync(SysQuartzLog sysQuartzLog)
         {
             await SysQuartzLogDao.AddAsync(sysQuartzLog);
             var result = await SysQuartzLogDao.SaveChangesAsync();
@@ -26,9 +26,9 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="taskLogListParam"></param>
         /// <returns></returns>
-        public async Task<PageResponse<SysQuartzLog>> GetTaskLogPageList(TaskLogListParam taskLogListParam)
+        public async Task<PageResponse<SysQuartzLog>> GetTaskLogPageListAsync(TaskLogListParam taskLogListParam)
         {
-            return await SysQuartzLogDao.GetTaskLogPageList(taskLogListParam);
+            return await SysQuartzLogDao.GetTaskLogPageListAsync(taskLogListParam);
         }
     }
 }

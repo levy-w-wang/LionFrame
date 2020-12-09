@@ -24,7 +24,7 @@ namespace LionFrame.Controller
         [HttpPost, Route("login"), AllowAnonymous]
         public async Task<ActionResult> Login(LoginParam loginParam)
         {
-            var result = await UserBll.Login(loginParam);
+            var result = await UserBll.LoginAsync(loginParam);
             return MyJson(result);
         }
 
@@ -83,7 +83,7 @@ namespace LionFrame.Controller
         [Route("modifypwd"), HttpPut]
         public async Task<ActionResult> ModifyPwd(ModifyPwdParam modifyPwdParam)
         {
-            var result = await UserBll.ModifyPwd(modifyPwdParam, CurrentUser);
+            var result = await UserBll.ModifyPwdAsync(modifyPwdParam, CurrentUser);
 
             return MyJson(result);
         }
@@ -97,7 +97,7 @@ namespace LionFrame.Controller
         public async Task<ActionResult> SendEmail()
         {
             var dic = GetJsonParams<Dictionary<string, string>>() ?? new Dictionary<string, string>();
-            var result = await UserBll.SendEmail(dic.TryGetValueOrDefault("email"));
+            var result = await UserBll.SendEmailAsync(dic.TryGetValueOrDefault("email"));
 
             return MyJson(result);
         }
@@ -109,7 +109,7 @@ namespace LionFrame.Controller
         [Route("retrievepwd"), HttpPost, AllowAnonymous]
         public async Task<ActionResult> RetrievePwd(RetrievePwdParam retrievePwdParam)
         {
-            var result = await UserBll.RetrievePwd(retrievePwdParam);
+            var result = await UserBll.RetrievePwdAsync(retrievePwdParam);
             return MyJson(result);
         }
 

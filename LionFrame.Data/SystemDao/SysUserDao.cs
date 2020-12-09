@@ -26,7 +26,7 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="loginParam"></param>
         /// <returns></returns>
-        public async Task<ResponseModel<UserCacheBo>> Login(LoginParam loginParam)
+        public async Task<ResponseModel<UserCacheBo>> LoginAsync(LoginParam loginParam)
         {
             CloseTracking();
             var response = new ResponseModel<UserCacheBo>();
@@ -77,7 +77,7 @@ namespace LionFrame.Data.SystemDao
         /// <param name="modifyPwdParam"></param>
         /// <param name="uid"></param>
         /// <returns></returns>
-        public async Task<bool> ModifyPwd(ModifyPwdParam modifyPwdParam, long uid)
+        public async Task<bool> ModifyPwdAsync(ModifyPwdParam modifyPwdParam, long uid)
         {
             var result = await CurrentDbContext.SysUsers.Where(c => c.UserId == uid).UpdateFromQueryAsync(c => new SysUser
             {// 使用这种方式只会修改这两个字段
@@ -92,16 +92,14 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="retrievePwdParam"></param>
         /// <returns></returns>
-        public bool RetrievePwd(RetrievePwdParam retrievePwdParam, out long uid)
+        public async Task<long> RetrievePwdAsync(RetrievePwdParam retrievePwdParam)
         {
-            var user = CurrentDbContext.SysUsers.First(c => c.Email == retrievePwdParam.Email);
+            var user = await CurrentDbContext.SysUsers.FirstAsync(c => c.Email == retrievePwdParam.Email);
             user.PassWord = retrievePwdParam.Pwd.Md5Encrypt();
             user.UpdatedTime = DateTime.Now;
             user.UpdatedBy = user.UserId;
-            uid = user.UserId;//找回密码 删除token
-            var result = SaveChanges();
-
-            return result > 0;
+            var result = await SaveChangesAsync();
+            return user.UserId;//找回密码 删除token
         }
 
         /// <summary>

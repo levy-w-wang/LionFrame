@@ -30,7 +30,7 @@ namespace LionFrame.Business
         /// 获取验证码
         /// </summary>
         /// <returns></returns>
-        public async Task<CaptchaResult> GetCaptchaResult()
+        public async Task<CaptchaResult> GetCaptchaResultAsync()
         {
             //var captcha = CaptchaHelper.GenerateCaptcha(75, 35, CaptchaHelper.GenerateCaptchaCode());
             var captcha = CaptchaHelper.CreateImage(CaptchaHelper.GenerateCaptchaCode());
@@ -46,7 +46,7 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="loginParam"></param>
         /// <returns></returns>
-        internal async Task<string> VerificationLogin(LoginParam loginParam)
+        internal async Task<string> VerificationLoginAsync(LoginParam loginParam)
         {
             var key = CacheKeys.CAPTCHA + loginParam.Uuid;
             var captcha = await RedisClient.GetAsync<string>(key);

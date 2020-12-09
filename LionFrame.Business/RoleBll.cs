@@ -110,7 +110,7 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<PageResponse<RoleListDto>> GetCanRelationRoleList(UserCacheBo currentUser)
         {
-            PageResponse<RoleListDto> roleList = await SysRoleDao.GetCanRelationRoleList(currentUser);
+            PageResponse<RoleListDto> roleList = await SysRoleDao.GetCanRelationRoleListAsync(currentUser);
             return roleList;
         }
 

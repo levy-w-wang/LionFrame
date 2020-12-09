@@ -140,7 +140,7 @@ namespace LionFrame.Business
         /// <param name="incrementMenu"></param>
         /// <returns></returns>
         [DbTransactionInterceptor]
-        public virtual async Task<BaseResponseModel> AddMenu(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
+        public virtual async Task<BaseResponseModel> AddMenuAsync(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
         {
             var responseModel = new ResponseModel<bool>();
             var sysMenu = incrementMenu.MapTo<SysMenu>();
@@ -201,7 +201,7 @@ namespace LionFrame.Business
         /// <param name="currentUser"></param>
         /// <param name="incrementMenu"></param>
         /// <returns></returns>
-        public async Task<BaseResponseModel> UpdateMenu(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
+        public async Task<BaseResponseModel> UpdateMenuAsync(UserCacheBo currentUser, IncrementMenuParam incrementMenu)
         {
             var responseModel = new ResponseModel<bool>();
             var count = await SysMenuDao.UpdateMenuAsync(currentUser, incrementMenu);
@@ -212,9 +212,9 @@ namespace LionFrame.Business
         /// 获取当前所有菜单
         /// </summary>
         /// <returns></returns>
-        public List<MenuManageDto> GetMenuManage()
+        public async Task<List<MenuManageDto>> GetMenuManageAsync()
         {
-            var menuManageDtos = SysMenuDao.CurrentDbContext.SysMenus.ProjectTo<MenuManageDto>(MapperProvider).ToList();
+            var menuManageDtos = await SysMenuDao.CurrentDbContext.SysMenus.ProjectTo<MenuManageDto>(MapperProvider).ToListAsync();
             var result = GetChildManage(menuManageDtos);
             return result;
         }

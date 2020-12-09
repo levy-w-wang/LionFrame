@@ -17,7 +17,7 @@ namespace LionFrame.Data.SystemDao
         /// </summary>
         /// <param name="taskListParam"></param>
         /// <returns></returns>
-        public async Task<PageResponse<SysQuartz>> GetTaskPageList(TaskListParam taskListParam)
+        public async Task<PageResponse<SysQuartz>> GetTaskPageListAsync(TaskListParam taskListParam)
         {
             CloseTracking();
             Expression<Func<SysQuartz, bool>> quartzExpression = quartz => true;

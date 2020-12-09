@@ -41,17 +41,17 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="loginParam"></param>
         /// <returns></returns>
-        public async Task<ResponseModel<UserDto>> Login(LoginParam loginParam)
+        public async Task<ResponseModel<UserDto>> LoginAsync(LoginParam loginParam)
         {
             var result = new ResponseModel<UserDto>();
-            var verificationResult = await SystemBll.VerificationLogin(loginParam);
+            var verificationResult = await SystemBll.VerificationLoginAsync(loginParam);
             if (verificationResult != "验证通过")
             {
                 result.Fail(ResponseCode.LoginFail, verificationResult, null);
                 return result;
             }
 
-            var responseResult = await SysUserDao.Login(loginParam);
+            var responseResult = await SysUserDao.LoginAsync(loginParam);
             if (responseResult.Success)
             {
                 var userCache = responseResult.Data;
@@ -288,7 +288,7 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        public async Task<ResponseModel<string>> SendEmail(string email)
+        public async Task<ResponseModel<string>> SendEmailAsync(string email)
         {
             var response = new ResponseModel<string>();
             if (!email.IsEmail())
@@ -324,7 +324,7 @@ namespace LionFrame.Business
         /// </summary>
         /// <param name="retrievePwdParam"></param>
         /// <returns></returns>
-        public async Task<ResponseModel<bool>> RetrievePwd(RetrievePwdParam retrievePwdParam)
+        public async Task<ResponseModel<bool>> RetrievePwdAsync(RetrievePwdParam retrievePwdParam)
         {
             var result = new ResponseModel<bool>();
             var verificationResult = await VerificationCaptchaAsync(CacheKeys.RETRIEVEPWDCAPTCHA, retrievePwdParam.Email, retrievePwdParam.Captcha, false);
@@ -333,16 +333,14 @@ namespace LionFrame.Business
                 return result.Fail(verificationResult, false);
             }
 
-            var update = SysUserDao.RetrievePwd(retrievePwdParam, out long uid);
-            if (update)
-            {
-                await LogoutAsync(new UserCacheBo()
-                {
-                    UserId = uid
-                });
-            }
+            var uid = await SysUserDao.RetrievePwdAsync(retrievePwdParam);
 
-            return update ? result.Succeed(true) : result.Fail("修改密码失败，请稍后再试");
+            await LogoutAsync(new UserCacheBo()
+            {
+                UserId = uid
+            });
+
+            return result.Succeed(true);
         }
 
         #endregion
@@ -353,7 +351,7 @@ namespace LionFrame.Business
         /// <param name="modifyPwdParam"></param>
         /// <param name="currentUser"></param>
         /// <returns></returns>
-        public async Task<ResponseModel<string>> ModifyPwd(ModifyPwdParam modifyPwdParam, UserCacheBo currentUser)
+        public async Task<ResponseModel<string>> ModifyPwdAsync(ModifyPwdParam modifyPwdParam, UserCacheBo currentUser)
         {
             var result = new ResponseModel<string>();
             if (modifyPwdParam.NewPassWord == modifyPwdParam.OldPassWord)
@@ -363,7 +361,7 @@ namespace LionFrame.Business
 
             if (modifyPwdParam.OldPassWord.Md5Encrypt() == currentUser.PassWord)
             {
-                var updateResult = await SysUserDao.ModifyPwd(modifyPwdParam, currentUser.UserId);
+                var updateResult = await SysUserDao.ModifyPwdAsync(modifyPwdParam, currentUser.UserId);
                 if (updateResult)
                 {
                     // 修改成功 登出 重新登录

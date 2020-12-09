@@ -59,7 +59,7 @@ namespace LionFrame.Business
         /// <param name="previousFireTime"></param>
         /// <param name="nextFireTime"></param>
         /// <returns></returns>
-        public async Task<bool> ModifyTaskLastFireTime(string jobGroup, string jobName, DateTime? previousFireTime, DateTime? nextFireTime)
+        public async Task<bool> ModifyTaskLastFireTimeAsync(string jobGroup, string jobName, DateTime? previousFireTime, DateTime? nextFireTime)
         {
             var result = await SysQuartzDao.CurrentDbContext.SysQuartzs.Where(c => c.JobGroup == jobGroup && c.JobName == jobName).UpdateFromQueryAsync(c => new SysQuartz()
             {
@@ -115,7 +115,7 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<PageResponse<SysQuartz>> GetTaskPageList(TaskListParam taskListParam)
         {
-            return await SysQuartzDao.GetTaskPageList(taskListParam);
+            return await SysQuartzDao.GetTaskPageListAsync(taskListParam);
         }
     }
 }

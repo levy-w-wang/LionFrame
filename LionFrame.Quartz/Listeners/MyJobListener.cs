@@ -131,8 +131,8 @@ namespace LionFrame.Quartz.Listeners
             var sysQuartzLogBll = container.Resolve<SysQuartzLogBll>();
             var sysQuartzBll = container.Resolve<SysQuartzBll>();
 
-            await sysQuartzLogBll.AddTaskLog(sysQuartzLog);
-            await sysQuartzBll.ModifyTaskLastFireTime(jobDetail.Key.Group, jobDetail.Key.Name, context.PreviousFireTimeUtc?.LocalDateTime, context.NextFireTimeUtc?.LocalDateTime);
+            await sysQuartzLogBll.AddTaskLogAsync(sysQuartzLog);
+            await sysQuartzBll.ModifyTaskLastFireTimeAsync(jobDetail.Key.Group, jobDetail.Key.Name, context.PreviousFireTimeUtc?.LocalDateTime, context.NextFireTimeUtc?.LocalDateTime);
         }
 
         private static string ConvertResult(IJobExecutionContext context)

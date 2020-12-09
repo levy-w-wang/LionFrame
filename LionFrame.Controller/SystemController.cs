@@ -17,7 +17,7 @@ namespace LionFrame.Controller
         [HttpGet, Route("captcha")]
         public async Task<ActionResult> GetCaptcha()
         {
-            var result = await SystemBll.GetCaptchaResult();
+            var result = await SystemBll.GetCaptchaResultAsync();
             return Succeed(result);
         }
     }
