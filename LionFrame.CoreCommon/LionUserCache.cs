@@ -85,22 +85,27 @@ namespace LionFrame.CoreCommon
             userCache.LoginIp = LionWeb.GetClientIp();
             userCache.LoginTime = DateTime.Now;
 
-            UserCacheBo oldCache = Get(sid,false);
-            UserCacheBo cache = oldCache;
+            var redisClient = LionWeb.AutofacContainer.Resolve<RedisClient>();
+            redisClient.Set(key, userCache, RedisTimeout);
+            AddToMemoryCache(key, userCache);
+            LionWeb.HttpContext.Items["user"] = userCache;
 
-            //如果是同一用户,仅更新时间 单点登录
-            if (oldCache?.LoginIp != userCache.LoginIp || oldCache?.UserToken != userCache.UserToken || oldCache?.PassWord != userCache.PassWord)
-            {
-                DeleteCache(sid);
-                oldCache = null;
-            }
-            if (oldCache == null)
-            {
-                cache = userCache;
-                var redisClient = LionWeb.AutofacContainer.Resolve<RedisClient>();
-                redisClient.Set(key, cache, RedisTimeout);
-                AddToMemoryCache(key, cache);
-            }
+            //UserCacheBo oldCache = Get(sid,false);
+            //UserCacheBo cache = oldCache;
+
+            ////如果是同一用户,仅更新时间 单点登录
+            //if (oldCache?.LoginIp != userCache.LoginIp || oldCache?.UserToken != userCache.UserToken || oldCache?.PassWord != userCache.PassWord)
+            //{
+            //    DeleteCache(sid);
+            //    oldCache = null;
+            //}
+            //if (oldCache == null)
+            //{
+            //    cache = userCache;
+            //    var redisClient = LionWeb.AutofacContainer.Resolve<RedisClient>();
+            //    redisClient.Set(key, cache, RedisTimeout);
+            //    AddToMemoryCache(key, cache);
+            //}
         }
 
         /// <summary>

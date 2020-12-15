@@ -117,7 +117,7 @@ namespace LionFrame.CoreCommon
                 var nToken = TokenManager.GenerateToken(userDic.ToJson());
                 CurrentUser.SessionId = newSessionId;
                 CurrentUser.UserToken = nToken;
-                LionUserCache.CreateUserCache(CurrentUser);
+                LionUser.CurrentUser = CurrentUser;
                 LionWeb.HttpContext.Response.Headers["token"] = nToken;
                 LionWeb.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "token";
                 return validResult;

@@ -84,7 +84,8 @@ namespace LionFrame.Business
             userCache.UserToken = token;
             LionWeb.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "token"; //多个以逗号分隔 eg:token,sid
 
-            LionUserCache.CreateUserCache(userCache);
+            LionUser.CurrentUser = userCache;
+            //LionUserCache.CreateUserCache(userCache);
         }
 
         /// <summary>
@@ -133,16 +134,12 @@ namespace LionFrame.Business
         /// <returns></returns>
         private async Task<bool> FrequentlyGetCaptchaAsync(string key, int expireMinutes, int bufferMinutes)
         {
-            if (await RedisClient.ExistAsync(key))
+            if (!await RedisClient.ExistAsync(key))
             {
-                var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
-                if (timeSpanLess.TotalMinutes + bufferMinutes > expireMinutes)
-                {
-                    return true;
-                }
+                return false;
             }
-
-            return false;
+            var timeSpanLess = await RedisClient.KeyTimeToLiveAsync(key);
+            return timeSpanLess.TotalMinutes + bufferMinutes > expireMinutes;
         }
 
 
