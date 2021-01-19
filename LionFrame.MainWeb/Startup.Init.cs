@@ -10,6 +10,8 @@ using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon;
 using LionFrame.CoreCommon.CustomException;
+using LionFrame.CoreCommon.Rabbit;
+using LionFrame.CoreCommon.Rabbit.Consumer;
 using LionFrame.Data.BasicData;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
@@ -66,6 +68,18 @@ namespace LionFrame.MainWeb
                 options.ReplaceService<IMigrationsModelDiffer, MigrationsModelDifferWithoutForeignKey>();
                 options.UseLoggerFactory(loggerFactory: DbConsoleLoggerFactory);
             });
+        }
+
+        /// <summary>
+        /// RabbitMQ 配置
+        /// </summary>
+        /// <param name="services"></param>
+        private void ConfigureServices_Rabbit(IServiceCollection services)
+        {
+            // 添加rabbit
+            services.AddRabbitConnection(Configuration);
+
+            services.AddHostedService<EmailQueueService>();
         }
 
         /// <summary>

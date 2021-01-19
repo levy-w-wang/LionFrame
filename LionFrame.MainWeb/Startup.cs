@@ -65,6 +65,8 @@ namespace LionFrame.MainWeb
             {
                 options.AllowSynchronousIO = true;
             });
+            
+            ConfigureServices_Rabbit(services);
 
             services.AddControllers(options =>
             {
@@ -154,7 +156,7 @@ namespace LionFrame.MainWeb
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMemoryCache memoryCache)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMemoryCache memoryCache, IHostApplicationLifetime applicationLeftTime)
         {
             // 全局异常处理的三种方式
             // 1.自定义的异常拦截管道 - - 放在第一位处理全局未捕捉的异常
@@ -220,6 +222,27 @@ namespace LionFrame.MainWeb
 
             // 初始化
             Init();
+
+            applicationLeftTime.ApplicationStopping.Register(OnShutdown, app);
+        }
+
+        /// <summary>
+        /// 注销掉rabbit等
+        /// </summary>
+        /// <param name="app"></param>
+        private void OnShutdown(object app)
+        {
+            if (!(app is IApplicationBuilder builder))
+            {
+                return;
+            }
+
+            var connection = builder.ApplicationServices.GetService<RabbitMQ.Client.IConnection>();
+            connection?.Close();
+            connection?.Dispose();
+
+            var redisClient = builder.ApplicationServices.GetService<RedisClient>();
+            redisClient?.Dispose();
         }
     }
 }

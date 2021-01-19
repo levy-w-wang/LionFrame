@@ -152,6 +152,10 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<string> GetRegisterCaptchaAsync(string emailTo)
         {
+            if (await ExistUserAsync(emailTo))
+            {
+                return "该邮箱已存在，请切换或找回密码";
+            }
             var key = $"{CacheKeys.REGISTERCAPTCHA}{emailTo}";
             var expireMinutes = 5;
 

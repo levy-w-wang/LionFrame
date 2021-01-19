@@ -4,11 +4,11 @@
     {
         public MailBo()
         {
-            MailFromName = "测试";
+            MailFromName = "Levy_Lion";
             MailFrom = "levy_wang@qq.com";
-            MailPwd = "xxxxxxxxxxx";
+            MailPwd = "xxxxxxxxxxxx";
             MailHost = "smtp.qq.com";
-            MailPort = 25; // 465
+            MailPort = 25; // 465 25  487
         }
 
         /// <summary>

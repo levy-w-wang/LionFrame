@@ -5,10 +5,12 @@ using LionFrame.Basic.Models;
 using LionFrame.Config;
 using LionFrame.CoreCommon.Cache.Redis;
 using LionFrame.Model.SystemBo;
-using MimeKit;
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using LionFrame.Model.RequestParam.UserParams;
+using RabbitMQ.Client;
 
 namespace LionFrame.Business
 {
@@ -17,6 +19,8 @@ namespace LionFrame.Business
     /// </summary>
     public class SystemBll : IScopedDependency
     {
+        public IConnection RabbitConnection { get; set; }
+
         /// <summary>
         /// 验证码5分钟过期
         /// </summary>
@@ -77,45 +81,45 @@ namespace LionFrame.Business
             {
                 return "发送失败,参数不允许为空!";
             }
-            try
+            var mailBo = new MailBo
             {
-                var mailBo = new MailBo
+                MailToName = emailToName,
+                MailTo = emailTo
+            };
+            var mqMailBo = new MqMailBo()
+            {
+                MailBo = mailBo,
+                Title = title,
+                HtmlContent = htmlContent
+            };
+            using (var channel = RabbitConnection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "LionEmailQueue",
+                                                    durable: true,
+                                                 exclusive: false,
+                                                 autoDelete: false,
+                                                 arguments: null);
+                channel.ConfirmSelect(); //等待发送成功确认
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true; //持久化
+                properties.MessageId = IdWorker.NextId().ToString();//消息Id
+                properties.Timestamp = new AmqpTimestamp(DateTime.Now.GetJsTimeStamp());
+                properties.Headers = new Dictionary<string, object>();
+                var bodyJson = mqMailBo.ToJson();
+                var body = Encoding.UTF8.GetBytes(bodyJson);
+                channel.BasicPublish(exchange: "",
+                                routingKey: "LionEmailQueue",
+                                basicProperties: properties,
+                                body: body);
+                var isOk = channel.WaitForConfirms();
+                if (isOk)
                 {
-                    MailToName = emailToName,
-                    MailTo = emailTo
-                };
-
-                var message = new MimeMessage();
-                message.From.Add(new MailboxAddress(mailBo.MailFromName ?? mailBo.MailFrom, mailBo.MailFrom));
-                foreach (var mailTo in mailBo.MailTo.Replace("；", ";").Replace("，", ";").Replace(",", ";").Split(';'))
-                {
-                    message.To.Add(new MailboxAddress(mailBo.MailToName ?? mailTo, mailTo));
+                    return "发送成功";
                 }
 
-                message.Subject = string.Format(title);
-                message.Body = new TextPart("html")
-                {
-                    Text = htmlContent
-                };
-                using (var client = new MailKit.Net.Smtp.SmtpClient())
-                {
-                    await client.ConnectAsync(mailBo.MailHost, mailBo.MailPort, false);
-                    await client.AuthenticateAsync(mailBo.MailFrom, mailBo.MailPwd);
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-
-                return "发送成功";
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Logger.Fatal(ex);
-#if DEBUG
-                return "发送异常  -  " + ex.Message;
-#else
-
+                //日志记录
+                LogHelper.Logger.Error($"邮件保存MQ失败,bodyJson:{bodyJson}");
                 return "发送异常";
-#endif
             }
         }
 
