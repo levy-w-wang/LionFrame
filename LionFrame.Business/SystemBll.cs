@@ -160,9 +160,9 @@ namespace LionFrame.Business
         {
             using (var channel = RabbitConnection.CreateModel())
             {
-                channel.ExchangeDeclare("TestExchange",ExchangeType.Direct);
+                channel.ExchangeDeclare("TestExchange", ExchangeType.Direct, true);
                 channel.QueueDeclare("TestQueue", true, false, false);
-                channel.QueueBind("TestQueue","TestExchange","TestRouteKey");
+                channel.QueueBind("TestQueue", "TestExchange", "TestRouteKey");
                 channel.ConfirmSelect();//等待发送确认
                 var properties = channel.CreateBasicProperties();
                 properties.Persistent = true;//设置为持久化

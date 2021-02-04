@@ -156,19 +156,19 @@ namespace LionFrame.CoreCommon.Rabbit.Consumer
         private void ConsumerInit()
         {
             _channel.BasicQos(0, 1, false);
-            _channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct);
+            _channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct, true);
             _channel.QueueDeclare(QueueName, true, false, false);
             _channel.QueueBind(QueueName, ExchangeName, RouteName); //绑定队列进行正常消费
-
+            // 重试队列定义
             var retryDic = new Dictionary<string, object>
             {
                 { "x-dead-letter-exchange", ExchangeName },
                 { "x-dead-letter-routing-key", RouteName }, //当消息超时时，消息转发到交换机对应路由key上
             };
-            _channel.ExchangeDeclare(ExchangeName + "@Retry", ExchangeType.Direct);
+            _channel.ExchangeDeclare(ExchangeName + "@Retry", ExchangeType.Direct, true);
             _channel.QueueDeclare(QueueName + "@Retry", true, false, false, retryDic);
             _channel.QueueBind(QueueName + "@Retry", ExchangeName + "@Retry", RouteName + "@Retry");
-
+            // 死信队列定义
             _channel.ExchangeDeclare(ExchangeName + "@Failed", ExchangeType.Direct, true);
             _channel.QueueDeclare(QueueName + "@Failed", true, false, false, null);
             _channel.QueueBind(QueueName + "@Failed", ExchangeName + "@Failed", RouteName + "@Failed");
