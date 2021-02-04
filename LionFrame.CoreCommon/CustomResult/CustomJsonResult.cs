@@ -1,7 +1,7 @@
-﻿using LionFrame.Basic.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Text;
+using LionFrame.Basic.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LionFrame.CoreCommon.CustomResult
 {

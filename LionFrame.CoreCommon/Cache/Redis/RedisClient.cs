@@ -1,10 +1,10 @@
-﻿using LionFrame.Basic;
+﻿using System;
+using System.Threading.Tasks;
+using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using StackExchange.Redis;
-using System;
-using System.Threading.Tasks;
 
 namespace LionFrame.CoreCommon.Cache.Redis
 {

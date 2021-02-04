@@ -1,5 +1,5 @@
-﻿using LionFrame.Model.SystemBo;
-using LionFrame.CoreCommon.CustomFilter;
+﻿using LionFrame.CoreCommon.CustomFilter;
+using LionFrame.Model.SystemBo;
 
 namespace LionFrame.CoreCommon.Controllers
 {

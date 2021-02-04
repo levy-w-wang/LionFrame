@@ -1,9 +1,9 @@
-﻿using LionFrame.Basic.Extensions;
+﻿using System;
+using System.Text;
+using LionFrame.Basic.Extensions;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Text;
 
 namespace LionFrame.CoreCommon.CustomResult
 {

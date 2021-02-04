@@ -1,7 +1,7 @@
-﻿using Autofac;
-using AutoMapper;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using Autofac;
+using AutoMapper;
 
 namespace LionFrame.CoreCommon.AutoMapperCfg
 {

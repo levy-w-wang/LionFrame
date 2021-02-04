@@ -1,12 +1,12 @@
-﻿using LionFrame.Basic;
+﻿using System;
+using System.Text;
+using System.Threading.Tasks;
+using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon.CustomException;
 using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LionFrame.CoreCommon.CustomMiddler
 {

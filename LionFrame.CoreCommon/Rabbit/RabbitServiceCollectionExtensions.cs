@@ -27,7 +27,7 @@ namespace LionFrame.CoreCommon.Rabbit
             {
                 Uri = new Uri(rabbitOption.Uri),
                 AutomaticRecoveryEnabled = true,
-                VirtualHost = "/",
+                VirtualHost = "/",//此处建议根据项目使用不同的目录
             };
 
             services.Add(ServiceDescriptor.Singleton(factory));

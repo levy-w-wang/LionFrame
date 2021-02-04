@@ -20,5 +20,16 @@ namespace LionFrame.Controller
             var result = await SystemBll.GetCaptchaResultAsync();
             return Succeed(result);
         }
+
+        /// <summary>
+        /// Rabbit Mq Retry dead-letter 测试
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("retry_dead_letter")]
+        public async Task<ActionResult> RetryDeadLetterMq(string msg)
+        {
+            var result = await SystemBll.RetryDeadLetterMqSendAsync(msg);
+            return Succeed(result);
+        }
     }
 }

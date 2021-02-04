@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -86,6 +85,7 @@ namespace LionFrame.CoreCommon.Rabbit.Consumer
         /// <param name="cancellationToken">Indicates that the shutdown process should no longer be graceful.</param>
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            this.Dispose();
             return Task.CompletedTask;
         }
 
@@ -97,6 +97,7 @@ namespace LionFrame.CoreCommon.Rabbit.Consumer
 
             _rabbitConnection?.Close();
             _rabbitConnection?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

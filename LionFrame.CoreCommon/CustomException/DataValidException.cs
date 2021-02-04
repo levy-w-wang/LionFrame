@@ -1,5 +1,5 @@
-﻿using LionFrame.Model;
-using System;
+﻿using System;
+using LionFrame.Model;
 
 namespace LionFrame.CoreCommon.CustomException
 {

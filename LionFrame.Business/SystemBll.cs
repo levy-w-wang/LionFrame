@@ -150,5 +150,32 @@ namespace LionFrame.Business
                    </div>";
             return emailContent;
         }
+
+        /// <summary>
+        ///  重试 死信 测试
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public async Task<string> RetryDeadLetterMqSendAsync(string msg)
+        {
+            using (var channel = RabbitConnection.CreateModel())
+            {
+                channel.ExchangeDeclare("TestExchange",ExchangeType.Direct);
+                channel.QueueDeclare("TestQueue", true, false, false);
+                channel.QueueBind("TestQueue","TestExchange","TestRouteKey");
+                channel.ConfirmSelect();//等待发送确认
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true;//设置为持久化
+                properties.MessageId = IdWorker.NextId().ToString(); //消息Id
+                var body = msg.GetBytes();
+                channel.BasicPublish("TestExchange", "TestRouteKey", properties, body);
+                var isOk = channel.WaitForConfirms(TimeSpan.FromSeconds(3));
+                if (isOk)
+                {
+                    return "发送成功";
+                }
+            }
+            return "发送失败";
+        }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
-using System;
 
 namespace LionFrame.CoreCommon.Cache.Redis
 {

@@ -79,7 +79,8 @@ namespace LionFrame.MainWeb
             // 添加rabbit
             services.AddRabbitConnection(Configuration);
 
-            services.AddHostedService<EmailQueueService>();
+            services.AddHostedService<EmailQueueService>();//邮件发送队列
+            services.AddHostedService<RetryDeadLetterConsumer>();//重试死信测试
         }
 
         /// <summary>

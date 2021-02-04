@@ -1,10 +1,9 @@
-﻿using LionFrame.Basic;
-using LionFrame.Basic.Extensions;
+﻿using System;
+using LionFrame.Basic;
 using LionFrame.CoreCommon.CustomException;
 using LionFrame.CoreCommon.CustomResult;
 using LionFrame.Model;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
 
 namespace LionFrame.CoreCommon.CustomFilter
 {
@@ -42,7 +41,7 @@ namespace LionFrame.CoreCommon.CustomFilter
                 var content = "";
 #if DEBUG
                 Console.WriteLine(filterContext.Exception);
-                content = filterContext.Exception.Message;                           
+                content = filterContext.Exception.Message;
 #else
                 content = "系统错误，请稍后再试或联系管理人员。";
 #endif

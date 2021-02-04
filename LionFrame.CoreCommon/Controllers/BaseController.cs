@@ -1,4 +1,6 @@
-﻿using LionFrame.Basic;
+﻿using System.Diagnostics;
+using System.Text;
+using LionFrame.Basic;
 using LionFrame.Basic.Extensions;
 using LionFrame.CoreCommon.CustomFilter;
 using LionFrame.CoreCommon.CustomResult;
@@ -6,8 +8,6 @@ using LionFrame.Model;
 using LionFrame.Model.ResponseDto.ResultModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Diagnostics;
-using System.Text;
 
 namespace LionFrame.CoreCommon.Controllers
 {
