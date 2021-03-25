@@ -1,14 +1,19 @@
-﻿namespace LionFrame.Model.SystemBo
+﻿using System;
+using Microsoft.Extensions.Configuration;
+
+namespace LionFrame.Model.SystemBo
 {
     public class MailBo
     {
-        public MailBo()
+        public MailBo(IConfiguration config)
         {
-            MailFromName = "Levy_Lion";
-            MailFrom = "levy_wang@qq.com";
-            MailPwd = "xxxxxxxxxxxx";
-            MailHost = "smtp.qq.com";
-            MailPort = 25; // 465 25  487
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+
+            var section = config.GetSection("MailBo");
+            section.Bind(this);
         }
 
         /// <summary>

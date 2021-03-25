@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using LionFrame.Model.RequestParam.UserParams;
+using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
 
 namespace LionFrame.Business
@@ -28,6 +29,7 @@ namespace LionFrame.Business
 
         public RedisClient RedisClient { get; set; }
 
+        public IConfiguration IConfiguration { get; set; }
         public IdWorker IdWorker { get; set; }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace LionFrame.Business
             {
                 return "发送失败,参数不允许为空!";
             }
-            var mailBo = new MailBo
+            var mailBo = new MailBo(IConfiguration)
             {
                 MailToName = emailToName,
                 MailTo = emailTo

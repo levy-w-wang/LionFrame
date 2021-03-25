@@ -1,10 +1,17 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 
-namespace LionFrame.CoreCommon.Rabbit
+namespace LionFrame.Model.SystemBo
 {
+    /// <summary>
+    /// MQ配置
+    /// </summary>
     public class RabbitOption
     {
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="config"></param>
         public RabbitOption(IConfiguration config)
         {
             if (config == null)

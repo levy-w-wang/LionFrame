@@ -1,4 +1,5 @@
 ﻿using System;
+using LionFrame.Model.SystemBo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
