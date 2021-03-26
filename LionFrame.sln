@@ -32,6 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{192AFB6B-C
 		docs\Log_Db.txt = docs\Log_Db.txt
 		docs\quartz_tables_mysql_innodb.sql = docs\quartz_tables_mysql_innodb.sql
 		docs\quartz_tables_sqlServer.sql = docs\quartz_tables_sqlServer.sql
+		docs\同一网络部署到Docker中.md = docs\同一网络部署到Docker中.md
 	EndProjectSection
 EndProject
 Global
