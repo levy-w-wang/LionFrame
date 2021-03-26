@@ -189,7 +189,7 @@ namespace LionFrame.Business
                 State = 1,
             });
 
-            await db.BulkInsertAsync(relations);
+            await db.SysRoleMenuRelations.AddRangeAsync(relations);
             await SysMenuDao.AddAsync(sysMenu);
             var count = await SysMenuDao.SaveChangesAsync();
             return count > 0 ? responseModel.Succeed(true) : responseModel.Fail(ResponseCode.Fail, "保存失败");

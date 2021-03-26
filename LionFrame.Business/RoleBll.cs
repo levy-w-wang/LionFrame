@@ -300,7 +300,7 @@ namespace LionFrame.Business
                         UpdatedTime = DateTime.Now,
                     });
                 });
-                await db.SysUserRoleRelations.BulkInsertAsync(userRoles);
+                await db.SysUserRoleRelations.AddRangeAsync(userRoles);
             }
 
             await db.SaveChangesAsync();
