@@ -38,8 +38,17 @@ namespace LionFrame.Business
         /// <returns></returns>
         public async Task<CaptchaResult> GetCaptchaResultAsync()
         {
-            //var captcha = CaptchaHelper.GenerateCaptcha(75, 35, CaptchaHelper.GenerateCaptchaCode());
-            var captcha = CaptchaHelper.CreateImage(CaptchaHelper.GenerateCaptchaCode());
+            CaptchaResult captcha;
+            try
+            {
+                captcha = CaptchaHelper.CreateVerifyCodeImage(CaptchaHelper.GenerateCaptchaCode());
+            }
+            catch (Exception e)
+            {
+                LogHelper.Logger.Fatal(e, "验证码生成 失败");
+                return null;
+            }
+            //var captcha = CaptchaHelper.CreateImage(CaptchaHelper.GenerateCaptchaCode());
             var uuid = IdWorker.NextId();
             var key = CacheKeys.CAPTCHA + uuid;
             await RedisClient.SetAsync(key, captcha.Captcha, CaptchaExpired);

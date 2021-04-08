@@ -13,11 +13,7 @@ namespace LionFrame.Basic.Models
         [JsonIgnore]
 #endif
         public string Captcha { get; set; }
-#if !DEBUG
-        [JsonIgnore]
-#endif
-        public byte[] CaptchaByteData { get; set; }
-        public string CaptchaBase64Data => Convert.ToBase64String(CaptchaByteData);
+        public byte[] CaptchaBase64Data { get; set; }
         public DateTime Timestamp { get; set; }
     }
 }

@@ -38,7 +38,7 @@ docker pull rabbitmq:management
 运行镜像
 
 ```linux
-docker run -d -p 5672:5672 -p 15672:15672 --net lion-net --ip 192.168.0.2 --name rabbitmq rabbitmq:management
+docker run -d -p 5672:5672 -p 15672:15672 --net lion-net --ip 192.168.0.2 --restart unless-stopped --name rabbitmq rabbitmq:management
 指定IP 方便应用内网联网  不用绕外网链接
 ```
 
@@ -69,12 +69,15 @@ docker build -t lionframe:v1 .
 运行镜像
 
 ```linux
-docker run -d -p 5000:5000 --net lion-net --ip 192.168.0.3 --name lionframe  lionframe:v1
+docker run -d -p 5000:5000 --net lion-net --ip 192.168.0.3 --restart unless-stopped --name lionframe  lionframe:v1
 -d 后台运行
 -p 服务器端口映射容器端口
 --net 指定网络名
 --ip 指定该网络下IP
 --name 命名
+--restart always     docker daemon会无限尝试重启退出的容器（无论以什么退出码退出）。手动停止容器后，容器策略不再生效。除非重启docker daemon
+--restart unless-stopped     与always类似，区别在于手动停止容器后，就算重启docker daemon，容器策略也不再生效。
+
 ```
 
 ```linux

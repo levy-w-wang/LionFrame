@@ -18,7 +18,7 @@ namespace LionFrame.Controller
         public async Task<ActionResult> GetCaptcha()
         {
             var result = await SystemBll.GetCaptchaResultAsync();
-            return Succeed(result);
+            return result == null ? Fail("验证码获取失败") : Succeed(result);
         }
 
         /// <summary>
