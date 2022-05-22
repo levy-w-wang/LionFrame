@@ -22,6 +22,7 @@ namespace LionFrame.CoreCommon.AutoMapperCfg
 
             CreateMap<UserCacheBo, UserDto>().ForMember(c => c.RoleDtos, c => c.MapFrom(d => d.RoleCacheBos));
             CreateMap<SysUser, UserManagerDto>();
+            CreateMap<MailBo, MailBoMqContent>();
 
             #endregion
 

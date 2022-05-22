@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using LionFrame.CoreCommon.AutoMapperCfg;
 using LionFrame.Model.RequestParam.UserParams;
 using Microsoft.Extensions.Configuration;
 using RabbitMQ.Client;
@@ -99,7 +100,7 @@ namespace LionFrame.Business
             };
             var mqMailBo = new MqMailBo()
             {
-                MailBo = mailBo,
+                MailBo = mailBo.MapTo<MailBoMqContent>(),
                 Title = title,
                 HtmlContent = htmlContent
             };

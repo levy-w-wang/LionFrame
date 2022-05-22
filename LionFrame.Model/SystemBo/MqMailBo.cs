@@ -9,7 +9,7 @@ namespace LionFrame.Model.SystemBo
         public string Title { get; set; }
         public string HtmlContent { get; set; }
 
-        public MailBo MailBo { get; set; }
+        public MailBoMqContent MailBo { get; set; }
         
     }
 }
